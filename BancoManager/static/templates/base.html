@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+
+    {% block header %}
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="{% url 'inicio' %}">Dashboard Financiero</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio' %}"><i class="fas fa-home"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'ingresos' %}"><i class="fas fa-money-bill-wave"></i> Ingresos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'egresos' %}"><i class="fas fa-money-bill-wave-alt"></i> Egresos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'deudas' %}"><i class="fas fa-exclamation-circle"></i> Deudas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'prestamos' %}"><i class="fas fa-hand-holding-usd"></i> Préstamos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cuentas' %}"><i class="fas fa-university"></i> Cuentas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'mi_cuenta' %}"><i class="fas fa-user"></i> Mi Cuenta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fa-solid fa-arrow-right"></i> Actualizar</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    {% endblock %}
+
+    <main>
+        {% block content %}
+        <!-- Aquí irá el contenido específico de cada página -->
+        {% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="bg-light text-dark text-center py-4">
+        <div>
+            {% if user.is_authenticated %}
+                <p>Usuario activo: <strong>{{ user.username }}</strong></p>
+                <a href="{% url 'logout' %}" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+            {% else %}
+                <p>No has iniciado sesión.</p>
+            {% endif %}
+        </div>
+        <nav>
+            <ul class="list-inline">
+                <li class="list-inline-item text-dark"><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li class="list-inline-item text-dark"><a href="{% url 'ingresos' %}">Ingresos</a></li>
+                <li class="list-inline-item text-dark"><a href="{% url 'egresos' %}">Egresos</a></li>
+                <li class="list-inline-item text-dark"><a href="{% url 'deudas' %}">Deudas</a></li>
+                <li class="list-inline-item text-dark"><a href="{% url 'prestamos' %}">Préstamos</a></li>
+                <li class="list-inline-item text-dark"><a href="{% url 'cuentas' %}">Cuentas</a></li>
+                <li class="list-inline-item text-dark"><a href="{% url 'mi_cuenta' %}">Mi Cuenta</a></li>
+            </ul>
+        </nav>
+        <p>&copy; 2023 Dashboard App</p>
+    </footer>
+    
+
+    {% endblock %}
+
+    {% block javascript %}
+
+
+    {% endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/js.js' %}"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Página de Inicio{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Bienvenido al Dashboard Financiero "Usuario"</h2>
+        <p class="text-center">Administra tus finanzas de manera sencilla y efectiva.</p>
+    
+        {# Tarjeta de inicio #}
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-money-bill-wave fa-2x"></i></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Agregar Ingreso</h6>
+                        <p class="card-text">Registra tus ingresos de forma rápida y sencilla.</p>
+                        <a href="{% url 'ingresos' %}" class="btn btn-primary">Ir a Ingresos</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-danger">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-money-bill-wave-alt fa-2x"></i></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Agregar Egreso</h6>
+                        <p class="card-text">Registra tus egresos para tener un control de gastos.</p>
+                        <a href="{% url 'egresos' %}" class="btn btn-danger">Ir a Egresos</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-university fa-2x"></i></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Agregar Cuenta</h6>
+                        <p class="card-text">Gestiona tus cuentas bancarias y balances.</p>
+                        <a href="{% url 'cuentas' %}" class="btn btn-success">Ir a Cuentas</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-hand-holding-usd fa-2x"></i></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Agregar Préstamo</h6>
+                        <p class="card-text">Registra tus préstamos y gestiona su devolución.</p>
+                        <a href="{% url 'prestamos' %}" class="btn btn-info">Ir a Préstamos</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-exclamation-circle fa-2x"></i></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Agregar Deuda</h6>
+                        <p class="card-text">Mantén un control de tus deudas y pagos.</p>
+                        <a href="{% url 'deudas' %}" class="btn btn-warning">Ir a Deudas</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-secondary">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fas fa-user fa-2x"></i></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Mi Cuenta</h6>
+                        <p class="card-text">Accede a la configuración de tu cuenta.</p>
+                        <a href="{% url 'mi_cuenta' %}" class="btn btn-secondary">Ir a Mi Cuenta</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Tarjeta de inicio #}
+        {# Graficos de ingresos - egresos #}
+        <div class="row mt-5">
+            <div class="col-md-6 mb-4">
+                <h4 class="text-center">Resumen de Ingresos</h4>
+                <canvas id="IngresosChart"></canvas>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h4 class="text-center">Resumen de Egresos</h4>
+                <canvas id="EgresosChart"></canvas>
+            </div>
+        </div>
+        {# Graficos de ingresos - egresos  #}
+
+        
+        {# Cuentas #}
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <h4 class="text-center mb-4">Mis Cuentas</h4>
+                <div class="row">
+                    {% for cuenta in cuentas %}
+                    <!-- Ejemplo de cuentas, se pueden reemplazar con datos reales de la base de datos -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card account-card">
+                            <div class="card-inner">
+                                <div class="card-front" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ cuenta.banco }}</h5>
+                                        <h6 class="card-subtitle mb-2">Número de Cuenta: {{ cuenta.numeroCuenta }}</h6>
+                                        <p class="card-text">Saldo: <strong>${{ cuenta.saldoActual }}</strong></p>
+                                        <p class="card-text">Últimos 4 dígitos: <strong>{{ cuenta.numeroCuenta|slice:"-4:" }} </strong></p>
+                                    </div>
+                                    <br>
+                                    <div class="card-icon mb-3">
+                                        {% if cuenta.afilacion == 'Visa' %}
+                                            <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}" alt="MasterCard" class="card-logo">
+                                        {% elif cuenta.afilacion == 'MasterCard' %}
+                                            <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}"  alt="Visa" class="card-logo">
+                                        {% elif cuenta.afilacion == 'American Express' %}
+                                            <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}"  alt="American Express" class="card-logo">
+                                        {% else %}
+                                            <i class="fas fa-credit-card fa-2x"></i>
+                                        {% endif %}
+                                    
+                                    </div>
+                                </div>
+                                <div class="card-back" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Detalles Adicionales</h5>
+                                        <p class="card-text">CVC: <strong>{{ cuenta.cvc }}</strong></p>
+                                        <p class="card-text">Fecha Vencimiento: <strong>{{ cuenta.fechaVencimiento|date:"F Y" }}</strong></p>
+                                        <p class="card-text">Banco: <strong>{{ cuenta.banco }}</strong></p>
+                                        <div class="card-icon">
+                                            <i class="fas fa-lock fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                        <div class="col-md-12">
+                            <div class="alert alert-warning" role="alert">
+                                No tienes cuentas registradas.
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <!-- Si hay más cuentas, se pueden repetir las col-md-4 según sea necesario -->
+                </div>
+                <a class="text-center mb-4">Ver todas</a>
+
+            </div>
+        </div>
+        {# Cuentas #}
+        {# Transacciones #}
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <h4 class="text-center mb-4">Transacciones del Mes</h4>
+                <div class="row">
+                    <!-- Tarjetas de Totales -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card transaction-card" style="background-color: #28a745; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Ingresos</h5>
+                                <p class="card-text">Total: <strong>${{ total_ingresos }}</strong></p>
+                                <h6 class="card-subtitle mb-2">Fuentes Principales:</h6>
+                                <ul>
+                                    {% for fuente in top_fuentes_ingresos %}
+                                        <li>{{ fuente.fuente }} ({{ fuente.count }})</li>
+                                    {% empty %}
+                                        <li>No hay fuentes disponibles.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="col-md-6 mb-4">
+                        <div class="card transaction-card" style="background-color: #dc3545; color: white;">
+                            <div class="card-body">
+                                <h5 class="card-title">Egresos</h5>
+                                <p class="card-text">Total: <strong>${{ total_egresos }}</strong></p>
+                                <h6 class="card-subtitle mb-2">Propósitos Principales:</h6>
+                                <ul>
+                                    {% for proposito in top_propositos_egresos %}
+                                        <li>{{ proposito.proposito }} ({{ proposito.count }})</li>
+                                    {% empty %}
+                                        <li>No hay propósitos disponibles.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Transacciones #}
+        {# Tablas de Transacciones y Cuentas #}
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <h4 class="text-center mb-4">Registro de Transacciones</h4>
+                
+                <!-- Menú de filtros -->
+                <div class="dropdown mb-3">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="filterMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Filtrar por
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="filterMenu">
+                        <h6 class="dropdown-header">Tipo</h6>
+                        <a class="dropdown-item" href="?tipo=ingreso">Ingresos</a>
+                        <a class="dropdown-item" href="?tipo=egreso">Egresos</a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <h6 class="dropdown-header">Categoría</h6>
+                        <a class="dropdown-item" href="?proposito=alimentacion">Alimentación</a>
+                        <a class="dropdown-item" href="?proposito=transporte">Transporte</a>
+                        <a class="dropdown-item" href="?proposito=entretenimiento">Entretenimiento</a>
+                        
+                        <div class="dropdown-divider"></div>
+                
+                        <h6 class="dropdown-header">Fecha</h6>
+                        <a class="dropdown-item" href="?fecha={{ today|date:'Y-m-d' }}">Hoy</a>
+                        <a class="dropdown-item" href="?fecha={{ last_month|date:'Y-m-d' }}">Último mes</a>
+                    </div>
+                </div>
+                <!-- Menú de filtros -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th><a href="?orden=fecha">Fecha</a></th>
+                                <th><a href="?orden=descripcion">Descripción</a></th>
+                                <th><a href="?orden=cantidad">Monto</a></th>
+                                <th><a href="?orden=categoria">Categoría</a></th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Mostrar ingresos -->
+                            {% for ingreso in ingresos %}
+                            <tr>
+                                <td>{{ ingreso.fecha }}</td>
+                                <td>{{ ingreso.descripcion }}</td>
+                                <td>${{ ingreso.cantidad }}</td>
+                                <td>{{ ingreso.fuente }}</td>
+                                <td><span class="badge badge-success">Ingreso</span></td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editTransaction({{ ingreso.id }})">Editar</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTransaction({{ ingreso.id }})">Eliminar</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No hay ingresos registrados.</td>
+                            </tr>
+                            {% endfor %}
+                            <!-- Mostrar egresos -->
+                            {% for egreso in egresos %}
+                            <tr>
+                                <td>{{ egreso.fecha }}</td>
+                                <td>{{ egreso.descripcion }}</td>
+                                <td>${{ egreso.cantidad }}</td>
+                                <td>{{ egreso.proposito }}</td>
+                                <td><span class="badge badge-danger">Egreso</span></td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editTransaction({{ egreso.id }})">Editar</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTransaction({{ egreso.id }})">Eliminar</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No hay egresos registrados.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {# Tablas de Transacciones y Cuentas #}
+        {# Cuentas a Pagar #}
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <h4 class="text-center mb-4">Cuentas Próximas a Pagar</h4>
+                
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th><a href="?orden=descripcion">Descripción</a></th>
+                                <th><a href="?orden=monto">Monto</a></th>
+                                <th><a href="?orden=fecha_vencimiento">Fecha de Vencimiento</a></th>
+                                <th><a href="?orden=categoria">Categoría</a></th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deuda in deudas_proximas %}
+                            <tr>
+                                <td>{{ deuda.descripcion }}</td>
+                                <td>${{ deuda.monto }}</td>
+                                <td>{{ deuda.fecha_vencimiento }}</td>
+                                <td>{{ deuda.tipo_deuda }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" onclick="editDebt({{ deuda.id }})">Editar</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteDebt({{ deuda.id }})">Eliminar</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No hay deudas próximas a pagar.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        {# Cuentas a Pagar #}
+
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+<footer class="bg-light text-dark text-center py-4">
+    <div>
+        {% if user.is_authenticated %}
+            <p>Usuario activo: <strong>{{ user.username }}</strong></p>
+            <a href="{% url 'logout' %}" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        {% else %}
+            <p>No has iniciado sesión.</p>
+        {% endif %}
+    </div>
+    <nav>
+        <ul class="list-inline">
+            <li class="list-inline-item"><a href="{% url 'inicio' %}">Inicio</a></li>
+            <li class="list-inline-item"><a href="{% url 'ingresos' %}">Ingresos</a></li>
+            <li class="list-inline-item"><a href="{% url 'egresos' %}">Egresos</a></li>
+            <li class="list-inline-item"><a href="{% url 'deudas' %}">Deudas</a></li>
+            <li class="list-inline-item"><a href="{% url 'prestamos' %}">Préstamos</a></li>
+            <li class="list-inline-item"><a href="{% url 'cuentas' %}">Cuentas</a></li>
+            <li class="list-inline-item"><a href="{% url 'mi_cuenta' %}">Mi Cuenta</a></li>
+        </ul>
+    </nav>
+    <p>&copy; 2023 Dashboard App</p>
+</footer>
+{% endblock %}
+
+
+{% block javascript %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+    function editTransaction(id) {
+        console.log('Editar transacción ID:', id);
+        // Implementar lógica para editar transacción
+    }
+
+    function deleteTransaction(id) {
+        console.log('Eliminar transacción ID:', id);
+        // Implementar lógica para eliminar transacción
+    }
+</script>
+
+<script>
+    function payAccount(id) {
+        console.log('Pagar cuenta ID:', id);
+        // Implementar lógica para pagar la cuenta
+    }
+
+    function deleteAccount(id) {
+        console.log('Eliminar cuenta ID:', id);
+        // Implementar lógica para eliminar la cuenta
+    }
+</script>
+
+
+<script>
+    function filterTransactions(type) {
+        // Aquí puedes implementar la lógica de filtrado en función del tipo
+        console.log('Filtrar transacciones por tipo:', type);
+        // Lógica para mostrar u ocultar tarjetas según el tipo seleccionado
+    }
+</script>
+
+<script>
+    // Datos de egresos por mes inyectados desde el contexto de Django
+    const egresosData = {{ egresos_data|safe }};
+    const ingresosData = {{ ingresos_data|safe }};
+    
+    // Configurar gráfico de gastos acumulados por mes
+    const ctxEgresos = document.getElementById('EgresosChart').getContext('2d');
+    const ctxIngresos = document.getElementById('IngresosChart').getContext('2d');
+
+    const ingresosChart = new Chart(ctxIngresos, {
+        type: 'bar',
+        data: {
+            labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            datasets: [{
+                label: 'Ingresos por Mes',
+                data: ingresosData,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Total Ingresos'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Meses'
+                    }
+                }
+            }
+        }
+    });
+
+    const egresosChart = new Chart(ctxEgresos, {
+        type: 'bar',
+        data: {
+            labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            datasets: [{
+                label: 'Egresos por Mes',
+                data: egresosData,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Total Egresos'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Meses'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+

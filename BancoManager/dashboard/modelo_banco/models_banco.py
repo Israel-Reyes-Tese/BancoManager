@@ -4,6 +4,15 @@ from django.conf import settings
 tipo_cuenta = (
     ('Credito', 'Crédito'),
     ('Debito', 'Débito'),
+    ('Cheques', 'Cheques'),
+)
+
+tipo_cuentas = (
+    ('Visa', 'Visa'),
+    ('MasterCard', 'MasterCard'),
+    ('American Express', 'American Express'),
+    ('Discover', 'Discover'),
+    ('Otra', 'Otra'),
 )
 #╔═════════════════════════════════════════════════════════════════════╗
 #║ ____    _    _   _  ____ ___    __  __  ___  ____  _____ _     ___  ║
@@ -32,11 +41,17 @@ class CuentaBancaria(models.Model):
     nombre = models.CharField(max_length=100)
     numeroCuenta = models.CharField(max_length=20, unique=True)
     tipoCuenta = models.CharField(choices=tipo_cuenta)  # Ejemplo: 'Crédito' o 'Débito'
+    afilacion = models.CharField(choices=tipo_cuentas, default="Otra")  # Ejemplo: 'Visa', 'MasterCard', 'American Express', 'Discover', 'Otra'
+    
     colorIdentificacion = models.CharField(max_length=20)
-    saldoInicial = models.DecimalField(max_digits=10, decimal_places=2)
-    saldoActual = models.DecimalField(max_digits=10, decimal_places=2)
+    saldoInicial = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    saldoActual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     banco = models.ForeignKey(Banco, on_delete=models.CASCADE, related_name='cuentas')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cuentas_bancarias')
+
+    cvc = models.CharField(max_length=3, blank=True, null=True, default='000')
+    fechaVencimiento = models.DateField(blank=True, null=True, default='2022-01-01')
+
 
     def __str__(self):
         return f"{self.nombre} - {self.numeroCuenta}"

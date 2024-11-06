@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .modelo_banco.models_banco import Banco
 from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
-from .modelo_deudas.models_deudas import Deuda
+from .modelo_deudas.models_deudas import Deuda, TarjetaCredito, Prestamo
 
 @admin.register(Banco)
 class BancoAdmin(admin.ModelAdmin):
@@ -50,7 +50,6 @@ class IngresoAdmin(admin.ModelAdmin):
     search_fields = ('fuente', 'cantidad', 'usuario__email')
     list_filter = ('fecha', 'cuenta__banco')
     ordering = ('-fecha',)
-    readonly_fields = ('fecha',)  # Assuming this cannot be changed once created
     date_hierarchy = 'fecha'
     list_select_related = True
 
@@ -60,7 +59,6 @@ class EgresoAdmin(admin.ModelAdmin):
     search_fields = ('proposito', 'cantidad', 'usuario__email')
     list_filter = ('fecha', 'cuenta__banco')
     ordering = ('-fecha',)
-    readonly_fields = ('fecha',)  # Assuming this cannot be changed once created
     date_hierarchy = 'fecha'
     list_select_related = True
 
@@ -74,3 +72,19 @@ class DeudaAdmin(admin.ModelAdmin):
     date_hierarchy = 'fecha_creacion'
     list_select_related = True
     autocomplete_fields = ('usuario_deudor',)  # Assuming we want autocomplete for user
+
+@admin.register(TarjetaCredito)
+class TarjetaCreditoAdmin(admin.ModelAdmin):
+    list_display = ('numero_tarjeta', 'nombre_titular', 'fecha_vencimiento', 'limite')
+    search_fields = ('numero_tarjeta', 'nombre_titular')
+    list_filter = ('fecha_vencimiento',)
+    ordering = ('-fecha_vencimiento',)
+    list_select_related = True
+
+@admin.register(Prestamo)
+class PrestamoAdmin(admin.ModelAdmin):
+    list_display = ('monto_total', 'tasa_interes', 'fecha_inicio', 'usuario_prestamista')
+    search_fields = ('monto_total', 'usuario_prestamista__email')
+    list_filter = ('fecha_inicio',)
+    ordering = ('-fecha_inicio',)
+    list_select_related = True

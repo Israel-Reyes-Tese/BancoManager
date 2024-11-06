@@ -51,12 +51,14 @@ class Deuda(models.Model):
     usuario_deudor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='deudas_deudor')
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_deuda = models.CharField(max_length=20, choices=DEUDA_TIPO_CHOICES)
-    fecha_creacion = models.DateField(auto_now_add=True)
     estado = models.BooleanField(default=False)  # Indica si la deuda está saldada o no
     descripcion = models.CharField(max_length=255, blank=True, null=True)
     
     tarjeta = models.ForeignKey(TarjetaCredito, on_delete=models.SET_NULL, null=True, blank=True)
     prestamo = models.ForeignKey(Prestamo, on_delete=models.SET_NULL, null=True, blank=True)
+
+    fecha_creacion = models.DateField(auto_now_add=True)
+    fecha_vencimiento = models.DateField(default='2022-01-01')
 
     def __str__(self):
         return f"{self.usuario_deudor} debe {self.monto} - Tipo: {self.tipo_deuda}"
