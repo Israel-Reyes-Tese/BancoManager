@@ -26,7 +26,7 @@ class InicioHelper:
     def obtener_transacciones_recientes(self, usuario):
         ingresos_recentes = Ingreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
         egresos_recentes = Egreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
-        return ingresos_recentes, egresos_recentes
+        return ingresos_recentes, egresos_recentes,
 
     def obtener_transacciones(self, usuario):
         ingresos = Ingreso.objects.filter(usuario=usuario)
@@ -144,11 +144,19 @@ class InicioView(LoginRequiredMixin, View):
         
         # Manejar filtrado y ordenación
         ingresos, egresos = helper.manejar_filtrado_ordenacion(request, ingresos, egresos)
-        
 
         # Obtener deudas próximas a pagar
         deudas_proximas = helper.obtener_deudas_proximas(request.user)
         total_deudas = helper.calcular_total_deudas(request.user)
+
+        # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
+        categorias = []
+
+        for fuente_ingresos in top_fuentes_ingresos:
+            categorias.append(fuente_ingresos['fuente'])
+        for proposito_egresos in top_propositos_egresos:
+            categorias.append(proposito_egresos['proposito'])
+
         context = {
             'total_ingresos': float(total_ingresos),
             'total_egresos': float(total_egresos),
@@ -168,6 +176,7 @@ class InicioView(LoginRequiredMixin, View):
             'top_propositos_egresos': top_propositos_egresos,
 
             'deudas_proximas': deudas_proximas,
+            'categorias': categorias,
         }
         print(context)
         

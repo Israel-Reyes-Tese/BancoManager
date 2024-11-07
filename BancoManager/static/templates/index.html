@@ -1,14 +1,11 @@
 
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}Página de Inicio{% endblock %}
-
 {% block content %}
     <div class="container mt-4">
         <h2 class="text-center mb-4">Bienvenido al Dashboard Financiero "Usuario"</h2>
         <p class="text-center">Administra tus finanzas de manera sencilla y efectiva.</p>
-    
         {# Tarjeta de inicio #}
         <div class="row">
             <div class="col-md-4 mb-4">
@@ -85,81 +82,89 @@
             </div>
         </div>
         {# Graficos de ingresos - egresos  #}
-
-        
         {# Cuentas #}
         <div class="row mt-5">
             <div class="col-md-12">
                 <h4 class="text-center mb-4">Mis Cuentas</h4>
-                <div class="row">
-                    {% for cuenta in cuentas %}
-                    <!-- Ejemplo de cuentas, se pueden reemplazar con datos reales de la base de datos -->
-                    <div class="col-md-4 mb-4">
-                        <div class="card account-card">
-                            <div class="card-inner">
-                                <div class="card-front" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ cuenta.banco }}</h5>
-                                        <h6 class="card-subtitle mb-2">Número de Cuenta: {{ cuenta.numeroCuenta }}</h6>
-                                        <p class="card-text">Saldo: <strong>${{ cuenta.saldoActual }}</strong></p>
-                                        <p class="card-text">Últimos 4 dígitos: <strong>{{ cuenta.numeroCuenta|slice:"-4:" }} </strong></p>
+                <div id="lista-cuentas">
+                    <div class="row">
+                        {% for cuenta in cuentas %}
+                        <!-- Ejemplo de cuentas, se pueden reemplazar con datos reales de la base de datos -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card account-card">
+                                <div class="card-inner">
+                                    <div class="card-front" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ cuenta.banco }}</h5>
+                                            <h6 class="card-subtitle mb-2">Cuenta: {{ cuenta.numeroCuenta }}</h6>
+                                            <p class="card-text">Saldo: <strong>${{ cuenta.saldoActual }}</strong></p>
+                                            <p class="card-text">Últimos 4 dígitos: <strong>{{ cuenta.numeroCuenta|slice:"-4:" }} </strong></p>
+                                        </div>
+                                        <br>
+                                        <div class="card-icon mb-3">
+                                            {% if cuenta.afilacion == 'Visa' %}
+                                                <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}" alt="MasterCard" class="card-logo">
+                                            {% elif cuenta.afilacion == 'MasterCard' %}
+                                                <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}"  alt="Visa" class="card-logo">
+                                            {% elif cuenta.afilacion == 'American Express' %}
+                                                <img src="{% static 'img/Afilaciones_bancos/american.png' %}"  alt="American Express" class="card-logo">
+                                            {% else %}
+                                                <i class="fas fa-credit-card fa-2x"></i>
+                                            {% endif %}
+                                        
+                                        </div>
                                     </div>
-                                    <br>
-                                    <div class="card-icon mb-3">
-                                        {% if cuenta.afilacion == 'Visa' %}
-                                            <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}" alt="MasterCard" class="card-logo">
-                                        {% elif cuenta.afilacion == 'MasterCard' %}
-                                            <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}"  alt="Visa" class="card-logo">
-                                        {% elif cuenta.afilacion == 'American Express' %}
-                                            <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}"  alt="American Express" class="card-logo">
-                                        {% else %}
-                                            <i class="fas fa-credit-card fa-2x"></i>
-                                        {% endif %}
-                                    
-                                    </div>
-                                </div>
-                                <div class="card-back" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Detalles Adicionales</h5>
-                                        <p class="card-text">CVC: <strong>{{ cuenta.cvc }}</strong></p>
-                                        <p class="card-text">Fecha Vencimiento: <strong>{{ cuenta.fechaVencimiento|date:"F Y" }}</strong></p>
-                                        <p class="card-text">Banco: <strong>{{ cuenta.banco }}</strong></p>
-                                        <div class="card-icon">
-                                            <i class="fas fa-lock fa-2x"></i>
+                                    <div class="card-back" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Detalles Adicionales</h5>
+                                            <p class="card-text">CVC: <strong>{{ cuenta.cvc }}</strong></p>
+                                            <p class="card-text">Fecha Vencimiento: <strong>{{ cuenta.fechaVencimiento|date:"F Y" }}</strong></p>
+                                            <p class="card-text">Banco: <strong>{{ cuenta.banco }}</strong></p>
+                                            <div class="card-icon">
+                                                <i class="fas fa-lock fa-2x"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {% empty %}
-                        <div class="col-md-12">
-                            <div class="alert alert-warning" role="alert">
-                                No tienes cuentas registradas.
+                        {% empty %}
+                            <div class="col-md-12">
+                                <div class="alert alert-warning" role="alert">
+                                    No tienes cuentas registradas.
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
-                    <!-- Si hay más cuentas, se pueden repetir las col-md-4 según sea necesario -->
-                </div>
-                <a class="text-center mb-4">Ver todas</a>
-
+                        {% endfor %}
+                        <!-- Si hay más cuentas, se pueden repetir las col-md-4 según sea necesario -->
+                    </div>
+                    <a class="text-center mb-4"  id="ver-todas-cuentas">Ver todas</a>
+                </div>    
             </div>
         </div>
         {# Cuentas #}
         {# Transacciones #}
         <div class="row mt-5">
+            
             <div class="col-md-12">
-                <h4 class="text-center mb-4">Transacciones del Mes</h4>
+                <div class="d-flex align-items-center mb-4">
+                    <!-- Botón para refrescar datos -->
+                    <button id="refrescar-transacciones" class="btn btn-primary me-2">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <h4 class="text-center">Transacciones del Mes</h4>
+                </div>
+                
+                
                 <div class="row">
                     <!-- Tarjetas de Totales -->
                     <div class="col-md-6 mb-4">
-                        <div class="card transaction-card" style="background-color: #28a745; color: white;">
+                        <div id="tarjeta-ingresos" class="card transaction-card" style="background-color: #28a745; color: white;">
                             <div class="card-body">
                                 <h5 class="card-title">Ingresos</h5>
-                                <p class="card-text">Total: <strong>${{ total_ingresos }}</strong></p>
+                                <p  id="total-ingresos" class="card-text">Total: <strong>${{ total_ingresos }}</strong></p>
                                 <h6 class="card-subtitle mb-2">Fuentes Principales:</h6>
-                                <ul>
+                                <ul id="top_fuentes_ingresos">
                                     {% for fuente in top_fuentes_ingresos %}
                                         <li>{{ fuente.fuente }} ({{ fuente.count }})</li>
                                     {% empty %}
@@ -171,12 +176,12 @@
                     </div>
         
                     <div class="col-md-6 mb-4">
-                        <div class="card transaction-card" style="background-color: #dc3545; color: white;">
+                        <div id="tarjeta-egresos" class="card transaction-card" style="background-color: #dc3545; color: white;">
                             <div class="card-body">
                                 <h5 class="card-title">Egresos</h5>
-                                <p class="card-text">Total: <strong>${{ total_egresos }}</strong></p>
+                                <p  id="total-egresos" class="card-text">Total: <strong>${{ total_egresos }}</strong></p>
                                 <h6 class="card-subtitle mb-2">Propósitos Principales:</h6>
-                                <ul>
+                                <ul id="top_fuentes_egresos">
                                     {% for proposito in top_propositos_egresos %}
                                         <li>{{ proposito.proposito }} ({{ proposito.count }})</li>
                                     {% empty %}
@@ -196,39 +201,35 @@
                 <h4 class="text-center mb-4">Registro de Transacciones</h4>
                 
                 <!-- Menú de filtros -->
-                <div class="dropdown mb-3">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="filterMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Filtrar por
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="filterMenu">
-                        <h6 class="dropdown-header">Tipo</h6>
-                        <a class="dropdown-item" href="?tipo=ingreso">Ingresos</a>
-                        <a class="dropdown-item" href="?tipo=egreso">Egresos</a>
-                        
-                        <div class="dropdown-divider"></div>
-                        
-                        <h6 class="dropdown-header">Categoría</h6>
-                        <a class="dropdown-item" href="?proposito=alimentacion">Alimentación</a>
-                        <a class="dropdown-item" href="?proposito=transporte">Transporte</a>
-                        <a class="dropdown-item" href="?proposito=entretenimiento">Entretenimiento</a>
-                        
-                        <div class="dropdown-divider"></div>
-                
-                        <h6 class="dropdown-header">Fecha</h6>
-                        <a class="dropdown-item" href="?fecha={{ today|date:'Y-m-d' }}">Hoy</a>
-                        <a class="dropdown-item" href="?fecha={{ last_month|date:'Y-m-d' }}">Último mes</a>
+
+                <div class="d-flex align-items-center mb-4">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filtrar por Categoría
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="#" data-categoria="todas">Todas</a></li>
+                            {% for categoria in categorias %}
+                                <li><a class="dropdown-item dropdown-item-transacciones" href="#" data-categoria="{{ categoria }}">{{ categoria }}</a></li>
+                            {% endfor %}
+                            <!-- Agrega más categorías según sea necesario -->
+                        </ul>
                     </div>
+                    
+                    <button id="refrescar-tablas" class="btn btn-primary me-2">
+                        <i class="fas fa-sync-alt"></i> Refrescar
+                    </button>
                 </div>
                 <!-- Menú de filtros -->
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
+                    <table class="table table-striped table-bordered" id="tabla-transacciones">
                         <thead>
                             <tr>
-                                <th><a href="?orden=fecha">Fecha</a></th>
-                                <th><a href="?orden=descripcion">Descripción</a></th>
-                                <th><a href="?orden=cantidad">Monto</a></th>
-                                <th><a href="?orden=categoria">Categoría</a></th>
-                                <th>Tipo</th>
+                                <th id="th-fecha" class="sortable">Fecha <i class="fas fa-sort" data-key="fecha"></i></th>
+                                <th id="th-descripcion" class="sortable">Descripción <i class="fas fa-sort" data-key="descripcion"></i></th>
+                                <th id="th-monto" class="sortable">Monto <i class="fas fa-sort" data-key="cantidad"></i></th>
+                                <th id="th-categoria" class="sortable">Categoría <i class="fas fa-sort" data-key="categoria"></i></th>
+                                <th id="th-tipo" class="sortable">Tipo <i class="fas fa-sort" data-key="tipo"></i></th>                               
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -240,7 +241,7 @@
                                 <td>{{ ingreso.descripcion }}</td>
                                 <td>${{ ingreso.cantidad }}</td>
                                 <td>{{ ingreso.fuente }}</td>
-                                <td><span class="badge badge-success">Ingreso</span></td>
+                                <td><span class="badge badge-success">{{ ingreso.tipo }}</span></td>
                                 <td>
                                     <button class="btn btn-warning btn-sm" onclick="editTransaction({{ ingreso.id }})">Editar</button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteTransaction({{ ingreso.id }})">Eliminar</button>
@@ -258,7 +259,7 @@
                                 <td>{{ egreso.descripcion }}</td>
                                 <td>${{ egreso.cantidad }}</td>
                                 <td>{{ egreso.proposito }}</td>
-                                <td><span class="badge badge-danger">Egreso</span></td>
+                                <td><span class="badge badge-danger">{{ egreso.tipo }}</span></td>
                                 <td>
                                     <button class="btn btn-warning btn-sm" onclick="editTransaction({{ egreso.id }})">Editar</button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteTransaction({{ egreso.id }})">Eliminar</button>
@@ -280,8 +281,25 @@
             <div class="col-md-12">
                 <h4 class="text-center mb-4">Cuentas Próximas a Pagar</h4>
                 
+                <div class="d-flex align-items-center mb-4">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuCuentas" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filtrar por Estado
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-deudas" aria-labelledby="dropdownMenuCuentas">
+                            <li><a class="dropdown-item dropdown-item-deudas" href="#" data-estado="todas">Todas</a></li>
+                            <li><a class="dropdown-item dropdown-item-deudas" href="#" data-estado="pendiente">Pendiente</a></li>
+                            <li><a class="dropdown-item dropdown-item-deudas" href="#" data-estado="pagada">Pagada</a></li>
+                        </ul>
+                    </div>
+                    
+                    <button id="refrescar-cuentas" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> Refrescar
+                    </button>
+                </div>
+
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
+                    <table class="table table-striped table-bordered" id="tabla-cuentas">
                         <thead>
                             <tr>
                                 <th><a href="?orden=descripcion">Descripción</a></th>
@@ -312,12 +330,9 @@
                     </table>
                 </div>
             </div>
-        </div>
-        
+        </div>  
         {# Cuentas a Pagar #}
-
     </div>
-
 {% endblock %}
 
 {% block footer %}

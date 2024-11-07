@@ -18,7 +18,7 @@ class Ingreso(models.Model):
     fuente = models.CharField(max_length=100)
     cuenta = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE, related_name='ingresos')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ingresos')
-
+    tipo = models.CharField(max_length=20, default='Ingreso')
     def __str__(self):
         return f"Ingreso: {self.cantidad} - {self.fecha}"
     
@@ -37,6 +37,7 @@ class Egreso(models.Model):
     proposito = models.CharField(max_length=100)
     cuenta = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE, related_name='egresos')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='egresos')
+    tipo = models.CharField(max_length=20, default='Egreso')
 
     def __str__(self):
         return f"Egreso: {self.cantidad} - {self.fecha}"    
