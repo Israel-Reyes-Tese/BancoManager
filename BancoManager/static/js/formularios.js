@@ -129,10 +129,23 @@ $(document).ready(function() {
 
     if (modelo_principal == "Ingreso"){
         // Inicializar funciones - Formulario ingreso
+             // Manejar el envío del formulario
         handleFormSubmit('#form-agregar-ingreso', '/crear_ingreso/');
+            // Manejar la búsqueda de cuentas de manera dinámica
         handleAccountSearch('#cuenta', '#lista-cuentas', '/api/buscar_dinamica_cuentas/');
+            // Manejar el clic en una cuenta de la lista
         handleAccountSelection('#lista-cuentas', '#cuenta', '#cuenta_id');
+            // Manejar el clic en el botón "Ver todas las cuentas"
+        handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
+    }else if(modelo_principal == "Egreso"){
+        // Inicializar funciones - Formulario egreso
+        // Manejar el envío del formulario
+        handleFormSubmit('#form-agregar-egreso', '/crear_egreso/');
+        // Manejar la búsqueda de cuentas de manera dinámica
+        handleAccountSearch('#cuenta', '#lista-cuentas', '/api/buscar_dinamica_cuentas/');
+        // Manejar el clic en una cuenta de la lista
+        handleAccountSelection('#lista-cuentas', '#cuenta', '#cuenta_id');
+        // Manejar el clic en el botón "Ver todas las cuentas"
         handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
     }
-
 });

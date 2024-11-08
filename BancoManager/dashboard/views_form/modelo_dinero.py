@@ -3,11 +3,11 @@
 from django.shortcuts import render, redirect
 from ..forms.modelo_dinero import IngresoForm, EgresoForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
-
-def guardar_formulario_post(form, request, modelo_principal, vista_redireccion):
+def guardar_formulario_post(form_model, request, modelo_principal, vista_redireccion, nombre_template):
     if request.method == 'POST':
-        form = IngresoForm(request.POST)
+        form = form_model(request.POST)
         print("Formulario recibido modelo", modelo_principal)
         try:
             if form.is_valid():
@@ -17,7 +17,7 @@ def guardar_formulario_post(form, request, modelo_principal, vista_redireccion):
                 form.usuario = request.user
                 form.save()
                 # Limpiar el formulario
-                form = IngresoForm()
+                form = form_model()
                 return redirect(vista_redireccion)
             else:
                 # Imprimir errores en consola
@@ -25,25 +25,16 @@ def guardar_formulario_post(form, request, modelo_principal, vista_redireccion):
         except Exception as e:
             messages.error(request, 'Error al guardar el ingreso', e)
     else:
-        form = IngresoForm()
-    return render(request, 'form/ingreso.html', {'form': form
+        form = form_model()
+    return render(request, f'form/create/{nombre_template}.html', {'form': form
                                                  , 'modelo_principal': modelo_principal})
 
     
 
-
-
+@login_required
 def crear_ingreso(request):
-    return guardar_formulario_post(IngresoForm, request, 'Ingreso', 'crear_ingreso')
+    return guardar_formulario_post(IngresoForm, request, 'Ingreso', 'crear_ingreso', 'ingreso')
 
-
+@login_required
 def crear_egreso(request):
-    if request.method == 'POST':
-        form = EgresoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Egreso agregado correctamente')
-            return redirect('nombre_de_la_vista_donde_rediriges')
-    else:
-        form = EgresoForm()
-    return render(request, 'form/egreso.html', {'form': form})
+    return guardar_formulario_post(EgresoForm, request, 'Egreso', 'crear_egreso', 'egreso')
