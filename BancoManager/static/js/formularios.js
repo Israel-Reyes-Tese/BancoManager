@@ -159,5 +159,13 @@ $(document).ready(function() {
         // Inicializar funciones - Formulario tarjeta
         // Manejar el envío del formulario
         handleFormSubmit('#form-agregar-tarjeta-credito', '/crear_tarjeta_credito/');
+    } else if (modelo_principal == "Banco"){
+        // Inicializar funciones - Formulario banco
+        // Manejar el envío del formulario
+        handleFormSubmit('#form-agregar-banco', '/crear_banco/');
+    } else if (modelo_principal == "Cuenta Bancaria"){
+        // Inicializar funciones - Formulario Cuenta Bancaria
+        // Manejar el envío del formulario
+        handleFormSubmit('#form-agregar-cuenta-bancaria', '/crear_cuenta_bancaria/');
     }
 });

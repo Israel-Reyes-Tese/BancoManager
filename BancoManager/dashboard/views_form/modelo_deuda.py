@@ -17,3 +17,5 @@ def crear_prestamo(request):
 def crear_deuda(request):
     inconsistencias = validar_inconsistencias(request, 'Deuda')
     return guardar_formulario_post(DeudaForm, request, 'Deuda', 'crear_deuda', 'deuda')
+
+

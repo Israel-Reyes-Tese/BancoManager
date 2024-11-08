@@ -17,7 +17,10 @@ def guardar_formulario_post(form_model, request, modelo_principal, vista_redirec
                 # Agregar el usuario al formulario
                 form = form.save(commit=False)
                 form.usuario = request.user
-                form.save()
+                try:
+                    form.save()
+                except Exception as e:
+                    messages.error(request, 'Error al guardar el ingreso', e)
                 # Limpiar el formulario
                 form = form_model()
                 return redirect(vista_redireccion)

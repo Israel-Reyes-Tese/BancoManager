@@ -6,6 +6,7 @@ from .peticiones_asyn.asyn_finanzas import *
 # Formularios
 from .views_form.modelo_dinero import crear_ingreso, crear_egreso
 from .views_form.modelo_deuda import crear_deuda, crear_prestamo, crear_tarjeta_credito
+from .views_form.modelo_banco import crear_banco, crear_cuenta_bancaria
 # Formularios asíncronos
 from .peticiones_asyn.asyn_forms import ObtenerCuentasicontainsView
 
@@ -39,6 +40,8 @@ urlpatterns = [
     path('crear_deuda/', crear_deuda, name='crear_deuda'),
     path('crear_prestamo/', crear_prestamo, name='crear_prestamo'),
     path('crear_tarjeta_credito/', crear_tarjeta_credito, name='crear_tarjeta_credito'),
+    path('crear_banco/', crear_banco, name='crear_banco'),	
+    path('crear_cuenta_bancaria/', crear_cuenta_bancaria, name='crear_cuenta_bancaria'),
     # Formularios async
     path('api/buscar_dinamica_cuentas/', ObtenerCuentasicontainsView.as_view(), name='buscar_dinamica_cuentas'),
 

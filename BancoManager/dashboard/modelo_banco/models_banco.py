@@ -49,8 +49,10 @@ class CuentaBancaria(models.Model):
     afilacion = models.CharField(choices=tipo_cuentas, default="Otra")  # Ejemplo: 'Visa', 'MasterCard', 'American Express', 'Discover', 'Otra'
     
     colorIdentificacion = models.CharField(max_length=20)
+    
     saldoInicial = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     saldoActual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     banco = models.ForeignKey(Banco, on_delete=models.CASCADE, related_name='cuentas')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cuentas_bancarias')
 
