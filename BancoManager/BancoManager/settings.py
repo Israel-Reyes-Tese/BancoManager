@@ -30,6 +30,9 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'usuario.usuario'
 
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuario',
     'dashboard',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [

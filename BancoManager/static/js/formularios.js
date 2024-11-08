@@ -24,7 +24,7 @@ $(document).ready(function() {
                 error: function(xhr) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error al agregar ingreso',
+                        title: 'Error al agregar',
                         text: xhr.responseText
                     });
                 }
@@ -147,5 +147,17 @@ $(document).ready(function() {
         handleAccountSelection('#lista-cuentas', '#cuenta', '#cuenta_id');
         // Manejar el clic en el botón "Ver todas las cuentas"
         handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
+    } else if(modelo_principal == "Deuda"){
+        // Inicializar funciones - Formulario deuda
+        // Manejar el envío del formulario
+        handleFormSubmit('#form-agregar-deuda', '/crear_deuda/');
+    } else if(modelo_principal == "Préstamo"){
+        // Inicializar funciones - Formulario cuenta
+        // Manejar el envío del formulario
+        handleFormSubmit('#form-agregar-prestamo', '/crear_prestamo/');
+    } else if (modelo_principal == "Tarjeta de Crédito"){
+        // Inicializar funciones - Formulario tarjeta
+        // Manejar el envío del formulario
+        handleFormSubmit('#form-agregar-tarjeta-credito', '/crear_tarjeta_credito/');
     }
 });

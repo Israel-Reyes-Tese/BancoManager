@@ -29,6 +29,7 @@ class Prestamo(models.Model):
     monto_total = models.DecimalField(max_digits=10, decimal_places=2)
     tasa_interes = models.DecimalField(max_digits=5, decimal_places=2)  
     fecha_inicio = models.DateField()
+    
     usuario_prestamista = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='prestamos')
     fechaIngreso = models.DateTimeField(auto_now_add=True)
 
