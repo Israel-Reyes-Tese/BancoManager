@@ -287,9 +287,11 @@
                             Filtrar por Estado
                         </button>
                         <ul class="dropdown-menu dropdown-menu-deudas" aria-labelledby="dropdownMenuCuentas">
+                            
                             <li><a class="dropdown-item dropdown-item-deudas" href="#" data-estado="todas">Todas</a></li>
                             <li><a class="dropdown-item dropdown-item-deudas" href="#" data-estado="pendiente">Pendiente</a></li>
                             <li><a class="dropdown-item dropdown-item-deudas" href="#" data-estado="pagada">Pagada</a></li>
+
                         </ul>
                     </div>
                     
@@ -362,42 +364,10 @@
 
 
 {% block javascript %}
-
+ {# Incluyendo //cdn.jsdelivr.net/npm/chart.js #}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-<script>
-    function editTransaction(id) {
-        console.log('Editar transacción ID:', id);
-        // Implementar lógica para editar transacción
-    }
-
-    function deleteTransaction(id) {
-        console.log('Eliminar transacción ID:', id);
-        // Implementar lógica para eliminar transacción
-    }
-</script>
-
-<script>
-    function payAccount(id) {
-        console.log('Pagar cuenta ID:', id);
-        // Implementar lógica para pagar la cuenta
-    }
-
-    function deleteAccount(id) {
-        console.log('Eliminar cuenta ID:', id);
-        // Implementar lógica para eliminar la cuenta
-    }
-</script>
-
-
-<script>
-    function filterTransactions(type) {
-        // Aquí puedes implementar la lógica de filtrado en función del tipo
-        console.log('Filtrar transacciones por tipo:', type);
-        // Lógica para mostrar u ocultar tarjetas según el tipo seleccionado
-    }
-</script>
+{# Incluyendo jQuery #}
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 
 <script>
     // Datos de egresos por mes inyectados desde el contexto de Django
@@ -472,5 +442,8 @@
         }
     });
 </script>
+
+<script src="{% static 'js/js.js' %}"></script>
+
 {% endblock %}
 

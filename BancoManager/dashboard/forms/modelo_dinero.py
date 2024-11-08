@@ -1,6 +1,10 @@
 
 from django import forms
 from ..models import Ingreso, Egreso  # Asegúrate de importar los modelos correctamente
+from ..modelo_banco.models_banco import CuentaBancaria, Banco# Asegúrate de importar los modelos correctamente
+
+from django.conf import settings
+
 
 class IngresoForm(forms.ModelForm):
     class Meta:
@@ -13,6 +17,12 @@ class IngresoForm(forms.ModelForm):
             'fuente': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Fuente'}),
             'cuenta': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(IngresoForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['cuenta'].queryset = CuentaBancaria.objects.filter(usuario=user)
 
 class EgresoForm(forms.ModelForm):
     class Meta:

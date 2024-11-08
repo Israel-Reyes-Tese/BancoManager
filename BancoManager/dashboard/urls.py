@@ -5,7 +5,8 @@ from . import views
 from .peticiones_asyn.asyn_finanzas import *
 # Formularios
 from .views_form.modelo_dinero import crear_ingreso, crear_egreso
-
+# Formularios asíncronos
+from .peticiones_asyn.asyn_forms import ObtenerCuentasicontainsView
 
 
 urlpatterns = [
@@ -34,5 +35,7 @@ urlpatterns = [
     # Formularios
     path('crear_ingreso/', crear_ingreso, name='crear_ingreso'),
     path('crear_egreso/', crear_egreso, name='crear_egreso'),
+    # Formularios async
+    path('api/buscar_dinamica_cuentas/', ObtenerCuentasicontainsView.as_view(), name='buscar_dinamica_cuentas'),
 
 ]

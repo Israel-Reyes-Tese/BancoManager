@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block style %}
+
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center">Agregar Ingreso</h2>
@@ -28,48 +32,190 @@
 
         <div class="mb-3">
             <label for="cuenta" class="form-label">Cuenta</label>
-            <select class="form-select" id="cuenta" name="cuenta" required>
-                <option value="">Selecciona una cuenta</option>
-                {% for cuenta in cuentas %}
-                <option value="{{ cuenta.id }}">{{ cuenta.nombre }}</option>
-                {% endfor %}
-            </select>
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todas-cuentas">
+                    <i class="fas fa-eye">Ver cuentas</i> 
+                </button>
+                <input type="text" class="form-control" id="cuenta" name="cuenta_nombre" autocomplete="off" required>
+                <input type="hidden" id="cuenta_id" name="cuenta">
+
+                <ul class="list-group" id="lista-cuentas" style="position: absolute; z-index: 1000; display: none;"></ul>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Agregar Ingreso <i class="fas fa-plus-circle"></i></button>
+        <div class="mb-3">
+            <div class="d-flex align-items-center">
+            <button type="submit" class="btn btn-primary align-items-center">Agregar Ingreso <i class="fas fa-plus-circle"></i></button>
+            </div>
+        </div>
+            
     </form>
+</div>
+<!-- Ventana Modal -->
+<div class="modal fade" id="modalCuentas" tabindex="-1" aria-labelledby="modalCuentasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCuentasLabel">Todas las Cuentas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tabla-cuentas" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Banco</th>
+                            <th>Cuenta</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
 
-{% block scripts %}
-<!-- Incluyendo el script de bootstrap (opcional si ya está en base.html) -->
+{% block javascript %}
+<!-- Incluyendo jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Incluyendo jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- Incluyendo el script de bootstrap (opcional si ya está en base.html) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Incluyendo SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Incluyendo Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- Incluyendo DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
 
 <script>
 // Ejemplo de código JavaScript para manejo de formulario
 $(document).ready(function() {
     $('#form-agregar-ingreso').on('submit', function(e) {
         e.preventDefault(); // Prevenir comportamiento por defecto
+        console.log('Formulario enviado', e);
 
         // Recolectar datos del formulario
         var formData = $(this).serialize();
 
         $.ajax({
-            url: "{% url 'agregar_ingreso' %}",  // URL para agregar ingresos
+            url: "/crear_ingreso/",  // URL para agregar ingresos
             method: "POST",
             data: formData,
             success: function(response) {
-                alert('Ingreso agregado exitosamente.');
-                // Opcional: Redirigir o limpiar el formulario
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Ingreso agregado exitosamente',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                // Limpiar el formulario
+                $('#form-agregar-ingreso').trigger('reset');
+                
+
             },
             error: function(xhr) {
-                console.error("Error al agregar ingreso: ", xhr.responseText);
-                alert('Error al agregar ingreso.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al agregar ingreso',
+                    text: xhr.responseText
+                });
             }
         });
     });
+    // Función para buscar cuentas
+    var debounceTimer;  // Variable para debounce
+
+    // Manejar la entrada en el campo de cuentas
+    $('#cuenta').on('input', function() {
+        var query = $(this).val().trim();
+        clearTimeout(debounceTimer);  // Limpiar el timer anterior
+
+        if (query.length > 1) {
+            debounceTimer = setTimeout(function() {
+                $.ajax({
+                    url: "/api/buscar_dinamica_cuentas/",  // Ruta que vas a usar para obtener cuentas
+                    method: "GET",
+                    data: { q: query },  // Envío de la consulta
+                    success: function(data) {
+                        mostrarResultados(data);
+                    },
+                    error: function(xhr) {
+                        console.error("Error al obtener cuentas: ", xhr.responseText);
+                    }
+                });
+            }, 300);  // Delay de 300ms
+        } else {
+            $('#lista-cuentas').hide();  // Ocultar la lista si el input está vacío
+        }
+    });
+
+    // Función para mostrar los resultados
+    function mostrarResultados(data) {
+        var $listaCuentas = $('#lista-cuentas');
+        $listaCuentas.empty();  // Limpiar la lista anterior
+        if (data.length > 0) {
+            data.forEach(function(cuenta) {
+                $listaCuentas.append('<li class="list-group-item cuenta-item" data-id="' + cuenta.id + '">' + cuenta.nombre + '</li>');
+            });
+            $listaCuentas.show();  // Mostrar la lista
+        } else {
+            $listaCuentas.hide();  // Si no hay resultados oculta la lista
+        }
+         }
+        // Manejar el clic en una cuenta de la lista
+        $(document).on('click', '.cuenta-item', function() {
+            var cuentaNombre = $(this).text();
+            var cuentaId = $(this).data('id');
+            $('#cuenta').val(cuentaNombre);  // Establecer el nombre de la cuenta en el input visible
+            $('#cuenta_id').val(cuentaId);  // Establecer el ID de la cuenta en el input oculto
+            $('#lista-cuentas').hide();  // Ocultar la lista
+        });
+
+        // Cerrar la lista si se hace clic fuera de ella
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#lista-cuentas').length && !$(e.target).is('#cuenta')) {
+                $('#lista-cuentas').hide();
+            }
+        });
+    // Manejar el clic en el botón "Ver todas las cuentas"
+    $('#ver-todas-cuentas').on('click', function() {
+        $.ajax({
+            url: "/api/cuentas/",  // URL para obtener todas las cuentas
+            method: "GET",
+            success: function(data) {
+                console.log("Informacion cuenta", data);
+
+                var table = $('#tabla-cuentas').DataTable();
+                // Mostrar
+                table.clear();
+                data.cuentas.forEach(function(cuenta) {
+                    table.row.add([
+                        cuenta.id,
+                        cuenta.nombre,
+                        cuenta.banco,
+                        cuenta.numeroCuenta,
+                        cuenta.tipoCuenta
+                    ]).draw();
+                });
+                // Mostrar la ventana modal
+                $('#modalCuentas').modal('show')
+            },
+            error: function(xhr) {
+                console.error("Error al obtener cuentas: ", xhr.responseText);
+            }
+        });
+    });        
 });
 </script>
 {% endblock %}

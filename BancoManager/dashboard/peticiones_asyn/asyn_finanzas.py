@@ -17,6 +17,7 @@ def listar_cuentas(request):
         for cuenta in cuentas:
             cuentas_data.append({
                 'id': cuenta.id,
+                "nombre": cuenta.nombre,
                 'banco': cuenta.banco.nombre,
                 'numeroCuenta': cuenta.numeroCuenta,
                 'saldoActual': str(cuenta.saldoActual),  # Convertimos a string para JSON
