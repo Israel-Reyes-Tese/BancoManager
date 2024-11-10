@@ -34,13 +34,19 @@
         <div class="mb-3">
             <label for="cuenta" class="form-label">Cuenta</label>
             <div class="d-flex align-items-center">
-                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todas-cuentas">
-                    <i class="fas fa-eye">Ver cuentas</i> 
-                </button>
-                <input type="text" class="form-control" id="cuenta" name="cuenta_nombre" autocomplete="off" required>
-                <input type="hidden" id="cuenta_id" name="cuenta">
+                <div class="input-group">
+                    <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todas-cuentas">
+                        <i class="fas fa-eye">Ver cuentas</i> 
+                    </button>
+                    <input type="text" class="form-control" id="cuenta" name="cuenta_nombre" autocomplete="off" required>
+                    <input type="hidden" id="cuenta_id" name="cuenta">
+                    
+                    <button type="button" class="btn btn-success btn-sm" id="agregar-cuenta">
+                        <i class="fas fa-plus-circle"></i> 
+                    </button>
 
-                <ul class="list-group" id="lista-cuentas" style="position: absolute; z-index: 1000; display: none;"></ul>
+                    <ul class="list-group" id="lista-cuentas" style="position: absolute; z-index: 1000; display: none;"></ul>
+                </div>
             </div>
         </div>
 
@@ -79,7 +85,21 @@
         </div>
     </div>
 </div>
-{# Modelo #}
+<!-- Ventana Modal para agregar cuenta -->
+<div class="modal fade" id="modalAgregarCuenta" tabindex="-1" aria-labelledby="modalAgregarCuentaLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarCuentaLabel">Agregar Cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-cuenta-bancaria"></div>
+            </div>
+        </div>
+    </div>
+</div>
 <input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
 
 {% endblock %}

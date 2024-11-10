@@ -1,13 +1,15 @@
 from django.http import JsonResponse
 from django.views import View
 
-from ..modelo_banco.models_banco import CuentaBancaria  # Asegúrate de que la ruta sea correcta
+from ..modelo_banco.models_banco import CuentaBancaria, Banco # Asegúrate de que la ruta sea correcta
 from ..modelo_dinero.models_dinero import Ingreso, Egreso  # Asegúrate de que la ruta sea correcta
-from ..modelo_deudas.models_deudas import Deuda  # Asegúrate de que la ruta sea correcta
-
+from ..modelo_deudas.models_deudas import Deuda, Prestamo, TarjetaCredito  # Asegúrate de que la ruta sea correcta
+# Usuario
+from django.conf import settings
+from usuario.models import usuario
 
 from ..views import InicioHelper  # Asegúrate de importar la clase InicioHelper
-
+# Cuentas
 def listar_cuentas(request):
     if request.method == 'GET':
         usuario = request.user  # Obtén el usuario autenticado
@@ -35,6 +37,24 @@ def listar_cuentas(request):
         return JsonResponse({'cuentas': cuentas_data})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
+def listar_bancos(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        bancos = Banco.objects.all()  # Obtén todos los bancos
+        bancos_data = []  # Lista para almacenar los datos de los bancos
+
+        for banco in bancos:
+            bancos_data.append({
+                'id': banco.id,
+                'nombre': banco.nombre,
+                'direccion': banco.direccion,
+                'telefono': banco.telefono,
+            })
+
+        return JsonResponse({'bancos': bancos_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+# Funciones de cuentas
 def obtener_transacciones_mes(request):
     if request.method == 'GET':
         usuario = request.user  # Obtén el usuario autenticado
@@ -93,6 +113,132 @@ def RefrescarTablasTransacciones(request):
 
         return JsonResponse(transacciones_data, safe=False)
     
+
+# Usuarios
+def listar_usuarios(request):
+    if request.method == 'GET':
+        usuario_OBJ = usuario.objects.all()  # Obtén todos los usuarios
+        usuarios_data = []  # Lista para almacenar los datos de los usuarios
+
+        for usuario_items in usuario_OBJ:
+            usuarios_data.append({
+                'id': usuario_items.id,
+                'nombre_usuario': usuario_items.username,
+                'nombre': usuario_items.first_name,
+                'apellido': usuario_items.last_name,
+                'correo': usuario_items.email,
+            })
+
+        return JsonResponse({'usuarios': usuarios_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+# Funciones de usuarios
+
+
+# Deudas
+
+def listar_deudas(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        deudas = Deuda.objects.filter(usuario_deudor=usuario)  # Filtrar deudas por usuario
+        deudas_data = []  # Lista para almacenar los datos de las deudas
+
+        for deuda in deudas:
+            deudas_data.append({
+                'id': deuda.id,
+                'descripcion': deuda.descripcion,
+                'monto': str(deuda.monto),  # Convertimos a string para JSON
+                'fecha_vencimiento': deuda.fecha_vencimiento.strftime('%Y-%m-%d'),
+                'estado': deuda.estado,
+                'tipo_deuda': deuda.tipo_deuda,
+            })
+
+        return JsonResponse({'deudas': deudas_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def listar_prestamos(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        prestamos = Prestamo.objects.filter(usuario_prestamista=usuario)  # Filtrar prestamos por usuario
+        prestamos_data = []  # Lista para almacenar los datos de los prestamos
+
+        for prestamo in prestamos:
+            prestamos_data.append({
+                'id': prestamo.id,
+                'descripcion': prestamo.descripcion,
+                'monto_total': str(prestamo.monto_total),  # Convertimos a string para JSON
+                'tasa_interes': str(prestamo.tasa_interes),
+                'fecha_inicio': prestamo.fecha_inicio.strftime('%Y-%m-%d'),
+                'usuario_prestamista': prestamo.usuario_prestamista.username,
+                'fechaIngreso': prestamo.fechaIngreso.strftime('%Y-%m-%d %H:%M:%S'),
+            })
+
+        return JsonResponse({'prestamos': prestamos_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def listar_tarjetas_credito(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        # Filtrar deudas por usuario
+        deudas = Deuda.objects.filter(usuario_deudor=usuario)
+         # Filtrar tarjetas de crédito por deudas valores unicos
+        tarjetas_credito =  TarjetaCredito.objects.filter(deuda__in=deudas).distinct()
+        tarjetas_credito_data = []  # Lista para almacenar los datos de las tarjetas de crédito
+
+        for tarjeta in tarjetas_credito:
+            tarjetas_credito_data.append({
+                'id': tarjeta.id,
+                'numero_tarjeta': tarjeta.numero_tarjeta,
+                'nombre_titular': tarjeta.nombre_titular,
+                'fecha_vencimiento': tarjeta.fecha_vencimiento.strftime('%Y-%m-%d'),
+                'colorIdentificacion': tarjeta.colorIdentificacion,
+                'limite': str(tarjeta.limite),
+            })
+
+        return JsonResponse({'tarjetas_credito': tarjetas_credito_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+# Funciones de deudas
+
+
+# Dinero 
+def listar_ingresos(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        ingresos = Ingreso.objects.filter(usuario=usuario)  # Filtrar ingresos por usuario
+        ingresos_data = []  # Lista para almacenar los datos de los ingresos
+
+        for ingreso in ingresos:
+            ingresos_data.append({
+                'id': ingreso.id,
+                'descripcion': ingreso.descripcion,
+                'cantidad': str(ingreso.cantidad),  # Convertimos a string para JSON
+                'fuente': ingreso.fuente,
+                'fecha': ingreso.fecha.strftime('%Y-%m-%d'),
+            })
+
+        return JsonResponse({'ingresos': ingresos_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def listar_egresos(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        egresos = Egreso.objects.filter(usuario=usuario)  # Filtrar egresos por usuario
+        egresos_data = []  # Lista para almacenar los datos de los egresos
+
+        for egreso in egresos:
+            egresos_data.append({
+                'id': egreso.id,
+                'descripcion': egreso.descripcion,
+                'cantidad': str(egreso.cantidad),  # Convertimos a string para JSON
+                'proposito': egreso.proposito,
+                'fecha': egreso.fecha.strftime('%Y-%m-%d'),
+            })
+
+        return JsonResponse({'egresos': egresos_data})
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
 
 class FiltrarTransaccionesView(View):
     def get(self, request):

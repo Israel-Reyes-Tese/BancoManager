@@ -2,7 +2,7 @@
 from ..forms.modelo_deudas import TarjetaCreditoForm, PrestamoForm, DeudaForm
 from django.contrib.auth.decorators import login_required
 
-from .funciones_forms_views import guardar_formulario_post, validar_inconsistencias
+from .funciones_forms_views import guardar_formulario_post,guardar_formulario_post_sin_user, validar_inconsistencias
 
 
 @login_required
@@ -11,11 +11,11 @@ def crear_tarjeta_credito(request):
 
 @login_required
 def crear_prestamo(request):
-    return guardar_formulario_post(PrestamoForm, request, 'Préstamo', 'crear_prestamo', 'prestamo')
+    return guardar_formulario_post_sin_user(PrestamoForm, request, 'Préstamo', 'crear_prestamo', 'prestamo')
 
 @login_required
 def crear_deuda(request):
     inconsistencias = validar_inconsistencias(request, 'Deuda')
-    return guardar_formulario_post(DeudaForm, request, 'Deuda', 'crear_deuda', 'deuda')
+    return guardar_formulario_post_sin_user(DeudaForm, request, 'Deuda', 'crear_deuda', 'deuda')
 
 

@@ -14,9 +14,20 @@
 
         {# Campo usuario deudor #}
         <div class="mb-3">
-            <label for="usuario_deudor" class="form-label text-danger">Usuario Deudor</label>
-            {{ form.usuario_deudor }}
+            <label for="cuenta" class="form-label">Usuario deudor</label>
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todos-usuarios" data-bs-toggle="modal" data-bs-target="#modalUsuarios">
+                    <i class="fas fa-eye">Ver usuarios</i> 
+                </button>
+                <input type="text" class="form-control" id="usuario_deudor" name="usuario_deudor_nombre" autocomplete="off" placeholder="Busca el usuario" required data-target-input="#usuario_deudor" data-target-hidden-input="#usuario_deudor_id">
+                <input type="hidden" id="usuario_deudor_id" name="usuario_deudor">
 
+                <button type="button" class="btn btn-success btn-sm" id="agregar-usuario">
+                    <i class="fas fa-plus-circle"></i> 
+                </button>
+
+                <ul class="list-group" id="lista-usuarios" style="position: absolute; z-index: 1000; display: none;" data-target-input="#usuario_deudor" data-target-hidden-input="#usuario_deudor_id"></ul>
+            </div>
         </div>
         {# Campo usuario deudor #}
         
@@ -56,13 +67,36 @@
         {# Campo tarjeta opcional #}
         <div class="mb-3">
             <label for="tarjeta" class="form-label text-danger">Tarjeta</label>
-            {{ form.tarjeta }}
+
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todas-tarjetas" data-bs-toggle="modal" data-bs-target="#modalTarjetas">
+                    <i class="fas fa-eye">Ver tarjetas</i>
+                </button>
+                <input type="text" class="form-control" id="tarjeta" name="tarjeta_nombre" autocomplete="off" placeholder="Busca la tarjeta" data-target-input="#tarjeta" data-target-hidden-input="#tarjeta_id">
+                <input type="hidden" id="tarjeta_id" name="tarjeta">
+
+                <button type="button" class="btn btn-success btn-sm" id="agregar-tarjeta">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-tarjetas" style="position: absolute; z-index: 1000; display: none;" data-target-input="#tarjeta" data-target-hidden-input="#tarjeta_id"></ul>
+            </div>
         </div>
         {# Campo tarjeta opcional #}
         {# Campo prestamo opcional #}
         <div class="mb-3">
             <label for="prestamo" class="form-label text-danger">Préstamo</label>
-            {{ form.prestamo }}
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todos-prestamos" data-bs-toggle="modal" data-bs-target="#modalPrestamos">
+                    <i class="fas fa-eye">Ver prestamos</i>
+                </button>
+                <input type="text" class="form-control" id="prestamo" name="prestamo_nombre" autocomplete="off" placeholder="Busca el prestamo" data-target-input="#prestamo" data-target-hidden-input="#prestamo_id"> 
+                <input type="hidden" id="prestamo_id" name="prestamo">
+
+                <button type="button" class="btn btn-success btn-sm" id="agregar-prestamo">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-prestamos" style="position: absolute; z-index: 1000; display: none;" data-target-input="#prestamo" data-target-hidden-input="#prestamo_id"></ul>
+            </div>
         </div>
         {# Campo prestamo opcional #}
         {# Campo fecha de vencimiento #}
@@ -82,25 +116,145 @@
 
     </form>
 </div>
-<!-- Ventana Modal -->
-<div class="modal fade" id="modalCuentas" tabindex="-1" aria-labelledby="modalCuentasLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<!-- Ventana Modal visualizar (usuarios) -->
+<div class="modal fade" id="modalUsuarios" tabindex="-1" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-danger" id="modalCuentasLabel">Todas las Cuentas</h5>
+                <h5 class="modal-title" id="modalUsuariosLabel">Usuarios</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Contenido del modal -->
+               <table id="tabla-usuarios" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Usuario</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Ventana Modal para agregar (usuario) -->
+<div class="modal fade" id="modalAgregarUsuario" tabindex="-1" aria-labelledby="modalAgregarUsuarioLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarUsuarioLabel">Agregar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-usuario"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Ventana Modal visualizar (tarjetas) -->
+<div class="modal fade" id="modalTarjetas" tabindex="-1" aria-labelledby="modalTarjetasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTarjetasLabel">Tarjetas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body
+            ">
+                <table id="tabla-tarjetas" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Banco</th>
+                            <th>Cuenta</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal para agregar (tarjeta) -->
+<div class="modal fade" id="modalAgregarTarjeta" tabindex="-1" aria-labelledby="modalAgregarTarjetaLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarTarjetaLabel">Agregar Tarjeta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body
+            ">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-tarjeta"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal visualizar (prestamos) -->
+<div class="modal fade" id="modalPrestamos" tabindex="-1" aria-labelledby="modalPrestamosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPrestamosLabel">Prestamos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tabla-prestamos" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripcion</th>
+                            <th>Monto total</th>
+                            <th>Interes</th>
+                            <th>Fecha de Inicio</th>
+                            <th>Usuario prestamista</th>
+                            <th>Fecha ingreso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal para agregar (prestamo) -->
+<div class="modal fade" id="modalAgregarPrestamo" tabindex="-1" aria-labelledby="modalAgregarPrestamoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarPrestamoLabel">Agregar Prestamo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-prestamo"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {# Modelo #}
 <input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+{# Modelo #}
 
 {% endblock %}
 

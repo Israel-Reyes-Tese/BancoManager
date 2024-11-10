@@ -55,14 +55,24 @@
             <label for="saldoActual" class="form-label text-primary">Saldo Actual</label>
             <input type="number" class="form-control border-primary" id="saldoActual" name="saldoActual" required>
         </div>
-        {# Saldo actual #}
+        {# Saldo actual #}     
         {# Banco #}
         <div class="mb-3">
             <label for="banco" class="form-label text-primary">Banco</label>
-            {{ form.banco }}
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todos-bancos" data-bs-toggle="modal" data-bs-target="#modalBancos">
+                    <i class="fas fa-eye">Ver bancos</i>
+                </button>
+                <input type="text" class="form-control" id="banco" name="banco_nombre" autocomplete="off" placeholder="Busca el banco" data-target-input="#banco" data-target-hidden-input="#banco_id">
+                <input type="hidden" id="banco_id" name="banco">
+
+                <button type="button" class="btn btn-success btn-sm" id="agregar-banco">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-bancos" style="position: absolute; z-index: 1000; display: none;" data-target-input="#banco" data-target-hidden-input="#banco_id"></ul>
+            </div>
         </div>
         {# Banco #}
-
         {# CVC maximo 3 valores #}
         <div class="mb-3">
             <label for="cvc" class="form-label text-primary">CVC</label>
@@ -78,7 +88,18 @@
         {# Campo usuario #}
         <div class="mb-3">
             <label for="usuario" class="form-label text-primary">Usuario</label>
-            {{ form.usuario }}
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todos-usuarios" data-bs-toggle="modal" data-bs-target="#modalUsuarios">
+                    <i class="fas fa-eye">Ver usuarios</i>
+                </button>
+                <input type="text" class="form-control" id="usuario" name="usuario_nombre" autocomplete="off" placeholder="Busca el usuario" data-target-input="#usuario" data-target-hidden-input="#usuario_id">
+                <input type="hidden" id="usuario_id" name="usuario">
+
+                <button type="button" class="btn btn-success btn-sm" id="agregar-usuario">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-usuarios" style="position: absolute; z-index: 1000; display: none;" data-target-input="#usuario" data-target-hidden-input="#usuario_id"></ul>
+            </div>
         </div>
         {# Campo usuario #}
 
@@ -104,6 +125,95 @@
         </div>
     </div>
 </div>
+<!-- Ventana Modal visualizar (usuarios) -->
+<div class="modal fade" id="modalUsuarios" tabindex="-1" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalUsuariosLabel">Usuarios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <table id="tabla-usuarios" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Usuario</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal para agregar (usuario) -->
+<div class="modal fade" id="modalAgregarUsuario" tabindex="-1" aria-labelledby="modalAgregarUsuarioLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarUsuarioLabel">Agregar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-usuario"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Ventana Modal visualizar (banco) -->
+<div class="modal fade" id="modalBancos" tabindex="-1" aria-labelledby="modalBancosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBancosLabel">Bancos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <table id="tabla-bancos" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>País</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Ventana Modal para agregar (banco) -->
+<div class="modal fade" id="modalAgregarBanco" tabindex="-1" aria-labelledby="modalBancosLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBancosLabel">Bancos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-banco"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 {# Modelo #}
 <input type="hidden" id="modelo_principal" value="{{modelo_principal}}">

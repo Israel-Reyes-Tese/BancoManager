@@ -17,8 +17,9 @@ class TarjetaCreditoForm(forms.ModelForm):
 class PrestamoForm(forms.ModelForm):
     class Meta:
         model = Prestamo
-        fields = ['monto_total', 'tasa_interes', 'fecha_inicio', 'usuario_prestamista']
+        fields = ['descripcion', 'monto_total', 'tasa_interes', 'fecha_inicio', 'usuario_prestamista']
         widgets = {
+            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Descripción'}),
             'monto_total': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Monto Total'}),
             'tasa_interes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Tasa de Interés'}),
             'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),

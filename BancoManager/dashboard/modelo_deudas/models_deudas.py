@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.db import models
+
+from ..modelo_banco.models_banco import CuentaBancaria
+
 #╔═══════════════════════════════════════════════════════════════════════════════╗
 #║ _____          _      _              _         ____       __     _ _ _        ║
 #║|_   _|_ _ _ __(_) ___| |_ __ _    __| | ___   / ___|_ __ /_/  __| (_) |_ ___  ║
@@ -26,6 +29,8 @@ class TarjetaCredito(models.Model):
 #║|_|   |_|  \___||___/\__\__,_|_| |_| |_|\___/ ║
 #╚══════════════════════════════════════════════╝
 class Prestamo(models.Model):
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+
     monto_total = models.DecimalField(max_digits=10, decimal_places=2)
     tasa_interes = models.DecimalField(max_digits=5, decimal_places=2)  
     fecha_inicio = models.DateField()
@@ -56,7 +61,7 @@ class Deuda(models.Model):
     estado = models.BooleanField(default=False)  # Indica si la deuda está saldada o no
     descripcion = models.CharField(max_length=255, blank=True, null=True)
     
-    tarjeta = models.ForeignKey(TarjetaCredito, on_delete=models.SET_NULL, null=True, blank=True)
+    tarjeta = models.ForeignKey(CuentaBancaria, on_delete=models.SET_NULL, null=True, blank=True)
     prestamo = models.ForeignKey(Prestamo, on_delete=models.SET_NULL, null=True, blank=True)
 
     fecha_creacion = models.DateField(auto_now_add=True)
