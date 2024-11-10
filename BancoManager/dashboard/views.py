@@ -1,3 +1,217 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.views import View
+from django.db import models
 
-# Create your views here.
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+
+
+from .modelo_banco.models_banco import Banco
+from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
+from .modelo_deudas.models_deudas import Deuda
+
+from datetime import datetime, timedelta
+
+
+class InicioHelper:
+    def obtener_totales_ingresos_egresos(self, usuario):
+        total_ingresos = Ingreso.objects.filter(usuario=usuario).aggregate(total_ingresos=models.Sum('cantidad'))['total_ingresos'] or 0
+        total_egresos = Egreso.objects.filter(usuario=usuario).aggregate(total_egresos=models.Sum('cantidad'))['total_egresos'] or 0
+        return total_ingresos, total_egresos
+
+    def obtener_cuentas(self, usuario):
+        return CuentaBancaria.objects.filter(usuario=usuario)[:3]
+
+    def obtener_transacciones_recientes(self, usuario):
+        ingresos_recentes = Ingreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
+        egresos_recentes = Egreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
+        return ingresos_recentes, egresos_recentes,
+
+    def obtener_transacciones(self, usuario):
+        ingresos = Ingreso.objects.filter(usuario=usuario)
+        egresos = Egreso.objects.filter(usuario=usuario)
+        return ingresos, egresos
+
+    def obtener_gastos_por_mes(self, usuario):
+        twelve_months_ago = datetime.now() - timedelta(days=365)
+        return Egreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
+
+    def obtener_fuentes_propositos_comunes(self, usuario):
+        top_fuentes_ingresos = Ingreso.objects.filter(usuario=usuario).values('fuente').annotate(count=models.Count('fuente')).order_by('-count')[:4]
+        top_propositos_egresos = Egreso.objects.filter(usuario=usuario).values('proposito').annotate(count=models.Count('proposito')).order_by('-count')[:4]
+        return top_fuentes_ingresos, top_propositos_egresos
+
+    def obtener_datos_graficos_mes_actual(self, usuario):
+        month = datetime.now().month
+        year = datetime.now().year
+        ingresos_mensuales = Ingreso.objects.filter(usuario=usuario, fecha__month=month, fecha__year=year)
+        egresos_mensuales = Egreso.objects.filter(usuario=usuario, fecha__month=month, fecha__year=year)
+        return ingresos_mensuales, egresos_mensuales
+
+    def obtener_gastos_ingresos_por_mes(self, usuario):
+        twelve_months_ago = datetime.now() - timedelta(days=365)
+        gastos_por_mes = Egreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
+        ingresos_por_mes = Ingreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
+        return gastos_por_mes, ingresos_por_mes
+
+    def obtener_deudas_proximas(self, usuario):
+        return Deuda.objects.filter(usuario_deudor=usuario, fecha_vencimiento__gte=datetime.now()).order_by('fecha_vencimiento')
+
+    def calcular_total_deudas(self, usuario):
+        return Deuda.objects.filter(usuario_deudor=usuario).aggregate(total_deuda=models.Sum('monto'))['total_deuda'] or 0
+
+    def calcular_acumulados_por_mes(self, transacciones_por_mes):
+        acumulados = {i: 0 for i in range(1, 13)}
+        for transaccion in transacciones_por_mes:
+            mes = transaccion.fecha.month
+            acumulados[mes] += transaccion.cantidad
+        return acumulados
+
+    def preparar_datos_graficas(self, ingresos_acumulados, gastos_acumulados):
+        ingresos_data = [float(ingresos_acumulados[i]) for i in range(1, 13)]
+        egresos_data = [float(gastos_acumulados[i]) for i in range(1, 13)]
+        return ingresos_data, egresos_data
+
+    def manejar_filtrado_ordenacion(self, request, ingresos, egresos):
+        tipo_filter = request.GET.get('tipo', None)
+        proposito_filter = request.GET.get('proposito', None)
+        fecha_filter = request.GET.get('fecha', None)
+        orden = request.GET.get('orden', 'fecha')
+
+        if tipo_filter:
+            if tipo_filter == 'ingreso':
+                ingresos = ingresos.all()
+                egresos = Egreso.objects.none()
+            elif tipo_filter == 'egreso':
+                egresos = egresos.all()
+                ingresos = Ingreso.objects.none()
+
+        if proposito_filter:
+            egresos = egresos.filter(proposito=proposito_filter)
+
+        if fecha_filter:
+            ingresos = ingresos.filter(fecha__date=fecha_filter)
+            egresos = egresos.filter(fecha__date=fecha_filter)
+
+        if orden == 'descripcion':
+            ingresos = ingresos.order_by('descripcion')
+            egresos = egresos.order_by('descripcion')
+        elif orden == 'cantidad':
+            ingresos = ingresos.order_by('cantidad')
+            egresos = egresos.order_by('cantidad')
+        else:
+            ingresos = ingresos.order_by('fecha')
+            egresos = egresos.order_by('fecha')
+
+        return ingresos, egresos
+
+
+class InicioView(LoginRequiredMixin, View):
+    def get(self, request):
+        helper = InicioHelper()
+        
+        # Obtener totales de ingresos y egresos
+        total_ingresos, total_egresos = helper.obtener_totales_ingresos_egresos(request.user)
+        
+        # Obtener cuentas
+        cuentas = helper.obtener_cuentas(request.user)
+        
+        # Obtener transacciones recientes
+        ingresos_recentes, egresos_recentes = helper.obtener_transacciones_recientes(request.user)
+       
+        # Obtener transacciones (ingresos y egresos)
+        ingresos, egresos = helper.obtener_transacciones(request.user)
+       
+        # Obtener gastos de los últimos 12 meses
+        gastos_por_mes = helper.obtener_gastos_por_mes(request.user)
+        
+        # Obtener fuentes más comunes de ingresos y propósitos más comunes de egresos
+        top_fuentes_ingresos, top_propositos_egresos = helper.obtener_fuentes_propositos_comunes(request.user)
+        
+        # Datos para los gráficos del mes actual
+        ingresos_mensuales, egresos_mensuales = helper.obtener_datos_graficos_mes_actual(request.user)
+        
+        # Obtener gastos e ingresos de los últimos 12 meses
+        gastos_por_mes, ingresos_por_mes = helper.obtener_gastos_ingresos_por_mes(request.user)
+        
+        # Crear un diccionario para almacenar el total acumulado por mes
+        gastos_acumulados = helper.calcular_acumulados_por_mes(gastos_por_mes)
+        ingresos_acumulados = helper.calcular_acumulados_por_mes(ingresos_por_mes)
+        
+        # Preparar datos para las gráficas
+        ingresos_data, egresos_data = helper.preparar_datos_graficas(ingresos_acumulados, gastos_acumulados)
+        
+        # Manejar filtrado y ordenación
+        ingresos, egresos = helper.manejar_filtrado_ordenacion(request, ingresos, egresos)
+
+        # Obtener deudas próximas a pagar
+        deudas_proximas = helper.obtener_deudas_proximas(request.user)
+        total_deudas = helper.calcular_total_deudas(request.user)
+
+        # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
+        categorias = []
+
+        for fuente_ingresos in top_fuentes_ingresos:
+            categorias.append(fuente_ingresos['fuente'])
+        for proposito_egresos in top_propositos_egresos:
+            categorias.append(proposito_egresos['proposito'])
+
+        context = {
+            'total_ingresos': float(total_ingresos),
+            'total_egresos': float(total_egresos),
+            'total_deudas': float(total_deudas),
+
+            'cuentas': cuentas,
+            'ingresos_recentes': ingresos_recentes,
+            'egresos_recentes': egresos_recentes,
+
+            'ingresos': ingresos,
+            'egresos': egresos,
+
+            'ingresos_data': ingresos_data,
+            'egresos_data': egresos_data,
+
+            'top_fuentes_ingresos': top_fuentes_ingresos,
+            'top_propositos_egresos': top_propositos_egresos,
+
+            'deudas_proximas': deudas_proximas,
+            'categorias': categorias,
+        }
+        print(context)
+        
+        return render(request, 'index.html', context)
+
+
+def deudas(request):
+    return render(request, 'finanzas/deudas.html')
+
+
+def ingresos(request):
+    return render(request, 'finanzas/ingresos.html')
+
+
+def egresos(request):
+    return render(request, 'finanzas/egresos.html')
+
+def bancos(request):
+    return render(request, 'finanzas/bancos.html')
+
+def prestamos(request):
+    return render(request, 'finanzas/prestamos.html')
+
+
+def cuentas(request):
+    return render(request, 'finanzas/cuenta.html')
+
+
+def mi_cuenta(request):
+    return render(request, 'finanzas/mi_cuenta.html')
+
+
+
+def login(request):
+    return render(request, '')
+
+def logout(request):
+    return render(request, '')

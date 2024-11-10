@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="text-center text-primary">Agregar Cuenta Bancaria</h2>
+    <form method="POST" id="form-agregar-cuenta-bancaria">
+        {% csrf_token %}
+
+        {# Campo número de cuenta #}
+        <div class="mb-3">
+            <label for="numeroCuenta" class="form-label text-primary">Número de Cuenta</label>
+            <input type="text" class="form-control border-primary" id="numeroCuenta" name="numeroCuenta" required>
+        </div>
+        {# Campo número de cuenta #}
+
+        {# Campo nombre #}
+        <div class="mb-3">
+            <label for="nombre" class="form-label text-primary">Nombre</label>
+            <input type="text" class="form-control border-primary" id="nombre" name="nombre" required>
+        </div>
+        {# Campo nombre #}
+
+        {# Campo tipo de cuenta #}
+        <div class="mb-3">
+            <label for="tipoCuenta" class="form-label text-primary">Tipo de Cuenta</label>
+            {{ form.tipoCuenta }}
+        </div>
+        {# Campo tipo de cuenta #}
+        {# Afilacion #}
+        <div class="mb-3">
+            <label for="afilacion" class="form-label text-primary">Afiliación</label>
+            {{ form.afilacion }}
+        </div>
+        {# Afilacion #}
+        {# Color Identificacion #}
+        <div class="mb-3">
+            <label for="colorIdentificacion" class="form-label text-primary">Color Identificación</label>
+            <input type="text" class="form-control border-primary" id="colorIdentificacion" name="colorIdentificacion" required>
+        </div>
+        {# Color Identificacion #}
+        {# Campo saldo inicial #}
+        <div class="mb-3">
+            <label for="saldoInicial" class="form-label text-primary">Saldo</label>
+            <input type="number" class="form-control border-primary" id="saldoInicial" name="saldoInicial" required>
+        </div>
+        {# Campo saldo inicial #}
+        {# Saldo actual #}
+        <div class="mb-3">
+            <label for="saldoActual" class="form-label text-primary">Saldo Actual</label>
+            <input type="number" class="form-control border-primary" id="saldoActual" name="saldoActual" required>
+        </div>
+        {# Saldo actual #}     
+        {# Banco #}
+        <div class="mb-3">
+            <label for="banco" class="form-label text-primary">Banco</label>
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todos-bancos" data-bs-toggle="modal" data-bs-target="#modalBancos">
+                    <i class="fas fa-eye">Ver bancos</i>
+                </button>
+                <input type="text" class="form-control" id="banco" name="banco_nombre" autocomplete="off" placeholder="Busca el banco" data-target-input="#banco" data-target-hidden-input="#banco_id">
+                <input type="hidden" id="banco_id" name="banco">
+
+                <button type="button" class="btn btn-success btn-sm" id="agregar-banco">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-bancos" style="position: absolute; z-index: 1000; display: none;" data-target-input="#banco" data-target-hidden-input="#banco_id"></ul>
+            </div>
+        </div>
+        {# Banco #}
+        {# CVC maximo 3 valores #}
+        <div class="mb-3">
+            <label for="cvc" class="form-label text-primary">CVC</label>
+            <input type="text" class="form-control border-primary" id="cvc" name="cvc" required pattern="123|456|789|010" title="Debe ser uno de los siguientes valores: 123, 456 o 789">
+        </div>
+        {# CVC #}
+        {# Fecha de Vencimiento #}
+        <div class="mb-3">
+            <label for="fechaVencimiento" class="form-label text-primary">Fecha de Vencimiento</label>
+            <input type="date" class="form-control border-primary" id="fechaVencimiento" name="fechaVencimiento" required>
+        </div>
+        {# Fecha de Vencimiento #}
+        {# Campo usuario #}
+        <div class="mb-3">
+            <label for="usuario" class="form-label text-primary">Usuario</label>
+            <div class="input-group">
+                <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todos-usuarios" data-bs-toggle="modal" data-bs-target="#modalUsuarios">
+                    <i class="fas fa-eye">Ver usuarios</i>
+                </button>
+                <input type="text" class="form-control" id="usuario" name="usuario_nombre" autocomplete="off" placeholder="Busca el usuario" data-target-input="#usuario" data-target-hidden-input="#usuario_id">
+                <input type="hidden" id="usuario_id" name="usuario">
+
+                <button type="button" class="btn btn-success btn-sm" id="agregar-usuario">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-usuarios" style="position: absolute; z-index: 1000; display: none;" data-target-input="#usuario" data-target-hidden-input="#usuario_id"></ul>
+            </div>
+        </div>
+        {# Campo usuario #}
+
+        <div class="mb-3">
+            <div class="d-flex align-items-center">
+                <button type="submit" class="btn btn-primary align-items-center">Agregar Cuenta Bancaria <i class="fas fa-plus-circle"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Ventana Modal -->
+<div class="modal fade" id="modalCuentas" tabindex="-1" aria-labelledby="modalCuentasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary" id="modalCuentasLabel">Todas las Cuentas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido del modal -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana Modal visualizar (usuarios) -->
+<div class="modal fade" id="modalUsuarios" tabindex="-1" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalUsuariosLabel">Usuarios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <table id="tabla-usuarios" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Usuario</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Correo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal para agregar (usuario) -->
+<div class="modal fade" id="modalAgregarUsuario" tabindex="-1" aria-labelledby="modalAgregarUsuarioLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarUsuarioLabel">Agregar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-usuario"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Ventana Modal visualizar (banco) -->
+<div class="modal fade" id="modalBancos" tabindex="-1" aria-labelledby="modalBancosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBancosLabel">Bancos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <table id="tabla-bancos" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>País</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se inyectarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Ventana Modal para agregar (banco) -->
+<div class="modal fade" id="modalAgregarBanco" tabindex="-1" aria-labelledby="modalBancosLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalBancosLabel">Bancos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-banco"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{# Modelo #}
+<input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+
+{% endblock %}
+
+{% block javascript %}
+<!-- Incluyendo jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Incluyendo jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- Incluyendo el script de bootstrap (opcional si ya está en base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Incluyendo SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Incluyendo Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- Incluyendo DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<script src="{% static 'js/formularios.js' %}"></script>
+
+
+{% endblock %}

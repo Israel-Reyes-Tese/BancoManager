@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.db import models
+
+from ..modelo_banco.models_banco import CuentaBancaria
+
 #╔═══════════════════════════════════════════════════════════════════════════════╗
 #║ _____          _      _              _         ____       __     _ _ _        ║
 #║|_   _|_ _ _ __(_) ___| |_ __ _    __| | ___   / ___|_ __ /_/  __| (_) |_ ___  ║
@@ -26,10 +29,14 @@ class TarjetaCredito(models.Model):
 #║|_|   |_|  \___||___/\__\__,_|_| |_| |_|\___/ ║
 #╚══════════════════════════════════════════════╝
 class Prestamo(models.Model):
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+
     monto_total = models.DecimalField(max_digits=10, decimal_places=2)
     tasa_interes = models.DecimalField(max_digits=5, decimal_places=2)  
     fecha_inicio = models.DateField()
+    
     usuario_prestamista = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='prestamos')
+    fechaIngreso = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Préstamo: {self.monto_total} - Prestamista: {self.usuario_prestamista}"
@@ -51,12 +58,14 @@ class Deuda(models.Model):
     usuario_deudor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='deudas_deudor')
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_deuda = models.CharField(max_length=20, choices=DEUDA_TIPO_CHOICES)
-    fecha_creacion = models.DateField(auto_now_add=True)
     estado = models.BooleanField(default=False)  # Indica si la deuda está saldada o no
     descripcion = models.CharField(max_length=255, blank=True, null=True)
     
-    tarjeta = models.ForeignKey(TarjetaCredito, on_delete=models.SET_NULL, null=True, blank=True)
+    tarjeta = models.ForeignKey(CuentaBancaria, on_delete=models.SET_NULL, null=True, blank=True)
     prestamo = models.ForeignKey(Prestamo, on_delete=models.SET_NULL, null=True, blank=True)
+
+    fecha_creacion = models.DateField(auto_now_add=True)
+    fecha_vencimiento = models.DateField(default='2022-01-01')
 
     def __str__(self):
         return f"{self.usuario_deudor} debe {self.monto} - Tipo: {self.tipo_deuda}"

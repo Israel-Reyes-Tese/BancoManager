@@ -1,0 +1,138 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Fondo claro */
+}
+
+header {
+    background: #35424a;
+    color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #35424a;
+    text-decoration: none;
+}
+
+
+footer {
+    background-color: #343a40; /* Color oscuro para el pie de página */
+    color: #f7f7f7; /* Color claro para el texto en el pie de página */
+    padding: 20px 0; /* Espaciado superior e inferior */
+}
+
+footer a {
+    color: #f7f7f7; /* Color claro específico para enlaces en el pie */
+}
+
+footer a:hover {
+    text-decoration: underline; /* Subrayar al pasar el cursor */
+}
+
+body {
+    font-family: Arial, sans-serif; /* Tipografía general */
+}
+
+
+
+.account-card {
+    perspective: 1000px; /* Crear un contexto en 3D para cada tarjeta */
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 200px; /* Altura de la tarjeta */
+    transition: transform 0.6s; /* Controla la transición del flip */
+    transform-style: preserve-3d;
+}
+
+.account-card:hover .card-inner {
+    transform: rotateY(180deg); /* Voltea la tarjeta al hacer hover */
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden; /* Oculta el lado posterior cuando no está visible */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Sombra suave */
+}
+
+.card-front {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-back {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transform: rotateY(180deg); /* Voltea hacia atrás */
+}
+
+.card-title {
+    margin-bottom: 10px; /* Espaciado entre título y contenido */
+}
+
+.card-logo {
+    width: 50px; /* Tamaño del logo de la tarjeta */
+}
+
+.card-icon {
+    margin-top: 15px; /* Espaciado superior para el ícono */
+    color: #ffcc00; /* Color dorado para el ícono del candado */
+}
+
+/* Gastos del mes */
+.transaction-card {
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Sombra */
+    transition: transform 0.3s; /* Transición suave */
+}
+
+.transaction-card:hover {
+    transform: translateY(-3px); /* Efecto de elevación al pasar el ratón */
+}
+
+.table {
+    border-radius: 10px; /* Bordes redondeados */
+    overflow: hidden; /* Ocultar bordes */
+}
+
+.table th {
+    background-color: #343a40; /* Fondo oscuro para encabezado */
+    color: white; /* Texto blanco */
+    text-align: center; /* Centrando el texto */
+}
+
+.table td {
+    vertical-align: middle; /* Alineación vertical */
+}
+
+/* Estilo para los badges */
+.badge-warning {
+    background-color: #ffcc00; /* Color dorado para badge de próximo */
+}
+
+/* Estilo para botones */
+.btn {
+    margin-right: 5px; /* Espaciado entre botones */
+}

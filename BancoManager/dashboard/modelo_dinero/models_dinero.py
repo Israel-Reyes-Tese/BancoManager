@@ -13,10 +13,13 @@ from ..modelo_banco.models_banco import CuentaBancaria
 
 class Ingreso(models.Model):
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
     fecha = models.DateField()
     fuente = models.CharField(max_length=100)
     cuenta = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE, related_name='ingresos')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ingresos')
+    tipo = models.CharField(max_length=20, default='Ingreso')
+    fechaIngreso = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Ingreso: {self.cantidad} - {self.fecha}"
@@ -31,10 +34,13 @@ class Ingreso(models.Model):
 
 class Egreso(models.Model):
     cantidad = models.DecimalField(max_digits=10, decimal_places=2)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
     fecha = models.DateField()
     proposito = models.CharField(max_length=100)
     cuenta = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE, related_name='egresos')
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='egresos')
+    tipo = models.CharField(max_length=20, default='Egreso')
+    fechaIngreso = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Egreso: {self.cantidad} - {self.fecha}"    
