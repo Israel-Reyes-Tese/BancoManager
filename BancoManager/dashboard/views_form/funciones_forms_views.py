@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 
 def validar_inconsistencias(form, modelo_principal):
@@ -67,3 +67,20 @@ def guardar_formulario_post_sin_user(form_model, request, modelo_principal, vist
     return render(request, f'form/create/{nombre_template}.html', {'form': form
                                                  , 'modelo_principal': modelo_principal})
     
+
+# Editar formulario
+def editar_formulario_get_or_post(form_model, request, app_label, template_name, modelo_principal, pk, vista_redireccion):
+    applicacion = get_object_or_404(app_label, pk=pk)
+    if request.method == 'POST':
+        form = form_model(request.POST, instance=applicacion)
+        if form.is_valid():
+            try:
+                form.save()
+            except Exception as e:
+                messages.error(request, 'Error al guardar el ingreso', e)
+    else:
+        form = form_model(instance=applicacion)
+    return render(request, f'form/create/{template_name}.html', {'form': form,
+                                                                'applicacion': applicacion,
+                                                                'modelo_principal': modelo_principal
+                                                                })

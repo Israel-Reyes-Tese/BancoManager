@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Resumen General de Egresos</h1>
+    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
+    {# Total de Egresos #}
+    <div class="row text-center mb-4">
+        <div class="col">
+            <div class="card p-3">
+                <h2>Total de Egresos</h2>
+                <p class="display-4" id="total-egresos">$0</p>
+                {# Botones CRUD para egresos #}
+                <div class="btn-group mt-3" role="group" aria-label="CRUD de Egresos">
+                    <button type="button" class="btn btn-success" id="btnRegistrarEgreso">Registrar Egreso</button>
+                    <button type="button" class="btn btn-warning" id="btnEditarEgreso">Editar Egreso</button>
+                    <button type="button" class="btn btn-danger" id="btnEliminarEgreso">Eliminar Egreso</button>
+                    <button type="button" class="btn btn-info" id="btnVerEgresos">Ver Egresos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Comparativa Mensual de Egresos #}
+    <div class="row">
+        <div class="col">
+            <h2>Comparativa Mensual de Egresos</h2>
+            <canvas id="comparativaMensualEgresos" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Estadísticas de Egresos #}
+    <div class="row">
+        <div class="col">
+            <h2>Egresos por Categoría</h2>
+            <canvas id="egresosPorCategoria" width="400" height="200"></canvas>
+        </div>
+        <div class="col">
+            <h2>Egresos Recientes</h2>
+            <ul id="egresosRecientes" class="list-group">
+                {# Egresos se llenarán con jQuery #}
+            </ul>
+        </div>
+    </div>
+
+    {# Filtros y Búsqueda #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Filtros y Búsqueda</h2>
+            <input type="text" class="form-control" id="buscarEgreso" placeholder="Buscar por propósito, descripción o cuenta">
+            <input type="date" class="form-control my-2" id="rangoFechaDesdeEgresos">
+            <input type="date" class="form-control" id="rangoFechaHastaEgresos">
+            <select class="custom-select my-2" id="categoriaEgreso">
+                <option selected>Selecciona una categoría...</option>
+                <option value="compras">Compras</option>
+                <option value="servicios">Servicios</option>
+                <option value="entretenimiento">Entretenimiento</option>
+            </select>
+            <button id="filtrarEgresos" class="btn btn-primary mt-2">Filtrar</button>
+        </div>
+    </div>
+
+    {# Registro Rápido de Egresos #}
+    <div class="row">
+        <div class="col">
+            <h2>Registro Rápido de Egresos</h2>
+            <form id="formEgreso">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Monto" id="montoEgreso">
+                    <input type="text" class="form-control" placeholder="Propósito" id="propositoEgreso">
+                    <select class="custom-select" id="cuentaEgreso">
+                        <option selected>Selecciona una cuenta...</option>
+                        <option value="cuenta1">Cuenta 1</option>
+                        <option value="cuenta2">Cuenta 2</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-success" type="submit">Registrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Notificaciones y Alertas de Gastos #}
+    <div id="notificacionesEgresos" class="alert alert-warning" role="alert">
+        No hay alertas de gastos excedidos.
+    </div>
+
+    {# Calendario de Egresos Programados #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Calendario de Egresos Programados</h2>
+            {# Placeholder para el calendario #}
+            <div id="calendarioEgresos" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+        </div>
+    </div>
+
+    {# Panel de Control Financiero #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Indicadores de Proporción de Gastos</h2>
+            <p>Proporción de egresos por cuenta o categoría.</p>
+        </div>
+    </div>
+
+    {# Botones de Acción Rápida #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnRegistrarEgreso">Registrar Egreso</button>
+        <button class="btn btn-secondary" id="btnExportarEgresos">Exportar Reporte de Egresos</button>
+        <button class="btn btn-info" id="btnVerReportesEgresos">Ver Reportes Detallados</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/js_home.js' %}"></script>
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+{# Bootstrap JS #}
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    {# Cargar total de egresos, comparativas y estadísticas al cargar la página #}
+    $('#total-egresos').text('$3000'); {# Ejemplo #}
+
+    {# Añadir gráficos con Chart.js #}
+    var ctx = document.getElementById('comparativaMensualEgresos').getContext('2d');
+    var chartEgresos = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Enero', 'Febrero', 'Marzo', 'Abril'],
+            datasets: [{
+                label: 'Egresos Mensuales',
+                data: [800, 1500, 2200, 1300],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    {# Gráfica de Egresos por Categoría #}
+    var ctx2 = document.getElementById('egresosPorCategoria').getContext('2d');
+    var chart2 = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: ['Compras', 'Servicios', 'Entretenimiento'],
+            datasets: [{
+                data: [1000, 1500, 500],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+    {# Manejo del formulario para agregar egresos #}
+    $('#formEgreso').on('submit', function(event) {
+        event.preventDefault();
+
+        var monto = $('#montoEgreso').val();
+        var proposito = $('#propositoEgreso').val();
+        var cuenta = $('#cuentaEgreso').val();
+        {# Lógica para agregar el egreso... #}
+
+        $('#egresosRecientes').append('<li class="list-group-item">' + proposito + ': $' + monto + ' - ' + new Date().toLocaleDateString() + ' (' + cuenta + ')</li>');
+    });
+});
+</script>
+{% endblock %}

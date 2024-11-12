@@ -1,0 +1,71 @@
+
+.loader {
+    text-align: center;
+}
+
+.bill {
+    width: 200px;
+    height: 100px;
+    background-color: #4CAF50; /* Color del billete */
+    border-radius: 10px;
+    position: relative;
+    animation: move 2s infinite alternate; /* Animación de movimiento */
+    overflow: hidden;
+}
+
+.bill-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 5px solid #333; /* Contorno del billete */
+    border-radius: 10px;
+    box-sizing: border-box;
+    animation: borderPulse 2s infinite; /* Animación de pulso del borde */
+}
+
+.dollar-sign {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centrar el signo de dólar */
+    font-size: 48px; /* Tamaño del signo */
+    color: #fff; /* Color del signo */
+    animation: fadeIn 2s forwards; /* Animación de aparición */
+}
+
+.loading-text {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #333;
+    opacity: 0; /* Inicialmente oculto */
+    animation: fadeIn 5s forwards; /* Animación de aparición */
+}
+
+@keyframes move {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(20px); /* Movimiento a la derecha */
+    }
+}
+
+@keyframes borderPulse {
+    0%, 100% {
+        border-color: #333; /* Color original */
+    }
+    50% {
+        border-color: #4CAF50; /* Color durante el pulso */
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

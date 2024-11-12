@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.db import models
+from django.db.models import Sum, F
 
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,27 +13,81 @@ from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
 from .modelo_deudas.models_deudas import Deuda
 
 from datetime import datetime, timedelta
+import random
+
+def generar_color_unico():
+    """Genera un color RGB único."""
+    r = random.randint(0, 255)
+    g = random.randint(0, 255)
+    b = random.randint(0, 255)
+    return f'rgba({r}, {g}, {b}, 0.5)'
 
 
 class InicioHelper:
-    def obtener_totales_ingresos_egresos(self, usuario):
-        total_ingresos = Ingreso.objects.filter(usuario=usuario).aggregate(total_ingresos=models.Sum('cantidad'))['total_ingresos'] or 0
+    def obtener_totales_ingresos_egresos(self, usuario, formato_query=True):
+        total_ingresos = Ingreso.objects.filter(usuario=usuario).annotate(mes=F('fecha__month')).aggregate(total_ingresos=models.Sum('cantidad'))['total_ingresos'] or 0
         total_egresos = Egreso.objects.filter(usuario=usuario).aggregate(total_egresos=models.Sum('cantidad'))['total_egresos'] or 0
         return total_ingresos, total_egresos
 
     def obtener_cuentas(self, usuario):
         return CuentaBancaria.objects.filter(usuario=usuario)[:3]
 
-    def obtener_transacciones_recientes(self, usuario):
+    def obtener_transacciones_recientes(self, usuario, formato_query=True):
         ingresos_recentes = Ingreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
         egresos_recentes = Egreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
-        return ingresos_recentes, egresos_recentes,
 
-    def obtener_transacciones(self, usuario):
+        if formato_query:
+            return ingresos_recentes, egresos_recentes
+        else:
+            lista_ingresos_recientes = []
+            lista_egresos_recientes = []
+            for ingreso in ingresos_recentes:
+                lista_ingresos_recientes.append({
+                    'cantidad': float(ingreso.cantidad),
+                    'descripcion': ingreso.descripcion,
+                    'fecha': ingreso.fecha,
+                    'fuente': ingreso.fuente,
+                    'cuenta': ingreso.cuenta.nombre
+                })
+            
+            for egreso in egresos_recentes:
+                lista_egresos_recientes.append({
+                    'cantidad': float(egreso.cantidad),
+                    'descripcion': egreso.descripcion,
+                    'fecha': egreso.fecha,
+                    'proposito': egreso.proposito,
+                    'cuenta': egreso.cuenta.nombre
+                })
+
+            return lista_ingresos_recientes, lista_egresos_recientes
+       
+
+    def obtener_transacciones(self, usuario, formato_query=True):
         ingresos = Ingreso.objects.filter(usuario=usuario)
         egresos = Egreso.objects.filter(usuario=usuario)
-        return ingresos, egresos
-
+        if formato_query:
+            return ingresos, egresos
+        else:
+            lista_ingresos = []
+            lista_egresos = []
+            for ingreso in ingresos:
+                lista_ingresos.append({
+                    'cantidad': float(ingreso.cantidad),
+                    'descripcion': ingreso.descripcion,
+                    'fecha': ingreso.fecha.strftime('%Y-%m-%d'),
+                    'fuente': ingreso.fuente,
+                    'cuenta': ingreso.cuenta.nombre
+                })
+            for egreso in egresos:
+                lista_egresos.append({
+                    'cantidad': float(egreso.cantidad),
+                    'descripcion': egreso.descripcion,
+                    'fecha': egreso.fecha.strftime('%Y-%m-%d'),
+                    'proposito': egreso.proposito,
+                    'cuenta': egreso.cuenta.nombre
+                })
+            return lista_ingresos, lista_egresos
+        
     def obtener_gastos_por_mes(self, usuario):
         twelve_months_ago = datetime.now() - timedelta(days=365)
         return Egreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
@@ -42,13 +97,35 @@ class InicioHelper:
         top_propositos_egresos = Egreso.objects.filter(usuario=usuario).values('proposito').annotate(count=models.Count('proposito')).order_by('-count')[:4]
         return top_fuentes_ingresos, top_propositos_egresos
 
-    def obtener_datos_graficos_mes_actual(self, usuario):
+    def obtener_datos_graficos_mes_actual(self, usuario, formato_query=True):
         month = datetime.now().month
         year = datetime.now().year
         ingresos_mensuales = Ingreso.objects.filter(usuario=usuario, fecha__month=month, fecha__year=year)
         egresos_mensuales = Egreso.objects.filter(usuario=usuario, fecha__month=month, fecha__year=year)
-        return ingresos_mensuales, egresos_mensuales
+        if formato_query:
+            return ingresos_mensuales, egresos_mensuales
+        else:
+            lista_ingresos_mensuales = []
+            lista_egresos_mensuales = []
+            for ingreso in ingresos_mensuales:
+                lista_ingresos_mensuales.append({
+                    'cantidad': float(ingreso.cantidad),
+                    'descripcion': ingreso.descripcion,
+                    'fecha': ingreso.fecha,
+                    'fuente': ingreso.fuente,
+                    'cuenta': ingreso.cuenta.nombre
+                })
 
+            for egreso in egresos_mensuales:
+                lista_egresos_mensuales.append({
+                    'cantidad': float(egreso.cantidad),
+                    'descripcion': egreso.descripcion,
+                    'fecha': egreso.fecha,
+                    'proposito': egreso.proposito,
+                    'cuenta': egreso.cuenta.nombre
+                })
+            return lista_ingresos_mensuales, lista_egresos_mensuales
+            
     def obtener_gastos_ingresos_por_mes(self, usuario):
         twelve_months_ago = datetime.now() - timedelta(days=365)
         gastos_por_mes = Egreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
@@ -57,6 +134,7 @@ class InicioHelper:
 
     def obtener_deudas_proximas(self, usuario):
         return Deuda.objects.filter(usuario_deudor=usuario, fecha_vencimiento__gte=datetime.now()).order_by('fecha_vencimiento')
+
 
     def calcular_total_deudas(self, usuario):
         return Deuda.objects.filter(usuario_deudor=usuario).aggregate(total_deuda=models.Sum('monto'))['total_deuda'] or 0
@@ -67,6 +145,23 @@ class InicioHelper:
             mes = transaccion.fecha.month
             acumulados[mes] += transaccion.cantidad
         return acumulados
+
+    def calcular_ingresos_por_categoria(self, usuario):
+        # Agrupar los ingresos por categoría y calcular el total de cada categoría
+        ingresos_por_categoria = (
+            Ingreso.objects.filter(usuario=usuario)
+            .values('fuente')
+            .annotate(total=Sum('cantidad'))
+            .order_by('fuente')
+            # Generar colores aleatorios para las categorías (fuente) dependiendo de la longitud de la fuente
+        )
+        # Convertir los datos a una lista de diccionarios y añadir un color único a cada categoría
+        ingresos_por_categoria_list = []
+        for ingreso in ingresos_por_categoria:
+            ingreso['color'] = generar_color_unico()
+            ingresos_por_categoria_list.append(ingreso)
+        
+        return ingresos_por_categoria_list
 
     def preparar_datos_graficas(self, ingresos_acumulados, gastos_acumulados):
         ingresos_data = [float(ingresos_acumulados[i]) for i in range(1, 13)]
@@ -105,6 +200,17 @@ class InicioHelper:
             egresos = egresos.order_by('fecha')
 
         return ingresos, egresos
+    
+    def filtrar_descripciones_unicas(self, usuario, formato_query=True):
+        ingresos = Ingreso.objects.filter(usuario=usuario).values('descripcion').distinct()
+        egresos = Egreso.objects.filter(usuario=usuario).values('proposito').distinct()
+        if formato_query:
+            return ingresos, egresos
+        else:
+            lista_ingresos = [ingreso['descripcion'] for ingreso in ingresos]
+            lista_egresos = [egreso['proposito'] for egreso in egresos]
+            return lista_ingresos, lista_egresos
+        
 
 
 class InicioView(LoginRequiredMixin, View):
@@ -187,8 +293,8 @@ def deudas(request):
     return render(request, 'finanzas/deudas.html')
 
 
-def ingresos(request):
-    return render(request, 'finanzas/ingresos.html')
+#def ingresos(request):
+    #return render(request, 'finanzas/ingresos.html')
 
 
 def egresos(request):
@@ -206,7 +312,7 @@ def cuentas(request):
 
 
 def mi_cuenta(request):
-    return render(request, 'finanzas/mi_cuenta.html')
+    return render(request, 'usuario/mi_cuenta.html')
 
 
 

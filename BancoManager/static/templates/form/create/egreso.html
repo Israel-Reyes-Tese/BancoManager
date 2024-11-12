@@ -31,24 +31,25 @@
             <input type="text" class="form-control" id="proposito" name="proposito" required>
         </div>
 
+        {# Campo cuenta #}
         <div class="mb-3">
             <label for="cuenta" class="form-label">Cuenta</label>
             <div class="d-flex align-items-center">
                 <div class="input-group">
-                    <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todas-cuentas">
-                        <i class="fas fa-eye">Ver cuentas</i> 
+                    <button type="button" class="btn btn-info btn-sm ms-2" id="ver-todas-cuentas" data-bs-toggle="modal" data-bs-target="#modalCuentas">
+                        <i class="fas fa-eye">Ver cuentas</i>
                     </button>
-                    <input type="text" class="form-control" id="cuenta" name="cuenta_nombre" autocomplete="off" required>
+                    <input type="text" class="form-control" id="cuenta" name="cuenta_nombre" autocomplete="off" placeholder="Busca la cuenta" data-target-input="#cuenta" data-target-hidden-input="#cuenta_id">
                     <input type="hidden" id="cuenta_id" name="cuenta">
-                    
-                    <button type="button" class="btn btn-success btn-sm" id="agregar-cuenta">
-                        <i class="fas fa-plus-circle"></i> 
-                    </button>
-
-                    <ul class="list-group" id="lista-cuentas" style="position: absolute; z-index: 1000; display: none;"></ul>
                 </div>
+                <button type="button" class="btn btn-success btn-sm" id="agregar-cuenta">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <ul class="list-group" id="lista-cuentas" style="position: absolute; z-index: 1000; display: none" data-target-input="#cuenta" data-target-hidden-input="#cuenta_id"></ul>
             </div>
         </div>
+        {# Campo cuenta #}
+
 
         <div class="mb-3">
             <div class="d-flex align-items-center">

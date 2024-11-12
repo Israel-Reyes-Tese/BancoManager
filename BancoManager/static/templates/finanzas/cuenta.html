@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Resumen General de Cuentas bancarias</h1>
+    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
+
+    {# Resumen de Cuentas Bancarias #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Total de Saldos</h2>
+            <p class="display-4" id="total-saldos">$0</p>
+            <h2>Gráfica Comparativa</h2>
+            <canvas id="graficaTipoCuenta" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Visualización Detallada de Cuentas #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Lista de Cuentas</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Número de Cuenta</th>
+                        <th>Tipo de Cuenta</th>
+                        <th>Saldo Actual</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-cuentas">
+                    {# Las cuentas se llenarán con jQuery #}
+                </tbody>
+            </table>
+            <select class="custom-select" id="filtroBanco">
+                <option selected>Filtrar por Banco...</option>
+                <option value="banco1">Banco 1</option>
+                <option value="banco2">Banco 2</option>
+            </select>
+        </div>
+    </div>
+
+    {# Estadísticas Financieras #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Progresión de Saldo</h2>
+            <canvas id="progresionSaldo" width="400" height="200"></canvas>
+        </div>
+        <div class="col">
+            <h2>Distribución de Tipos de Cuentas</h2>
+            <canvas id="distribucionTipos" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Acciones Rápidas #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnTransferencia">Transferencia Rápida</button>
+        <button class="btn btn-success" id="btnAñadirCuenta">Añadir Nueva Cuenta</button>
+    </div>
+
+    {# Calendario de Movimientos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Transacciones Recientes</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Monto</th>
+                        <th>Tipo de Transacción</th>
+                    </tr>
+                </thead>
+                <tbody id="transaccionesRecientes">
+                    {# Las transacciones se llenarán con jQuery #}
+                </tbody>
+            </table>
+            <h2>Eventos Futuros</h2>
+            <div id="calendarioMovimientos" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+        </div>
+    </div>
+
+    {# Notificaciones y Alertas #}
+    <div id="notificaciones" class="alert alert-warning" role="alert">
+        No hay alertas de saldos bajos.
+    </div>
+    
+    {# Configuración y Personalización #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Configuración y Personalización</h2>
+            <button class="btn btn-info" id="btnPersonalizacion">Personalizar Interfaz</button>
+            <button class="btn btn-secondary" id="btnPreferencias">Preferencias de Notificación</button>
+        </div>
+    </div>
+
+    {# Integración con Otros Módulos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Resumen de Préstamos y Créditos</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Monto Total</th>
+                    </tr>
+                </thead>
+                <tbody id="resumenPrestamos">
+                    <tr>
+                        <td>Préstamos Activos</td>
+                        <td id="totalPrestamos">$0</td>
+                    </tr>
+                    <tr>
+                        <td>Balance de Tarjetas de Crédito</td>
+                        <td id="balanceTarjetas">$0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Informe de Deudas</h2>
+            <p id="informeDeudas">Resumen de deudas pendientes y próximas cuotas.</p>
+        </div>
+    </div>
+
+    {# Opciones de Exportación y Reportes #}
+    <div class="text-center mt-4">
+        <button class="btn btn-secondary" id="btnDescargarExtracto">Descargar Extracto</button>
+        <button class="btn btn-dark" id="btnAccesoReportes">Acceso a Reportes Detallados</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/js_home.js' %}"></script>
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+{# Bootstrap JS #}
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    {# Mostrar el saludo y resumen rápido #}
+    $('#resumen-rapido').text('3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.');
+
+    {# Cargar total de saldos al cargar la página #}
+    $('#total-saldos').text('$15000'); {# Ejemplo #}
+
+    {# Gráfica: Saldo por tipo de cuenta #}
+    var ctx1 = document.getElementById('graficaTipoCuenta').getContext('2d');
+    var chartTipoCuenta = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Crédito', 'Débito'],
+            datasets: [{
+                data: [6000, 9000],
+                backgroundColor: ['#36A2EB', '#FF6384']
+            }]
+        }
+    });
+
+    {# Gráfica: Progresión de Saldo #}
+    var ctx2 = document.getElementById('progresionSaldo').getContext('2d');
+    var chartProgresion = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+            datasets: [{
+                label: 'Progresión de Saldo',
+                data: [15000, 14000, 15500, 16000],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    {# Gráfica: Distribución de Tipos de Cuentas #}
+    var ctx3 = document.getElementById('distribucionTipos').getContext('2d');
+    var chartDistribucion = new Chart(ctx3, {
+        type: 'pie',
+        data: {
+            labels: ['Visa', 'MasterCard', 'Otro'],
+            datasets: [{
+                data: [5, 2, 3],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+    {# Manejo de la transferencia y creación de cuentas #}
+    $('#btnTransferencia').on('click', function() {
+        alert('Funcionalidad de Transferencia Rápida por implementar.');
+    });
+
+    $('#btnAñadirCuenta').on('click', function() {
+        alert('Funcionalidad de Añadir Nueva Cuenta por implementar.');
+    });
+
+    {# Cargar transacciones recientes y cuentas #}
+    $('#transaccionesRecientes').append('<tr><td>2023-04-01</td><td>$100</td><td>Transferencia</td></tr>');
+    $('#transaccionesRecientes').append('<tr><td>2023-04-05</td><td>$200</td><td>Pago Préstamo</td></tr>');
+});
+</script>
+{% endblock %}

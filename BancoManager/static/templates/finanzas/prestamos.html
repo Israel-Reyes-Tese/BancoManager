@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Bootstrap CSS #}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{# Font Awesome #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Resumen General de Préstamos</h1>
+    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
+    {# Monto Total de Préstamos #}
+    <div class="row text-center mb-4">
+        <div class="col">
+            <div class="card p-3">
+                <h2>Monto Total de Préstamos</h2>
+                <p class="display-4" id="total-prestamos">$0</p>
+            </div>
+        </div>
+    </div>
+
+    {# Interés Acumulado #}
+    <div class="row text-center mb-4">
+        <div class="col">
+            <div class="card p-3">
+                <h2>Interés Acumulado</h2>
+                <p class="display-4" id="interes-acumulado">$0</p>
+            </div>
+        </div>
+    </div>
+
+    {# Estadísticas de Préstamos #}
+    <div class="row">
+        <div class="col">
+            <h2>Préstamos por Fecha de Inicio</h2>
+            <canvas id="prestamosPorFecha" width="400" height="200"></canvas>
+        </div>
+        <div class="col">
+            <h2>Préstamos por Usuario</h2>
+            <canvas id="prestamosPorUsuario" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Detalles y Búsqueda de Préstamos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Búsqueda Avanzada de Préstamos</h2>
+            <input type="text" class="form-control" id="buscarPrestamo" placeholder="Buscar por descripción, monto o usuario">
+            <input type="date" class="form-control my-2" id="fechaInicioDesde">
+            <input type="date" class="form-control" id="fechaInicioHasta">
+            <button id="filtrarPrestamos" class="btn btn-primary mt-2">Filtrar</button>
+        </div>
+    </div>
+
+    {# Registro de Nuevos Préstamos #}
+    <div class="row">
+        <div class="col">
+            <h2>Registro de Nuevos Préstamos</h2>
+            <form id="formPrestamo">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Monto" id="montoPrestamo">
+                    <input type="text" class="form-control" placeholder="Tasa de Interés (%)" id="tasaInteresPrestamo">
+                    <input type="text" class="form-control" placeholder="Descripción" id="descripcionPrestamo">
+                    <select class="custom-select" id="usuarioPrestamista">
+                        <option selected>Selecciona un usuario prestamista...</option>
+                        <option value="usuario1">Usuario 1</option>
+                        <option value="usuario2">Usuario 2</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-success" type="submit">Registrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Notificaciones y Alertas #}
+    <div id="notificacionesPrestamos" class="alert alert-warning" role="alert">
+        No hay recordatorios de pagos activos.
+    </div>
+
+    {# Calendario de Pagos Programados #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Vista de Calendario de Pagos Programados</h2>
+            {# Placeholder para el calendario #}
+            <div id="calendarioPrestamos" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+        </div>
+    </div>
+
+    {# Panel de Control Financiero de Préstamos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Indicadores Clave</h2>
+            <p>Porcentaje de interés aplicado sobre el total de préstamos.</p>
+        </div>
+    </div>
+
+    {# Botones de Acción Rápida #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnRegistrarPrestamo">Registrar Préstamo</button>
+        <button class="btn btn-info" id="btnCalcularIntereses">Calcular Intereses Acumulados</button>
+        <button class="btn btn-secondary" id="btnExportarPrestamos">Exportar Reporte de Préstamos</button>
+        <button class="btn btn-dark" id="btnVerReportesPrestamos">Ver Reportes Detallados</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/js_home.js' %}"></script>
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+{# Bootstrap JS #}
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    {# Cargar monto total de préstamos y interés acumulado al cargar la página #}
+    $('#total-prestamos').text('$10000'); {# Ejemplo #}
+    $('#interes-acumulado').text('$1200'); {# Ejemplo #}
+
+    {# Gráfica de Préstamos por Fecha de Inicio #}
+    var ctx1 = document.getElementById('prestamosPorFecha').getContext('2d');
+    var chartFecha = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: ['Enero', 'Febrero', 'Marzo', 'Abril'],
+            datasets: [{
+                label: 'Préstamos por Fecha de Inicio',
+                data: [5000, 3000, 4000, 3000],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    {# Gráfica de Préstamos por Usuario #}
+    var ctx2 = document.getElementById('prestamosPorUsuario').getContext('2d');
+    var chartUsuario = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Usuario 1', 'Usuario 2'],
+            datasets: [{
+                label: 'Préstamos por Usuario',
+                data: [6000, 4000],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    {# Manejo del formulario para agregar préstamos #}
+    $('#formPrestamo').on('submit', function(event) {
+        event.preventDefault();
+
+        var monto = $('#montoPrestamo').val();
+        var tasaInteres = $('#tasaInteresPrestamo').val();
+        var descripcion = $('#descripcionPrestamo').val();
+        var usuario = $('#usuarioPrestamista').val();
+        // Lógica para agregar el préstamo...
+
+        $('#notificacionesPrestamos').text('Préstamo registrado: ' + descripcion + ' de $' + monto);
+    });
+});
+</script>
+{% endblock %}

@@ -79,9 +79,6 @@ def obtener_transacciones_mes(request):
                 "count" : proposito_egresos['count']
                 })
 
-        print("Obtener transacciones del mes \n" + "Total ingresos",str(total_ingresos) + "\n" + "Total egresos", 
-              str(total_egresos) + "\n" + "Top fuentes ingresos", str(top_fuentes_ingresos_lista) + "\n" + "Top fuentes egresos",str(top_propositos_egresos_lista))
-
         return JsonResponse({'total_ingresos': total_ingresos, 'total_egresos': total_egresos,
                              'top_fuentes_ingresos': top_fuentes_ingresos_lista, 'top_propositos_egresos': top_propositos_egresos_lista})
     
@@ -365,3 +362,18 @@ class FiltrarDeudasView(View):
         } for deuda in deudas]
 
         return JsonResponse({'cuentas': deudas_data})
+    
+
+def a ():
+    applicacion = get_object_or_404(Ingreso, pk=pk)
+    if request.method == 'POST':
+        form = IngresoForm(request.POST, instance=applicacion)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+    else:
+        form = IngresoForm(instance=applicacion)
+    return render(request, 'form/create/ingreso.html', {'form': form,
+                                                        'applicacion': applicacion,
+                                                        'modelo_principal': 'Ingreso_Actualizado'
+                                                        })
