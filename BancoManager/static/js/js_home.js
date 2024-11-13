@@ -275,7 +275,6 @@ function handleFormLoadNoButton(url, targetSelector, modalSelector) {
         success: function(response) {
             response = response.replace(/<header>[\s\S]*<\/header>/, '');
             response = response.replace(/<footer class="bg-light text-dark text-center py-4">[\s\S]*<\/footer>/, '');
-            console.log('Respuesta del servidor', response);
             $(targetSelector).html(response);
             $(modalSelector).removeAttr('aria-hidden').modal('show');
         },

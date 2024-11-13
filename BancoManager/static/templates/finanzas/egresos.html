@@ -101,35 +101,7 @@
         </div>
     </div>
 
-    {# Registro Rápido de Egresos #}
-    <div class="row">
-        <div class="col">
-            <h2>Registro Rápido de Egresos</h2>
-            <form id="formAgregarRapidoEgreso">
-                {% csrf_token %}
-                <div class="input-group mb-3">
-                    <input type="number" class="form-control" id="cantidad" name="cantidad" value="" required>
-                    {# Fuente lista añadir a input cuando se seleccione #}
-                    <select class="custom-select" id="fuente" name="fuente" required>
-                        <option value="" selected disabled>Selecciona la fuente</option>
-                        <option value="Salario">Salario</option>
-                        <option value="Venta">Venta</option>
-                        <option value="Préstamo">Préstamo</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                    {# Fuente lista añadir a input cuando se seleccione #}
-                    <select class="custom-select" id="cuenta" name="cuenta" required>
-                        <option selected>Selecciona una cuenta...</option>
-                        {# Cuentas se llenarán con jQuery #}
-                    </select>
 
-                    <div class="input-group-append">
-                        <button class="btn btn-success" type="submit">Agregar</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
     {# Notificaciones y Alertas de Gastos #}
     <div id="notificacionesEgresos" class="alert alert-warning" role="alert">

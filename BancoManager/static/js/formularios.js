@@ -59,12 +59,10 @@ $(document).ready(function() {
                         $(inputSelector).val(value);
                     }
                 }  
-
-
                 // Actualizar los botones
-                $('#boton_cuenta').text('Actualizar');                
-
-
+                $('#boton_agregar').text('Actualizar');
+                // Acrtualizar el titulo
+                $('#titulo_principal').text('Actualizar '+ response.data[0].modelo + '');                
             },
             error: function(xhr) {
                 Swal.fire({
@@ -494,6 +492,8 @@ if (modelo_principal == "Deuda"){
          handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
          // Cargar formularios extras
          handleFormLoad('#agregar-cuenta', '/crear_cuenta_bancaria/', '#insert-form-agregar-cuenta-bancaria', '#modalAgregarCuenta');
+
+         
     } else if (modelo_principal == "Egreso_Actualizado"){
         // Extraer el id de la url
         id = $("#id_formulario").val();

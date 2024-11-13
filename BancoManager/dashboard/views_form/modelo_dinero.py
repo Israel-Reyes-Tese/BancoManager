@@ -39,6 +39,8 @@ def cargar_registros_ingresos(request, pk):
                 'tipo': registro.tipo,
                 'fechaIngreso': registro.fechaIngreso,
                 'cuenta_nombre': registro.cuenta.nombre,
+                'modelo': 'Egreso',
+
             })
 
         return JsonResponse({
@@ -68,6 +70,7 @@ def cargar_registros_egresos(request, pk):
                 'usuario': registro.usuario.id,
                 'tipo': registro.tipo,
                 'cuenta_nombre': registro.cuenta.nombre,
+                'modelo': 'Egreso',
             })
         return JsonResponse({
             'success': True,
