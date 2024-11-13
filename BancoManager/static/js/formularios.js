@@ -52,12 +52,15 @@ $(document).ready(function() {
             success: function(response) {
                 console.log('Formulario cargado exitosamente', response.data[0]);
                 // Llenar los campos del formulario
-                $('#descripcion').val(response.data[0].descripcion);
-                $('#cantidad').val(response.data[0].cantidad);
-                $('#fecha').val(response.data[0].fecha);
-                $('#fuente').val(response.data[0].fuente);
-                $('#cuenta_id').val(response.data[0].cuenta);
-                $('#cuenta').val(response.data[0].cuenta_nombre);
+                for (var key in response.data[0]) {
+                    if (response.data[0].hasOwnProperty(key)) {
+                        var value = response.data[0][key];
+                        var inputSelector = `#${key}`;
+                        $(inputSelector).val(value);
+                    }
+                }  
+
+
                 // Actualizar los botones
                 $('#boton_cuenta').text('Actualizar');                
 
@@ -491,9 +494,22 @@ if (modelo_principal == "Deuda"){
          handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
          // Cargar formularios extras
          handleFormLoad('#agregar-cuenta', '/crear_cuenta_bancaria/', '#insert-form-agregar-cuenta-bancaria', '#modalAgregarCuenta');
-         
-
-    }
+    } else if (modelo_principal == "Egreso_Actualizado"){
+        // Extraer el id de la url
+        id = $("#id_formulario").val();
+        // Cargar los datos del formulario
+        handleFormLoadDataincome(`../../../api/cargar_registros_egresos/${id}/`);
+        // Manejar el actualizacion del formulario
+        handleFormSubmit('#form-agregar-egreso', `../../../api/editar_egreso/${id}/`, metodo="POST", modalSelector="modalEditarEgreso");
+        // Manejar la búsqueda de cuentas de manera dinámica
+        handleAccountSearch('#cuenta', '#lista-cuentas', '/api/buscar_dinamica_cuentas/');
+        // Manejar el clic en una cuenta de la lista
+        handleAccountSelection('#lista-cuentas', '#cuenta', '#cuenta_id');
+        // Manejar el clic en el botón "Ver todas las cuentas"
+        handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
+        // Cargar formularios extras
+        handleFormLoad('#agregar-cuenta', '/crear_cuenta_bancaria/', '#insert-form-agregar-cuenta-bancaria', '#modalAgregarCuenta');
+        }
 
 
 });

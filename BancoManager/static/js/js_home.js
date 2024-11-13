@@ -275,6 +275,7 @@ function handleFormLoadNoButton(url, targetSelector, modalSelector) {
         success: function(response) {
             response = response.replace(/<header>[\s\S]*<\/header>/, '');
             response = response.replace(/<footer class="bg-light text-dark text-center py-4">[\s\S]*<\/footer>/, '');
+            console.log('Respuesta del servidor', response);
             $(targetSelector).html(response);
             $(modalSelector).removeAttr('aria-hidden').modal('show');
         },
@@ -480,12 +481,36 @@ if (modelo_principal) {
     // AGREGAR RÁPIDO
     handleFormSubmit(`#formAgregarRapido${modelo_principal}`, `/api/crear_rapido_${modelo_principal.toLowerCase()}/`, 'POST', modelo_principal );
 }
+
+
+
+function buscarBotoneditar() {
+    var botones = document.querySelectorAll('.editbutton');
+    console.log("Los botones son: ", botones);
+    botones.forEach(function(boton) {
+        boton.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            editarIngreso(id);
+        });
+    });
+}
+
+function buscarBotonEliminar() {
+    var botones = document.querySelectorAll('.deletebutton');
+    console.log("Los botones son: ", botones);
+    botones.forEach(function(boton) {
+        boton.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            eliminarIngreso(id);
+        });
+    });
+}
+
+
+
 // Llamar a la función para cargar datos del modelo principal
 cargarDatosModelo(modelo_principal);
-// Función cuando se cierre un formulario en un modal, se actualiza la información
-$('.modal').on('show.bs.modal', function() {
-    cargarDatosModelo(modelo_principal);
-});
+
 // Boton actualizar
 $(`#btnActualizar${modelo_principal}`).on('click', function() {
     cargarDatosModelo(modelo_principal);

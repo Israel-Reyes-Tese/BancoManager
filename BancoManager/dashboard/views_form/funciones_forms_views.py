@@ -97,14 +97,23 @@ def editar_formulario_get_or_post(form_model, request, app_label, template_name,
                 messages.error(request, 'Error al guardar el ingreso', e)
             # Cerrar la vista y redirigir a la vista principal a la url 'api/editar_ingreso/pk/
             return redirect(vista_redireccion, pk=pk)
+        else:
+            print("Formulario inválido", form.errors)
+            return render(request, f'form/create/{template_name}.html', {
+                                                                    'form': form,
+                                                                    'id_formulario': pk,
+                                                                    'applicacion': applicacion,
+                                                                    'modelo_principal': modelo_principal
+                                                                    })
     else:
+        print("Se retorna el formulario para editar")
         form = form_model(instance=applicacion)
-    return render(request, f'form/create/{template_name}.html', {
-                                                                'form': form,
-                                                                'id_formulario': pk,
-                                                                'applicacion': applicacion,
-                                                                'modelo_principal': modelo_principal
-                                                                })
+        return render(request, f'form/create/{template_name}.html', {
+                                                                    'form': form,
+                                                                    'id_formulario': pk,
+                                                                    'applicacion': applicacion,
+                                                                    'modelo_principal': modelo_principal
+                                                                    })
 
 # Eliminar registro
 

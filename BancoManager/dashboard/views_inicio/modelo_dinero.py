@@ -21,9 +21,13 @@ from ..views import InicioHelper
 class BuscarIngresosView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return BuscarInformacionFechasView(request, Ingreso, values=('id', 'cantidad', 'descripcion', 'fecha', 'fuente', 'cuenta__nombre'), retorno_json=True)
+    
+class BuscarEgresosView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        return BuscarInformacionFechasView(request, Egreso, values=('id', 'cantidad', 'descripcion', 'fecha', 'proposito', 'cuenta__nombre'), retorno_json=True)
 
 
-def InformacionIngresosView(request, retorno_json=True):
+def InformacionIngresosView(request, retorno_json=True, modelo_principal=""):
     helper = InicioHelper()
     if retorno_json:
         total_ingresos, total_egresos = helper.obtener_totales_ingresos_egresos(request.user)
@@ -49,6 +53,7 @@ def InformacionIngresosView(request, retorno_json=True):
     ingresos_graficables, egresos_graficables = helper.preparar_datos_graficas(ingresos_acumulados, gastos_acumulados)
     # Preparar datos para las gráficas ingresos por categoría
     ingresos_por_categoria_graficables = helper.calcular_ingresos_por_categoria(request.user)
+    egresos_por_categoria_graficables = helper.calcular_egresos_por_categoria(request.user)
     # Obtener las cuentas del usuario
     cuentas = helper.obtener_cuentas(request.user, formato_query=False) 
     # Preparar el contexto para el template
@@ -63,6 +68,7 @@ def InformacionIngresosView(request, retorno_json=True):
         'egreso_graficables': egresos_graficables,
 
         'ingreso_por_categoria_graficables': ingresos_por_categoria_graficables,
+        'egreso_por_categoria_graficables': egresos_por_categoria_graficables,
 
         'ingreso_recientes': ingresos_recientes,
         'egreso_recientes': egresos_recientes,
@@ -73,7 +79,7 @@ def InformacionIngresosView(request, retorno_json=True):
         'categorias': ingresos_descripcion,
         'categorias_egresos': egresos_descripcion,
 
-        "modelo_principal": "Ingreso",
+        "modelo_principal": modelo_principal,
 
         'cuentas': cuentas,
     }
@@ -94,10 +100,25 @@ class IngresoInicioView(LoginRequiredMixin, View):
     # Obtener el usuario autenticado
     def get(self, request, *args, **kwargs):
         try:
-            context = InformacionIngresosView(request, retorno_json=False)
+            context = InformacionIngresosView(request, retorno_json=False, modelo_principal="Ingreso")
             return render(request, self.template_name, context)
 
         except Exception as e:
             messages.error(request, _("Ocurrió un error al cargar los ingresos."))
             print(f"Error en la vista IngresoInicioView: {e}")  # Registro del error
+            return render(request, self.template_name)  # Renderiza sin datos si ocurre un error
+        
+
+class EgresoInicioView(LoginRequiredMixin, View):
+    template_name = 'finanzas/egresos.html'
+    login_url = '/login/'  # URL de redirección para usuarios no autenticados
+    # Obtener el usuario autenticado
+    def get(self, request, *args, **kwargs):
+        try:
+            context = InformacionIngresosView(request, retorno_json=False, modelo_principal="Egreso")
+            return render(request, self.template_name, context)
+
+        except Exception as e:
+            messages.error(request, _("Ocurrió un error al cargar los egresos."))
+            print(f"Error en la vista EgresoInicioView: {e}")  # Registro del error
             return render(request, self.template_name)  # Renderiza sin datos si ocurre un error

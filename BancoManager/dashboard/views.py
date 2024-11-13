@@ -67,7 +67,7 @@ class InicioHelper:
                     'cantidad': float(egreso.cantidad),
                     'descripcion': egreso.descripcion,
                     'fecha': egreso.fecha,
-                    'proposito': egreso.proposito,
+                    'fuente': egreso.proposito,
                     'cuenta': egreso.cuenta.nombre
                 })
 
@@ -97,7 +97,7 @@ class InicioHelper:
                     'cantidad': float(egreso.cantidad),
                     'descripcion': egreso.descripcion,
                     'fecha': egreso.fecha.strftime('%Y-%m-%d'),
-                    'proposito': egreso.proposito,
+                    'fuente': egreso.proposito,
                     'cuenta': egreso.cuenta.nombre
                 })
             return lista_ingresos, lista_egresos
@@ -176,6 +176,26 @@ class InicioHelper:
             ingresos_por_categoria_list.append(ingreso)
         
         return ingresos_por_categoria_list
+    
+    def calcular_egresos_por_categoria(self, usuario):
+        # Agrupar los egresos por categoría y calcular el total de cada categoría
+        egresos_por_categoria = (
+            Egreso.objects.filter(usuario=usuario)
+            .values('proposito')
+            .annotate(total=Sum('cantidad'))
+            .order_by('proposito')
+            # Generar colores aleatorios para las categorías (proposito) dependiendo de la longitud del proposito
+        )
+        # Renombra la clave 'proposito' a 'fuente' para que coincida con la clave de ingresos
+        egresos_por_categoria = [{'fuente': egreso.pop('proposito'), 'total': egreso['total']} for egreso in egresos_por_categoria]
+        # Convertir los datos a una lista de diccionarios y añadir un color único a cada categoría
+        egresos_por_categoria_list = []
+        for egreso in egresos_por_categoria:
+            egreso['color'] = generar_color_unico()
+            egresos_por_categoria_list.append(egreso)
+    
+
+        return egresos_por_categoria_list
 
     def preparar_datos_graficas(self, ingresos_acumulados, gastos_acumulados):
         ingresos_data = [float(ingresos_acumulados[i]) for i in range(1, 13)]

@@ -21,7 +21,7 @@ urlpatterns = [
     # Finanzas
     path('deudas/', views.deudas, name='deudas'),
     path('ingresos/', IngresoInicioView.as_view(), name='ingresos'),
-    path('egresos/', views.egresos, name='egresos'),
+    path('egresos/', EgresoInicioView.as_view(), name='egresos'),
     path('bancos/', views.bancos, name='bancos'),
     path('prestamos/', views.prestamos, name='prestamos'),
     path('cuentas/', views.cuentas, name='cuentas'),
@@ -47,6 +47,7 @@ urlpatterns = [
 
     # Petición asíncrona Inicio modelos
     path('api/informacion_ingreso/', InformacionIngresosView, name='informacion_ingresos'),  # Petición asíncrona ingresos
+    path('api/informacion_egreso/', InformacionIngresosView, name='informacion_egresos'),  # Petición asíncrona egresos
 
 
 
@@ -74,23 +75,27 @@ urlpatterns = [
     path('crear_usuario/', crear_usuario, name='crear_usuario'),
     # Fomularios crear rapido
     path('api/crear_rapido_ingreso/', crear_ingreso_rapido, name='crear_rapido_ingreso'),
+    path('api/crear_rapido_egreso/', crear_egreso_rapido, name='crear_rapido_egreso'),
 
 
     # Eliminar registros
     path('api/eliminar_ingreso/<int:pk>/', eliminar_ingreso, name='eliminar_ingreso'),
+    path('api/eliminar_egreso/<int:pk>/', eliminar_egreso, name='eliminar_egreso'),
 
 
     # Formularios editables
     path('api/editar_ingreso/<int:pk>/', editar_ingreso, name='editar_ingreso'),
+    path('api/editar_egreso/<int:pk>/', editar_egreso, name='editar_egreso'),
     
 
     # Cargar registros
     path('api/cargar_registros_ingresos/<int:pk>/', cargar_registros_ingresos, name='cargar_registros_ingresos'),
-
+    path('api/cargar_registros_egresos/<int:pk>/', cargar_registros_egresos, name='cargar_registros_egresos'),
     
 
     # Buscar dinámica 
     path('api/buscar_dinamica_ingresos/', BuscarIngresosView.as_view(), name='buscar_dinamica_ingresos'),
+    path('api/buscar_dinamica_egresos/', BuscarEgresosView.as_view(), name='buscar_dinamica_egresos'),
  
 
 
