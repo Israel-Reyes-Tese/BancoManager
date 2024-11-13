@@ -76,16 +76,15 @@ $(document).ready(function() {
 
 
     // Manejar el envío del formulario
-    function handleFormSubmit(formSelector, url) {
+    function handleFormSubmit(formSelector, url, metodo = "POST", modalSelector=null) {
         $(formSelector).on('submit', function(e) {
             e.preventDefault(); // Prevenir comportamiento por defecto
             console.log('Formulario enviado', e);
-
             // Recolectar datos del formulario
             var formData = $(this).serialize();
             $.ajax({
                 url: url,  // URL para agregar ingresos
-                method: "POST",
+                method: metodo,
                 data: formData,
                 headers: {
                     'X-CSRFToken': csrfToken
@@ -99,6 +98,12 @@ $(document).ready(function() {
                     });
                     // Limpiar el formulario
                     $(formSelector).trigger('reset');
+                    // Validar si existe un modal
+                    if (modalSelector) {
+                        // Ocultar el modal
+                        console.log('Cerrando modal', $(modalSelector));
+                        $(modalSelector).modal('hide');
+                    }
                 },
                 error: function(xhr) {
                     Swal.fire({
@@ -111,7 +116,7 @@ $(document).ready(function() {
         });
     }
 
-    
+
     // Funcion principal para la busqueda de registros
     function handleSearchProcess(inputSelector, resultSelector, searchUrl) {
         var debounceTimer;  // Variable para debounce
@@ -473,9 +478,11 @@ if (modelo_principal == "Deuda"){
 
     if (modelo_principal == "Ingreso_Actualizado"){
         // Extraer el id de la url
-        id = window.location.pathname.split('/')[3];
+        id = $("#id_formulario").val();
         // Cargar los datos del formulario
         handleFormLoadDataincome(`../../../api/cargar_registros_ingresos/${id}/`);
+             // Manejar el actualizacion del formulario
+        handleFormSubmit('#form-agregar-ingreso', `../../../api/editar_ingreso/${id}/`, metodo="POST", modalSelector="modalEditarIngreso");
              // Manejar la búsqueda de cuentas de manera dinámica
          handleAccountSearch('#cuenta', '#lista-cuentas', '/api/buscar_dinamica_cuentas/');
              // Manejar el clic en una cuenta de la lista

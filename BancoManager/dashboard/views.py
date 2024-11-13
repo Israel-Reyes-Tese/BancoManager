@@ -29,8 +29,20 @@ class InicioHelper:
         total_egresos = Egreso.objects.filter(usuario=usuario).aggregate(total_egresos=models.Sum('cantidad'))['total_egresos'] or 0
         return total_ingresos, total_egresos
 
-    def obtener_cuentas(self, usuario):
-        return CuentaBancaria.objects.filter(usuario=usuario)[:3]
+    def obtener_cuentas(self, usuario, formato_query=True):
+        if formato_query:
+            return CuentaBancaria.objects.filter(usuario=usuario)[:3]
+        else:
+            cuentas = CuentaBancaria.objects.filter(usuario=usuario)
+            lista_cuentas = []
+            for cuenta in cuentas:
+                lista_cuentas.append({
+                    'id': cuenta.id,
+                    'nombre': cuenta.nombre,
+                    'saldo': cuenta.saldoActual
+                })
+            return lista_cuentas        
+        
 
     def obtener_transacciones_recientes(self, usuario, formato_query=True):
         ingresos_recentes = Ingreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
@@ -72,6 +84,7 @@ class InicioHelper:
             lista_egresos = []
             for ingreso in ingresos:
                 lista_ingresos.append({
+                    "id": ingreso.id,
                     'cantidad': float(ingreso.cantidad),
                     'descripcion': ingreso.descripcion,
                     'fecha': ingreso.fecha.strftime('%Y-%m-%d'),
@@ -80,6 +93,7 @@ class InicioHelper:
                 })
             for egreso in egresos:
                 lista_egresos.append({
+                    "id": egreso.id,
                     'cantidad': float(egreso.cantidad),
                     'descripcion': egreso.descripcion,
                     'fecha': egreso.fecha.strftime('%Y-%m-%d'),
@@ -263,6 +277,9 @@ class InicioView(LoginRequiredMixin, View):
         for proposito_egresos in top_propositos_egresos:
             categorias.append(proposito_egresos['proposito'])
 
+         # Obtener todas las cuentas
+        cuentas = helper.obtener_cuentas(request.user, formato_query=False) 
+
         context = {
             'total_ingresos': float(total_ingresos),
             'total_egresos': float(total_egresos),
@@ -283,9 +300,8 @@ class InicioView(LoginRequiredMixin, View):
 
             'deudas_proximas': deudas_proximas,
             'categorias': categorias,
+            'cuentas': cuentas,
         }
-        print(context)
-        
         return render(request, 'index.html', context)
 
 

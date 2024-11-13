@@ -46,7 +46,7 @@ urlpatterns = [
 
 
     # Petición asíncrona Inicio modelos
-    path('api/informacion_ingresos/', InformacionIngresosView, name='informacion_ingresos'),  # Petición asíncrona ingresos
+    path('api/informacion_ingreso/', InformacionIngresosView, name='informacion_ingresos'),  # Petición asíncrona ingresos
 
 
 
@@ -72,6 +72,13 @@ urlpatterns = [
     path('crear_cuenta_bancaria/', crear_cuenta_bancaria, name='crear_cuenta_bancaria'),
     # Formularios principales
     path('crear_usuario/', crear_usuario, name='crear_usuario'),
+    # Fomularios crear rapido
+    path('api/crear_rapido_ingreso/', crear_ingreso_rapido, name='crear_rapido_ingreso'),
+
+
+    # Eliminar registros
+    path('api/eliminar_ingreso/<int:pk>/', eliminar_ingreso, name='eliminar_ingreso'),
+
 
     # Formularios editables
     path('api/editar_ingreso/<int:pk>/', editar_ingreso, name='editar_ingreso'),

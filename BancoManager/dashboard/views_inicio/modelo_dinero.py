@@ -49,32 +49,33 @@ def InformacionIngresosView(request, retorno_json=True):
     ingresos_graficables, egresos_graficables = helper.preparar_datos_graficas(ingresos_acumulados, gastos_acumulados)
     # Preparar datos para las gráficas ingresos por categoría
     ingresos_por_categoria_graficables = helper.calcular_ingresos_por_categoria(request.user)
-
-
-
+    # Obtener las cuentas del usuario
+    cuentas = helper.obtener_cuentas(request.user, formato_query=False) 
     # Preparar el contexto para el template
     context = {
-        'total_ingresos': total_ingresos,
-        'total_egresos': total_egresos,
+        'total_ingreso': total_ingresos,
+        'total_egreso': total_egresos,
 
-        'todos_ingresos': todos_ingresos,
-        'todos_egresos': todos_egresos,
+        'todos_ingreso': todos_ingresos,
+        'todos_egreso': todos_egresos,
 
-        'ingresos_graficables': ingresos_graficables,
-        'egresos_graficables': egresos_graficables,
+        'ingreso_graficables': ingresos_graficables,
+        'egreso_graficables': egresos_graficables,
 
-        'ingresos_por_categoria_graficables': ingresos_por_categoria_graficables,
+        'ingreso_por_categoria_graficables': ingresos_por_categoria_graficables,
 
-        'ingresos_recientes': ingresos_recientes,
-        'egresos_recientes': egresos_recientes,
+        'ingreso_recientes': ingresos_recientes,
+        'egreso_recientes': egresos_recientes,
 
-        'ingresos_mensuales': ingresos_mensuales,
-        'egresos_mensuales': egresos_mensuales,
+        'ingreso_mensuales': ingresos_mensuales,
+        'egreso_mensuales': egresos_mensuales,
         
         'categorias': ingresos_descripcion,
         'categorias_egresos': egresos_descripcion,
 
         "modelo_principal": "Ingreso",
+
+        'cuentas': cuentas,
     }
     print("Datos de ingresos cargados correctamente.", 
             "\n Total ingresos: ", total_ingresos, "\n Total egresos: ", total_egresos,

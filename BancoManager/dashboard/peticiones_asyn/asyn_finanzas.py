@@ -362,18 +362,3 @@ class FiltrarDeudasView(View):
         } for deuda in deudas]
 
         return JsonResponse({'cuentas': deudas_data})
-    
-
-def a ():
-    applicacion = get_object_or_404(Ingreso, pk=pk)
-    if request.method == 'POST':
-        form = IngresoForm(request.POST, instance=applicacion)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True})
-    else:
-        form = IngresoForm(instance=applicacion)
-    return render(request, 'form/create/ingreso.html', {'form': form,
-                                                        'applicacion': applicacion,
-                                                        'modelo_principal': 'Ingreso_Actualizado'
-                                                        })

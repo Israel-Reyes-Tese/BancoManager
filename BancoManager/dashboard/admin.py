@@ -46,7 +46,7 @@ class CuentaBancariaAdmin(admin.ModelAdmin):
 
 @admin.register(Ingreso)
 class IngresoAdmin(admin.ModelAdmin):
-    list_display = ('cantidad', 'fecha', 'fuente', 'cuenta', 'usuario')
+    list_display = ('cantidad', 'fecha', 'fuente', 'cuenta', 'descripcion', 'usuario')
     search_fields = ('fuente', 'cantidad', 'usuario__email')
     list_filter = ('fecha', 'cuenta__banco')
     ordering = ('-fecha',)
