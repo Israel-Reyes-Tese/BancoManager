@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 
 from .modelo_banco.models_banco import Banco
 from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
-from .modelo_deudas.models_deudas import Deuda
+from .modelo_deudas.models_deudas import Deuda, Prestamo, TarjetaCredito
 
 from datetime import datetime, timedelta
 import random
@@ -245,61 +245,165 @@ class InicioHelper:
             lista_egresos = [egreso['proposito'] for egreso in egresos]
             return lista_ingresos, lista_egresos
         
+    def obtener_cuentas_bancarias(self, usuario, formato_query=True):
+        if formato_query:
+            return CuentaBancaria.objects.filter(usuario=usuario)[:3]
+        else:
+            cuentas = CuentaBancaria.objects.filter(usuario=usuario)
+            lista_cuentas = []
+            for cuenta in cuentas:
+                lista_cuentas.append({
+                    "id": cuenta.id,
+                    'nombre': cuenta.nombre,
+                    'numeroCuenta': cuenta.numeroCuenta,
+                    'tipoCuenta': cuenta.tipoCuenta,
+                    'afiliacion': cuenta.afilacion,
+                    'saldoInicial': cuenta.saldoInicial,
+                    'saldoActual': cuenta.saldoActual,
+                    'banco': cuenta.banco.nombre,
+                    'colorIdentificacion': cuenta.colorIdentificacion,
+                    'cvc': cuenta.cvc,
+                    'fechaVencimiento': cuenta.fechaVencimiento,
+                    'usuario': cuenta.usuario.id,
+                    'modelo_principal': 'CuentaBancaria',
+                })
+            return lista_cuentas
+        
+    def obtener_bancos(self, formato_query=True):
+        if formato_query:
+            return Banco.objects.all()
+        else:
+            bancos = Banco.objects.all()
+            lista_bancos = []
+            for banco in bancos:
+                lista_bancos.append({
+                    'id': banco.id,
+                    'nombre': banco.nombre,
+                    'pais': banco.pais
+                })
+            return lista_bancos
+        
+    #     $('#resumen-rapido').text(`${data.cuentas.length} cuentas, ${data.tarjetas_credito.length} tarjeta(s) de crédito, ${data.prestamos.length} préstamo(s) activos.`);
+    def obtener_tarjetas_credito(self, usuario, formato_query=True):
+        if formato_query:
+            return TarjetaCredito.objects.filter(usuario=usuario)
+        else:
+            tarjetas = TarjetaCredito.objects.filter(usuario=usuario)
+            lista_tarjetas = []
+            for tarjeta in tarjetas:
+                lista_tarjetas.append({
+                    "id": tarjeta.id,
+                    "numeroTarjeta": tarjeta.numeroTarjeta,
+                    "nombre_titular": tarjeta.nombre_titular,
+                    "fechaVencimiento": tarjeta.fechaVencimiento,
+                    "colorIdentificacion": tarjeta.colorIdentificacion,
+                    "limte": tarjeta.limite,
+                    "usuario": tarjeta.usuario.id,
+                })
+            return lista_tarjetas
+        
+    def obtener_prestamos(self, usuario, formato_query=True):
+        if formato_query:
+            return Prestamo.objects.filter(usuario_prestamista=usuario)
+        else:
+            prestamos = Prestamo.objects.filter(usuario_prestamista=usuario)
+            lista_prestamos = []
+            for prestamo in prestamos:
+                lista_prestamos.append({
+                    "id": prestamo.id,
+                    "descripcion": prestamo.descripcion,
+                    "monto_total": prestamo.monto_total,
+                    "tasa_interes": prestamo.tasa_interes,
+                    "fecha_inicio": prestamo.fecha_inicio,
+                    "usuario": prestamo.usuario_prestamista.id,
+                    "fechaIngreso": prestamo.fechaIngreso,
+                })
+            return lista_prestamos
+        
+    def obtener_prestamos_activos(self, usuario, formato_query=True):
+        if formato_query:
+            return Prestamo.objects.filter(usuario_prestamista=usuario, estado=True)
+        else:
+            prestamos = Prestamo.objects.filter(usuario_prestamista=usuario, estado=True)
+            lista_prestamos = []
+            for prestamo in prestamos:
+                lista_prestamos.append({
+                    "id": prestamo.id,
+                    "descripcion": prestamo.descripcion,
+                    "monto_total": prestamo.monto_total,
+                    "tasa_interes": prestamo.tasa_interes,
+                    "fecha_inicio": prestamo.fecha_inicio,
+                    "usuario": prestamo.usuario_prestamista.id,
+                    "fechaIngreso": prestamo.fechaIngreso,
+                })
+            return lista_prestamos
 
+    def obtener_deudas(self, usuario, formato_query=True):
+        if formato_query:
+            return Deuda.objects.filter(usuario_deudor=usuario)
+        else:
+            deudas = Deuda.objects.filter(usuario_deudor=usuario)
+            # Contar cuantas son de tarjeta de crédito y cuantas son de préstamos
+            tarjetas = deudas.filter(tipo_deuda='tarjeta')
+            prestamos = deudas.filter(tipo_deuda='prestamo')
+            # 
+            
+
+
+            lista_deudas = []
+            for deuda in deudas:
+                lista_deudas.append({
+                    "id": deuda.id,
+                    "usuario_deudor": deuda.usuario_deudor.id,
+                    
+                    "monto": deuda.monto,
+                    "tipo_deuda": deuda.tipo_deuda,
+
+                    "estado": deuda.estado,
+                    
+                    "fechaIngreso": deuda.fechaIngreso,
+                    "fecha_vencimiento": deuda.fecha_vencimiento,
+                    
+                })
+            return lista_deudas
 
 class InicioView(LoginRequiredMixin, View):
     def get(self, request):
         helper = InicioHelper()
-        
         # Obtener totales de ingresos y egresos
         total_ingresos, total_egresos = helper.obtener_totales_ingresos_egresos(request.user)
-        
         # Obtener cuentas
         cuentas = helper.obtener_cuentas(request.user)
-        
         # Obtener transacciones recientes
         ingresos_recentes, egresos_recentes = helper.obtener_transacciones_recientes(request.user)
-       
         # Obtener transacciones (ingresos y egresos)
         ingresos, egresos = helper.obtener_transacciones(request.user)
-       
         # Obtener gastos de los últimos 12 meses
         gastos_por_mes = helper.obtener_gastos_por_mes(request.user)
-        
         # Obtener fuentes más comunes de ingresos y propósitos más comunes de egresos
         top_fuentes_ingresos, top_propositos_egresos = helper.obtener_fuentes_propositos_comunes(request.user)
-        
         # Datos para los gráficos del mes actual
         ingresos_mensuales, egresos_mensuales = helper.obtener_datos_graficos_mes_actual(request.user)
-        
         # Obtener gastos e ingresos de los últimos 12 meses
         gastos_por_mes, ingresos_por_mes = helper.obtener_gastos_ingresos_por_mes(request.user)
-        
         # Crear un diccionario para almacenar el total acumulado por mes
         gastos_acumulados = helper.calcular_acumulados_por_mes(gastos_por_mes)
         ingresos_acumulados = helper.calcular_acumulados_por_mes(ingresos_por_mes)
-        
         # Preparar datos para las gráficas
         ingresos_data, egresos_data = helper.preparar_datos_graficas(ingresos_acumulados, gastos_acumulados)
-        
         # Manejar filtrado y ordenación
         ingresos, egresos = helper.manejar_filtrado_ordenacion(request, ingresos, egresos)
-
         # Obtener deudas próximas a pagar
         deudas_proximas = helper.obtener_deudas_proximas(request.user)
         total_deudas = helper.calcular_total_deudas(request.user)
-
         # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
         categorias = []
-
         for fuente_ingresos in top_fuentes_ingresos:
             categorias.append(fuente_ingresos['fuente'])
         for proposito_egresos in top_propositos_egresos:
             categorias.append(proposito_egresos['proposito'])
-
          # Obtener todas las cuentas
         cuentas = helper.obtener_cuentas(request.user, formato_query=False) 
-
         context = {
             'total_ingresos': float(total_ingresos),
             'total_egresos': float(total_egresos),

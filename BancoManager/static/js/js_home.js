@@ -1,6 +1,23 @@
 // JS_HOME.js
 // Objeto global para almacenar las gráficas
 var charts = {};
+// Inicializar el cuadro de carga
+const cargaIngresos = cuadroCarga('#cuadroCargaIngresos');
+// Obtener el token CSRF desde del input oculto en el HTML body 
+// <input type="hidden" name="csrfmiddlewaretoken" value="p07Eb4EnxPEdHIlgSAUwpSOTh1rVfyGkxQPeNk3wBJPNdAyqKyqLnopRWd0bAyNJ">
+var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+// Configurar jQuery para incluir el token CSRF en todas las solicitudes AJAX
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        }
+    }
+});
+// Función para editar un modelo
+window.editarModelo = function(modelo, id) {
+    handleFormLoad(null, `/api/editar_${modelo.toLowerCase()}/` + id + '/', `#insert-form-editar-${modelo.toLowerCase()}`, `#modalEditar${modelo}`);
+}
 
 // Función para crear el cuadro de carga
 function cuadroCarga(divID) {
@@ -79,6 +96,35 @@ function configurarGrafica({ canvasId, tipoGrafica = 'bar', etiquetas, datos, la
     });
 }
 
+function configurarTabla({ tablaId, modelo, opciones = {}, data={}, campos={} } ) {
+    // Eliminar los widgets de buscar y filtrar
+    limpiarHTML(`#${tablaId}_length`, true);
+    limpiarHTML(`#${tablaId}_filter`, true);
+    limpiarHTML(`#${tablaId}_info`, true);
+    limpiarHTML(`#${tablaId}_paginate`, true);
+
+    // Limpiar la tabla antes de llenarla
+    $(`#${tablaId}`).DataTable().clear().destroy();
+    // Llenar la tabla con los datos
+    data.forEach(function(item) {
+        var fila = '<tr>';
+        campos.forEach(function(campo) {
+            fila += `<td>${item[campo]}</td>`;
+        });
+        fila += `<td> <button class="btn btn-warning btn-sm editbutton" id="btnEditar${modelo}" data-id="${item.id}">Editar</button>` +
+            `<button class="btn btn-danger btn-sm deletebutton" id="btnEliminar${modelo}" data-id="${item.id}">Eliminar</button> </td></tr>`;
+        $(`#${tablaId} tbody`).append(fila);
+    });
+    // Inicializar DataTables
+    $(`#${tablaId}`).DataTable(Object.assign({
+        order: [[2, 'desc']],
+        paging: true,
+        searching: true,
+        lengthChange: true,
+        pageLength: 10,
+    }, opciones));
+}
+            
 
 function limpiarHTML(target, destroy = false) {
     // Validar si existe el target
@@ -90,8 +136,249 @@ function limpiarHTML(target, destroy = false) {
     }
 }
 
+function generarListadocuentas(url, targetSelector) {
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(data) {
+            // Seleccionar el elemento objetivo
+            const targetElement = document.querySelector(targetSelector);
+            if (!targetElement) {
+                console.error('Elemento objetivo no encontrado:', targetSelector);
+                return;
+            }
+            const cuentaSelect = $('#cuenta');
+            cuentaSelect.empty(); // Limpiar las opciones existentes
+            cuentaSelect.append('<option selected>Selecciona una cuenta...</option>');
+            data.cuentas.forEach(function(cuenta) {
+                cuentaSelect.append(`<option value="${cuenta.id}">${cuenta.nombre}</option>`);
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+        }
+    });
+}
 
+function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = '', fuente =  ['Salario', 'Venta', 'Préstamo', 'Otro'], cuenta = '') {
+    // Validar eliminar todo el contenido que exista en el targetSelector
+    limpiarHTML(targetSelector);
+    // Seleccionar el elemento objetivo
+    const targetElement = document.querySelector(targetSelector);
+    if (!targetElement) {
+        console.error('Elemento objetivo no encontrado:', targetSelector);
+        return;
+    }
+    // Crear el div row
+    const div_row = document.createElement('div');
+    div_row.className = 'row';
+    targetElement.appendChild(div_row);
+    // Crear el div col
+    const div_col = document.createElement('div');
+    div_col.className = 'col';
+    div_row.appendChild(div_col);
+    // Crear el h2 con el titulo
+    const h2 = document.createElement('h2');
+    h2.textContent = `Agregar ${modelo} Rápido`;
+    div_col.appendChild(h2);
+    // Crear el formulario
+    const form = document.createElement('form');
+    form.id = `formAgregarRapido${modelo}`;
+    div_col.appendChild(form);
+    // Generar el token CSRF y añadirlo al formulario
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = csrfToken;
+    form.appendChild(csrf);
+    // Crear el div form-group
+    const div_form_group = document.createElement('div');
+    div_form_group.className = 'input-group mb-3';
+    form.appendChild(div_form_group);
+    // Crear el label para cantidad
+    const label_cantidad = document.createElement('input');
+    label_cantidad.htmlFor = 'cantidad';
+    label_cantidad.textContent = 'Cantidad:';
+    label_cantidad.className = 'form-control';
+    label_cantidad.id = 'cantidad';
+    label_cantidad.name = 'cantidad';
+    label_cantidad.type = 'number';
+    label_cantidad.value = cantidad;
+    label_cantidad.required = true;
+    div_form_group.appendChild(label_cantidad);
+    // Crear el select de fuente
+    const fuenteSelect = document.createElement('select');
+    fuenteSelect.className = 'custom-select';
+    fuenteSelect.id = 'fuente';
+    fuenteSelect.name = 'fuente';
+    fuenteSelect.required = true;
+    const fuentes = fuente;
+    fuentes.forEach(fuenteOption => {
+        const option = document.createElement('option');
+        option.value = fuenteOption;
+        option.text = fuenteOption;
+        if (fuenteOption === fuente) {
+            option.selected = true;
+        }
+        fuenteSelect.appendChild(option);
+    });
+    div_form_group.appendChild(fuenteSelect);
+    // Crear el select de cuenta
+    const cuentaSelect = document.createElement('select');
+    cuentaSelect.className = 'custom-select';
+    cuentaSelect.id = 'cuenta';
+    cuentaSelect.name = 'cuenta';
+    cuentaSelect.required = true;
+    div_form_group.appendChild(cuentaSelect);
+    // El div # input-group-append
+    const div_input_group_append = document.createElement('div');
+    div_input_group_append.className = 'input-group-append';
+    div_form_group.appendChild(div_input_group_append);
 
+    // Crear el botón de submit
+    const submitButton = document.createElement('button');
+    submitButton.className = 'btn btn-success';
+    submitButton.type = 'submit';
+    submitButton.textContent = 'Agregar';
+    div_input_group_append.appendChild(submitButton);
+    // Funciones de ayuda
+    generarListadocuentas(`/api/informacion_${modelo.toLowerCase()}/`, '#cuenta');
+    // Enviar el formulario
+    handleFormSubmit(`#formAgregarRapido${modelo}`, `/api/crear_rapido_${modelo.toLowerCase()}/`, 'POST', modelo);
+}
+function cargarDatosModeloIngresosorEgresos(modelo, data) {
+    // Actualizar el total
+    $(`#total-${modelo.toLowerCase()}`).text('$' + data[`total_${modelo.toLowerCase()}`]);
+    // Verifica si existen datos recientes
+    if (data[`${modelo.toLowerCase()}_recientes`].length > 0) {
+        data[`${modelo.toLowerCase()}_recientes`].forEach(function(item) {
+            $(`#lista_${modelo.toLowerCase()}_recientes`).append('<li class="list-group-item">' + item.descripcion + ': $' + item.cantidad + ' - ' + item.fecha + '</li>');
+        });
+    } else {
+        $('#no_data_message').show();  // Mostrar mensaje de sin datos
+    }
+
+    // Generar el listado de opciones cuentas
+    const cuentaSelect = $('#cuenta');
+    cuentaSelect.empty(); // Limpiar las opciones existentes
+    cuentaSelect.append('<option selected>Selecciona una cuenta...</option>');
+    data.cuentas.forEach(function(cuenta) {
+        cuentaSelect.append(`<option value="${cuenta.id}">${cuenta.nombre}</option>`);
+    });
+
+    var mes_lista = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    // Configura la gráfica de datos
+    configurarGrafica({
+        canvasId: `comparativaMensual`,
+        tipoGrafica: 'bar',
+        etiquetas: mes_lista,
+        datos: data[`${modelo.toLowerCase()}_graficables`],
+        label: `${modelo} por Mes`,
+        backgroundColor: 'rgba(75, 192, 192, 0.5)'
+    });
+    // Configura la gráfica de datos por categoría
+    configurarGrafica({
+        canvasId: `${modelo.toLowerCase()}PorCategoria`,
+        tipoGrafica: 'doughnut',
+        etiquetas: data[`${modelo.toLowerCase()}_por_categoria_graficables`].map(item => item.fuente),
+        datos: data[`${modelo.toLowerCase()}_por_categoria_graficables`].map(item => item.total),
+        label: `${modelo} por Categoría`,
+        backgroundColor: data[`${modelo.toLowerCase()}_por_categoria_graficables`].map(item => item.color)
+    });
+    // Eliminar los widgets de buscar y filtrar         charts[canvasId].destroy();
+    limpiarHTML(`#tabla${modelo}_length`, true);
+    limpiarHTML(`#tabla${modelo}_filter`, true);            
+    limpiarHTML(`#tabla${modelo}_info`, true);
+    limpiarHTML(`#tabla${modelo}_paginate`, true);
+
+    // Limpiar la tabla antes de llenarla
+    $(`#tabla${modelo}`).DataTable().clear().destroy();
+    // Llenar la tabla con los datos
+    data[`todos_${modelo.toLowerCase()}`].forEach(function(item) {
+        $(`#tabla${modelo} tbody`).append(
+            '<tr>' +
+            '<td>' + item.descripcion + '</td>' +
+            '<td>' + item.cantidad + '</td>' +
+            '<td>' + item.fecha + '</td>' +
+            '<td>' + item.fuente + '</td>' +
+            '<td>' + item.cuenta + '</td>' +
+            '<td> <button class="btn btn-warning btn-sm editbutton" id="btnEditar' + modelo + '" data-id="'+item.id+'">Editar</button>' +
+            '<button class="btn btn-danger btn-sm deletebutton" id="btnEliminar' + modelo + '" data-id="'+item.id+'">Eliminar</button> </td>' +
+            '</tr>'
+        );
+    });
+
+    // Inicializar DataTables
+    $(`#tabla${modelo}`).DataTable({
+        order: [[2, 'desc']],
+        paging: true,
+        searching: true,
+        lengthChange: true,
+        pageLength: 10,
+        language: {
+            "url": "/static/js/i18n/es-ES.json"
+        }
+    });
+}
+
+function cargarDatosModeloCuentasBancarias(modelo, data) {
+    console.log('Datos de cuentas bancarias cargados: Funcion lv 2' );
+    console.log('Datos de cuentas bancarias cargados: ', data.total_cuenta_bancaria);
+    // Obtener el csrfToken
+    console.log('csrfToken: ', csrfToken);
+    // Actualizar el total
+    $(`#total-cuenta_bancaria`).text('$' + data.total_cuenta_bancaria);
+    // Verifica si existen datos recientes
+    if (data[`${modelo.toLowerCase()}_recientes`].length > 0) {
+        data[`${modelo.toLowerCase()}_recientes`].forEach(function(item) {
+            $(`#lista_${modelo.toLowerCase()}_recientes`).append('<li class="list-group-item">' + item.descripcion + ': $' + item.cantidad + ' - ' + item.fecha + '</li>');
+        });
+    } else {
+        $('#no_data_message').show();  // Mostrar mensaje de sin datos
+    }
+    // Actualizar el resumen rápido
+    $('#resumen-rapido').text(`${data.cuentas.length} cuentas, ${data.tarjetas_credito.length} tarjeta(s) de crédito, ${data.prestamos.length} préstamo(s) activos.`);
+    // Llenar la lista de cuentas
+    configurarTabla({
+        tablaId: `tabla${modelo}`,
+        modelo: modelo,            
+        data: data.cuentas,
+        campos: ['nombre', 'saldoActual', 'banco', 'tipoCuenta']
+    });
+    var mes_lista = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    // Configurar la gráfica comparativa
+    configurarGrafica({
+        canvasId: 'graficaTipoCuenta',
+        tipoGrafica: 'pie',
+        etiquetas: data.cuentas.map(cuenta => cuenta.banco),
+        datos: data.cuentas.map(cuenta => cuenta.saldoActual),
+        label: 'Distribución de Saldos por Tipo de Cuenta',
+        backgroundColor: data.cuentas.map(cuenta => cuenta.colorIdentificacion)
+    });    
+    // Configura la gráfica de datos
+    configurarGrafica({
+        canvasId: `comparativaMensual`,
+        tipoGrafica: 'bar',
+        etiquetas: mes_lista,
+        datos: data[`${modelo.toLowerCase()}_graficables`],
+        label: `${modelo} por Mes`,
+        backgroundColor: 'rgba(75, 192, 192, 0.5)'
+    });
+    // Configura la gráfica distribución de tipos de cuenta
+    configurarGrafica({
+        canvasId: 'distribucionTipos',
+        tipoGrafica: 'doughnut',
+        etiquetas: data.cuentas.map(cuenta => cuenta.banco),
+        datos: data.cuentas.map(cuenta => cuenta.saldoActual),
+        label: 'Distribución de Saldos por Tipo de Cuenta',
+        backgroundColor: data.cuentas.map(cuenta => cuenta.colorIdentificacion)
+    });
+    // Cargar el formulario de agregar ingreso
+    insertarRegistroRapido(csrfToken, '#insertar_form_ingreso_rapido', 'Ingreso');
+    
+
+}
 // Función para cargar datos de un modelo
 function cargarDatosModelo(modelo) {
     const cargaModelo = cuadroCarga(`#cuadroCarga${modelo}`);
@@ -100,78 +387,13 @@ function cargarDatosModelo(modelo) {
         type: 'GET',
         success: function(data) {
             console.log(`Datos de ${modelo} cargados: `, data);
-            // Actualizar el total
-            $(`#total-${modelo.toLowerCase()}`).text('$' + data[`total_${modelo.toLowerCase()}`]);
-            // Verifica si existen datos recientes
-            if (data[`${modelo.toLowerCase()}_recientes`].length > 0) {
-                data[`${modelo.toLowerCase()}_recientes`].forEach(function(item) {
-                    $(`#lista_${modelo.toLowerCase()}_recientes`).append('<li class="list-group-item">' + item.descripcion + ': $' + item.cantidad + ' - ' + item.fecha + '</li>');
-                });
-            } else {
-                $('#no_data_message').show();  // Mostrar mensaje de sin datos
+            // Validar que modelo es para cargar los datos
+            if (modelo === 'Ingreso' || modelo === 'Egreso') {
+                cargarDatosModeloIngresosorEgresos(modelo, data);
+            } else if (modelo === 'Cuenta_bancaria') {
+                console.log('Datos de cuentas bancarias cargados: Funcion' );
+                cargarDatosModeloCuentasBancarias(modelo, data);
             }
-            // Generar el listado de opciones cuentas
-            const cuentaSelect = $('#cuenta');
-            cuentaSelect.empty(); // Limpiar las opciones existentes
-            cuentaSelect.append('<option selected>Selecciona una cuenta...</option>');
-            data.cuentas.forEach(function(cuenta) {
-                cuentaSelect.append(`<option value="${cuenta.id}">${cuenta.nombre}</option>`);
-            });
-
-            var mes_lista = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            
-            // Configura la gráfica de datos
-            configurarGrafica({
-                canvasId: `comparativaMensual`,
-                tipoGrafica: 'bar',
-                etiquetas: mes_lista,
-                datos: data[`${modelo.toLowerCase()}_graficables`],
-                label: `${modelo} por Mes`,
-                backgroundColor: 'rgba(75, 192, 192, 0.5)'
-            });
-            // Configura la gráfica de datos por categoría
-            configurarGrafica({
-                canvasId: `${modelo.toLowerCase()}PorCategoria`,
-                tipoGrafica: 'doughnut',
-                etiquetas: data[`${modelo.toLowerCase()}_por_categoria_graficables`].map(item => item.fuente),
-                datos: data[`${modelo.toLowerCase()}_por_categoria_graficables`].map(item => item.total),
-                label: `${modelo} por Categoría`,
-                backgroundColor: data[`${modelo.toLowerCase()}_por_categoria_graficables`].map(item => item.color)
-            });
-            // Eliminar los widgets de buscar y filtrar         charts[canvasId].destroy();
-            limpiarHTML(`#tabla${modelo}_length`, true);
-            limpiarHTML(`#tabla${modelo}_filter`, true);            
-            limpiarHTML(`#tabla${modelo}_info`, true);
-            limpiarHTML(`#tabla${modelo}_paginate`, true);
-
-            // Limpiar la tabla antes de llenarla
-            $(`#tabla${modelo}`).DataTable().clear().destroy();
-            // Llenar la tabla con los datos
-            data[`todos_${modelo.toLowerCase()}`].forEach(function(item) {
-                $(`#tabla${modelo} tbody`).append(
-                    '<tr>' +
-                    '<td>' + item.descripcion + '</td>' +
-                    '<td>' + item.cantidad + '</td>' +
-                    '<td>' + item.fecha + '</td>' +
-                    '<td>' + item.fuente + '</td>' +
-                    '<td>' + item.cuenta + '</td>' +
-                    '<td> <button class="btn btn-warning btn-sm editbutton" id="btnEditar' + modelo + '" data-id="'+item.id+'">Editar</button>' +
-                    '<button class="btn btn-danger btn-sm deletebutton" id="btnEliminar' + modelo + '" data-id="'+item.id+'">Eliminar</button> </td>' +
-                    '</tr>'
-                );
-            });
-
-            // Inicializar DataTables
-            $(`#tabla${modelo}`).DataTable({
-                order: [[2, 'desc']],
-                paging: true,
-                searching: true,
-                lengthChange: true,
-                pageLength: 10,
-                language: {
-                    "url": "/static/js/i18n/es-ES.json"
-                }
-            });
         },
         error: function(xhr, status, error) {
             console.error(`Error cargando datos de ${modelo}: `, error);
@@ -368,10 +590,7 @@ function handleFormDelete(url) {
         }
     });
 }
-// Función para editar un modelo
-window.editarModelo = function(modelo, id) {
-    handleFormLoad(null, `/api/editar_${modelo.toLowerCase()}/` + id + '/', `#insert-form-editar-${modelo.toLowerCase()}`, `#modalEditar${modelo}`);
-}
+
 // Manejar el envío del formulario
 function handleFormSubmit(formSelector, url, metodo = "POST", modelo,  modalSelector=null, actualizar_informacion = true) {
     $(formSelector).on('submit', function(e) {
@@ -416,18 +635,7 @@ function handleFormSubmit(formSelector, url, metodo = "POST", modelo,  modalSele
         });
     });
 }
-// Inicializar el cuadro de carga
-const cargaIngresos = cuadroCarga('#cuadroCargaIngresos');
-// Obtener el token CSRF desde la meta etiqueta
-var csrfToken = $('meta[name="csrf-token"]').attr('content');
-// Configurar jQuery para incluir el token CSRF en todas las solicitudes AJAX
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrfToken);
-        }
-    }
-});
+
 // Evento para el botón de filtrar
 $('#filtrarIngresos').on('click', function() {
     buscarModelo('Ingresos');
@@ -514,3 +722,4 @@ cargarDatosModelo(modelo_principal);
 $(`#btnActualizar${modelo_principal}`).on('click', function() {
     cargarDatosModelo(modelo_principal);
 });
+

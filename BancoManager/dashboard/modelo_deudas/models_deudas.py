@@ -17,6 +17,7 @@ class TarjetaCredito(models.Model):
     fecha_vencimiento = models.DateField()
     colorIdentificacion = models.CharField(max_length=20)
     limite = models.DecimalField(max_digits=10, decimal_places=2)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tarjetas_credito')
 
     def __str__(self):
         return f"Tarjeta: {self.numero_tarjeta} - Titular: {self.nombre_titular}"
@@ -37,6 +38,8 @@ class Prestamo(models.Model):
     
     usuario_prestamista = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='prestamos')
     fechaIngreso = models.DateTimeField(auto_now_add=True)
+
+    estado = models.BooleanField(default=False)  # Indica si la deuda está saldada o no
 
     def __str__(self):
         return f"Préstamo: {self.monto_total} - Prestamista: {self.usuario_prestamista}"

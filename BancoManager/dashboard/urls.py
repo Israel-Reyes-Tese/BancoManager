@@ -12,6 +12,7 @@ from .views_form.modelo_usuario import crear_usuario
 from .peticiones_asyn.asyn_forms import *
 # Views inicio
 from .views_inicio.modelo_dinero import *
+from .views_inicio.modelo_bancos import *
 urlpatterns = [
     # Inicio
     path('', InicioView.as_view(), name='inicio'),  # Vista de inicio
@@ -20,11 +21,14 @@ urlpatterns = [
 
     # Finanzas
     path('deudas/', views.deudas, name='deudas'),
+
     path('ingresos/', IngresoInicioView.as_view(), name='ingresos'),
     path('egresos/', EgresoInicioView.as_view(), name='egresos'),
-    path('bancos/', views.bancos, name='bancos'),
+
+    path('cuentas/', CuentasBancaInicioView.as_view(), name='cuentas'),
+    path('bancos/', BancoInicioView.as_view(), name='bancos'),
+
     path('prestamos/', views.prestamos, name='prestamos'),
-    path('cuentas/', views.cuentas, name='cuentas'),
     path('mi_cuenta/', views.mi_cuenta, name='mi_cuenta'),
 
     # Salir - Ingresar
@@ -48,6 +52,8 @@ urlpatterns = [
     # Petición asíncrona Inicio modelos
     path('api/informacion_ingreso/', InformacionIngresosView, name='informacion_ingresos'),  # Petición asíncrona ingresos
     path('api/informacion_egreso/', InformacionIngresosView, name='informacion_egresos'),  # Petición asíncrona egresos
+    path('api/informacion_banco/', InformacionBancosView, name='informacion_banco'),  # Petición asíncrona bancos
+    path('api/informacion_cuenta_bancaria/', InformacionCuentasBancariasView, name='informacion_cuenta_bancaria'),  # Petición asíncrona cuentas bancarias
 
 
 
@@ -57,12 +63,15 @@ urlpatterns = [
 
     path('api/transacciones_mes/', obtener_transacciones_mes, name='obtener_transacciones_mes'),  # Nueva ruta
     path('api/refrescar_tablas_transacciones/', RefrescarTablasTransacciones, name='refrescar_tablas_transacciones'),
+
     # Transacciones ...
     path('api/filtrar_transacciones/', FiltrarTransaccionesView.as_view(), name='filtrar_transacciones'),
     path('api/ordenar_transacciones/', OrdenarTransaccionesView.as_view(), name='ordenar_transacciones'),
+
     # Cuenta a vencer
     path('api/refrescar_deudas/', RefrescarDeudasView.as_view(), name='refrescar_deudas'),
     path('api/filtrar_deudas/', FiltrarDeudasView.as_view(), name='filtrar_deudas'),
+
     # Formularios
     path('crear_ingreso/', crear_ingreso, name='crear_ingreso'),
     path('crear_egreso/', crear_egreso, name='crear_egreso'),
