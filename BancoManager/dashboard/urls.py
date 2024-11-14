@@ -5,9 +5,9 @@ from . import views
 from .peticiones_asyn.asyn_finanzas import *
 # Formularios
 from .views_form.modelo_dinero import *
-from .views_form.modelo_deuda import crear_deuda, crear_prestamo, crear_tarjeta_credito
-from .views_form.modelo_banco import crear_banco, crear_cuenta_bancaria
-from .views_form.modelo_usuario import crear_usuario
+from .views_form.modelo_deuda import *
+from .views_form.modelo_banco import *
+from .views_form.modelo_usuario import *
 # Formularios asíncronos
 from .peticiones_asyn.asyn_forms import *
 # Views inicio
@@ -85,21 +85,29 @@ urlpatterns = [
     # Fomularios crear rapido
     path('api/crear_rapido_ingreso/', crear_ingreso_rapido, name='crear_rapido_ingreso'),
     path('api/crear_rapido_egreso/', crear_egreso_rapido, name='crear_rapido_egreso'),
-
+    path('api/crear_rapido_banco/', crear_banco_rapido, name='crear_rapido_banco'),
+    path('api/crear_rapido_cuenta_bancaria/', crear_cuenta_bancaria_rapido, name='crear_rapido_cuenta_bancaria'),
 
     # Eliminar registros
     path('api/eliminar_ingreso/<int:pk>/', eliminar_ingreso, name='eliminar_ingreso'),
     path('api/eliminar_egreso/<int:pk>/', eliminar_egreso, name='eliminar_egreso'),
+    path('api/eliminar_banco/<int:pk>/', eliminar_banco, name='eliminar_banco'),
+    path('api/eliminar_cuenta_bancaria/<int:pk>/', eliminar_cuenta_bancaria, name='eliminar_cuenta_bancaria'),
+
 
 
     # Formularios editables
     path('api/editar_ingreso/<int:pk>/', editar_ingreso, name='editar_ingreso'),
     path('api/editar_egreso/<int:pk>/', editar_egreso, name='editar_egreso'),
+    path('api/editar_banco/<int:pk>/', editar_banco, name='editar_banco'),
+    path('api/editar_cuenta_bancaria/<int:pk>/', editar_cuenta_bancaria, name='editar_cuenta_bancaria'),
     
 
     # Cargar registros
     path('api/cargar_registros_ingresos/<int:pk>/', cargar_registros_ingresos, name='cargar_registros_ingresos'),
     path('api/cargar_registros_egresos/<int:pk>/', cargar_registros_egresos, name='cargar_registros_egresos'),
+    path('api/cargar_registros_banco/<int:pk>/', cargar_registros_banco, name='cargar_registros_banco'),
+    path('api/cargar_registros_cuenta_bancaria/<int:pk>/', cargar_registros_cuenta_bancaria, name='cargar_registros_cuenta_bancaria'),
     
 
     # Buscar dinámica 

@@ -141,13 +141,14 @@ function generarListadocuentas(url, targetSelector) {
         url: url,
         method: 'GET',
         success: function(data) {
+            console.log('Generando lista de cuentas desde', url, 'en', targetSelector);
             // Seleccionar el elemento objetivo
             const targetElement = document.querySelector(targetSelector);
             if (!targetElement) {
                 console.error('Elemento objetivo no encontrado:', targetSelector);
                 return;
             }
-            const cuentaSelect = $('#cuenta');
+            const cuentaSelect = $(targetElement);
             cuentaSelect.empty(); // Limpiar las opciones existentes
             cuentaSelect.append('<option selected>Selecciona una cuenta...</option>');
             data.cuentas.forEach(function(cuenta) {
@@ -160,7 +161,7 @@ function generarListadocuentas(url, targetSelector) {
     });
 }
 
-function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = '', fuente =  ['Salario', 'Venta', 'Préstamo', 'Otro'], cuenta = '') {
+function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = '', lista_select=[]) {
     // Validar eliminar todo el contenido que exista en el targetSelector
     limpiarHTML(targetSelector);
     // Seleccionar el elemento objetivo
@@ -196,40 +197,61 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
     div_form_group.className = 'input-group mb-3';
     form.appendChild(div_form_group);
     // Crear el label para cantidad
-    const label_cantidad = document.createElement('input');
-    label_cantidad.htmlFor = 'cantidad';
-    label_cantidad.textContent = 'Cantidad:';
-    label_cantidad.className = 'form-control';
-    label_cantidad.id = 'cantidad';
-    label_cantidad.name = 'cantidad';
-    label_cantidad.type = 'number';
-    label_cantidad.value = cantidad;
-    label_cantidad.required = true;
-    div_form_group.appendChild(label_cantidad);
+    const label_input = document.createElement('input');
+    label_input.htmlFor = 'cantidad';
+    label_input.textContent = 'Cantidad:';
+    label_input.className = 'form-control';
+    label_input.id = 'cantidad';
+    label_input.name = 'cantidad';
+    label_input.type = 'number';
+    label_input.value = cantidad;
+    label_input.required = true;
+    div_form_group.appendChild(label_input);
+
     // Crear el select de fuente
     const fuenteSelect = document.createElement('select');
     fuenteSelect.className = 'custom-select';
+    if (modelo === 'Ingreso') {
     fuenteSelect.id = 'fuente';
     fuenteSelect.name = 'fuente';
+    }else if (modelo === 'Egreso') {
+    fuenteSelect.id = 'proposito';
+    fuenteSelect.name = 'proposito';
+    }
     fuenteSelect.required = true;
-    const fuentes = fuente;
+    const fuentes = lista_select;
     fuentes.forEach(fuenteOption => {
         const option = document.createElement('option');
         option.value = fuenteOption;
         option.text = fuenteOption;
-        if (fuenteOption === fuente) {
+        if (fuenteOption === lista_select) {
             option.selected = true;
         }
         fuenteSelect.appendChild(option);
     });
     div_form_group.appendChild(fuenteSelect);
+
+    // validar si ya existe el select cuenta y en caso de que exista asignar los mismo valores para que se vean los dos o mas
+
     // Crear el select de cuenta
-    const cuentaSelect = document.createElement('select');
-    cuentaSelect.className = 'custom-select';
-    cuentaSelect.id = 'cuenta';
-    cuentaSelect.name = 'cuenta';
-    cuentaSelect.required = true;
+    var existingCuentaSelect = document.getElementById('cuenta');
+
+    if (existingCuentaSelect) {
+        console.log('El select cuenta ya existe', existingCuentaSelect);
+        var cuentaSelect = document.createElement('select');
+        cuentaSelect.className = 'custom-select';
+        cuentaSelect.id = `cuenta-${modelo}`;
+        cuentaSelect.name = `cuenta-${modelo}`;
+        cuentaSelect.required = true;
+    } else {
+        var cuentaSelect = document.createElement('select');
+        cuentaSelect.className = 'custom-select';
+        cuentaSelect.id = 'cuenta';
+        cuentaSelect.name = 'cuenta';
+        cuentaSelect.required = true;
+    }
     div_form_group.appendChild(cuentaSelect);
+
     // El div # input-group-append
     const div_input_group_append = document.createElement('div');
     div_input_group_append.className = 'input-group-append';
@@ -241,11 +263,18 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
     submitButton.type = 'submit';
     submitButton.textContent = 'Agregar';
     div_input_group_append.appendChild(submitButton);
+    if (existingCuentaSelect) {
     // Funciones de ayuda
-    generarListadocuentas(`/api/informacion_${modelo.toLowerCase()}/`, '#cuenta');
+        generarListadocuentas(`/api/informacion_${modelo.toLowerCase()}/`, `#cuenta-${modelo}`);
+    }else{
+        generarListadocuentas(`/api/informacion_${modelo.toLowerCase()}/`, '#cuenta');
+    }
+
     // Enviar el formulario
     handleFormSubmit(`#formAgregarRapido${modelo}`, `/api/crear_rapido_${modelo.toLowerCase()}/`, 'POST', modelo);
 }
+
+
 function cargarDatosModeloIngresosorEgresos(modelo, data) {
     // Actualizar el total
     $(`#total-${modelo.toLowerCase()}`).text('$' + data[`total_${modelo.toLowerCase()}`]);
@@ -375,8 +404,9 @@ function cargarDatosModeloCuentasBancarias(modelo, data) {
         backgroundColor: data.cuentas.map(cuenta => cuenta.colorIdentificacion)
     });
     // Cargar el formulario de agregar ingreso
-    insertarRegistroRapido(csrfToken, '#insertar_form_ingreso_rapido', 'Ingreso');
-    
+    insertarRegistroRapido(csrfToken, '#insertar_form_ingreso_rapido', 'Ingreso', '', lista_select=['Salario', 'Venta', 'Intereses', 'Otro']);
+    // Cargar el formulario de agregar egreso
+    insertarRegistroRapido(csrfToken, '#insertar_form_egreso_rapido', 'Egreso', '', lista_select=['Compra', 'Pago', 'Retiro', 'Otro']);
 
 }
 // Función para cargar datos de un modelo
@@ -468,7 +498,7 @@ function buscarModelo(modelo) {
 function handleFormLoad(buttonSelector, url, targetSelector, modalSelector) {
     $(buttonSelector).on('click', function(e) {
         e.preventDefault(); // Prevenir comportamiento por defecto
-        console.log('Cargando formulario desde', url);
+        console.log('Cargando formulario desde', url, 'en', targetSelector, 'con modal', modalSelector, 'al hacer click en', buttonSelector);
         $.ajax({
             url: url,
             method: "GET",
@@ -490,7 +520,7 @@ function handleFormLoad(buttonSelector, url, targetSelector, modalSelector) {
 }
 // Función para manejar la carga del formulario sin botón
 function handleFormLoadNoButton(url, targetSelector, modalSelector) {
-    console.log('Cargando formulario desde', url);
+    console.log('Cargando formulario desde', url, 'en', targetSelector, 'con modal', modalSelector);
     $.ajax({
         url: url,
         method: "GET",
@@ -598,6 +628,8 @@ function handleFormSubmit(formSelector, url, metodo = "POST", modelo,  modalSele
         console.log('Formulario enviado', e);
         // Recolectar datos del formulario
         var formData = $(this).serialize();
+        // Añadir el modelo al envío
+        formData += `&modelo=${modelo}`;
         console.log('Datos del formulario', formData);
         $.ajax({
             url: url,  // URL para agregar ingresos

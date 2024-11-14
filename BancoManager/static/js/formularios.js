@@ -59,10 +59,11 @@ $(document).ready(function() {
                         $(inputSelector).val(value);
                     }
                 }  
+                var nombre_modelo = response.data[0].modelo.replace("_", " ");
                 // Actualizar los botones
                 $('#boton_agregar').text('Actualizar');
                 // Acrtualizar el titulo
-                $('#titulo_principal').text('Actualizar '+ response.data[0].modelo + '');                
+                $('#titulo_principal').text('Actualizar '+ nombre_modelo + '');                
             },
             error: function(xhr) {
                 Swal.fire({
@@ -509,7 +510,24 @@ if (modelo_principal == "Deuda"){
         handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
         // Cargar formularios extras
         handleFormLoad('#agregar-cuenta', '/crear_cuenta_bancaria/', '#insert-form-agregar-cuenta-bancaria', '#modalAgregarCuenta');
-        }
-
+        } else if (modelo_principal == "Cuenta_bancaria"){
+        // Extraer el id de la url
+        id = $("#id_formulario").val();
+        // Cargar los datos del formulario
+        handleFormLoadDataincome(`../../../api/cargar_registros_cuenta_bancaria/${id}/`);
+        // Manejar el actualizacion del formulario
+        handleFormSubmit('#form-agregar-cuenta-bancaria', `../../../api/editar_cuenta_bancaria/${id}/`, metodo="POST", modalSelector="modalEditarCuenta");
+        // Manejar la búsqueda de bancos de manera dinámica
+        handleBankSearch('#banco', '#lista-bancos', '/api/buscar_dinamica_bancos/');
+        // Manejar la búsqueda de usuarios de manera dinámica
+        handleUserSearch('#usuario', '#lista-usuarios', '/api/buscar_dinamica_usuarios/');
+        // Manejar el clic en un banco de la lista
+        handleBankSelection('#lista-bancos', '#banco', '#banco_id');
+        // Manejar el clic en un usuario de la lista
+        handleUserSelection('#lista-usuarios', '#usuario', '#usuario_id');
+        // Cargar formularios extras
+        handleFormLoad('#agregar-banco', '/crear_banco/', '#insert-form-agregar-banco', '#modalAgregarBanco');
+        handleFormLoad('#agregar-usuario', '/crear_usuario/', '#insert-form-agregar-usuario', '#modalAgregarUsuario');
+}
 
 });

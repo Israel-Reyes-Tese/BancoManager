@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-warning">Agregar Préstamo</h2>
+    <h2 class="text-warning" id="titulo_principal">Agregar Préstamo</h2>
     <form method="post" id="form-agregar-prestamo">
         {% csrf_token %}
         <div class="mb-3">
@@ -54,7 +54,7 @@
 
         <div class="mb-3">
             <div class="d-flex align-items-center">
-                <button type="submit" class="btn btn-warning align-items-center">Agregar Préstamo <i class="fas fa-plus-circle"></i></button>
+                <button type="submit" class="btn btn-warning align-items-center" id="boton_agregar">Agregar Préstamo <i class="fas fa-plus-circle"></i></button>
             </div>
         </div>
     </form>

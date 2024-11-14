@@ -11,7 +11,6 @@
     <h1 class="text-center">Resumen General de Cuentas bancarias</h1>
     <h1 class="text-center">Bienvenido, {{usuario}}</h1>
     <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
-
     {# Resumen de Cuentas Bancarias #}
     <div class="row mb-4">
         <div class="col">
@@ -21,9 +20,7 @@
             <canvas id="graficaTipoCuenta" width="400" height="200"></canvas>
         </div>
     </div>
-
-
-
+    {# Resumen de Cuentas Bancarias #}
     {# Tabla para visualizar los cuentas y poder filtrarlos #}
     <div class="container mt-5">
         <h2 class="text-center">Lista de Cuentas
@@ -46,8 +43,6 @@
         </table>
     </div>
     {# Tabla para visualizar los cuentas y poder filtrarlos #}
-
-
     {# Estadísticas Financieras #}
     <div class="row mb-4">
         <div class="col">
@@ -55,25 +50,25 @@
             <canvas id="comparativaMensual" width="400" height="200"></canvas>
         </div>
 
-
         <div class="col">
             <h2>Distribución de Tipos de Cuentas</h2>
             <canvas id="distribucionTipos" width="400" height="200"></canvas>
         </div>
     </div>
-
     {# Registro Rápido de Ingresos #}
-    <div id="insertar_form_ingreso_rapido">
-
-        
+    <div id="insertar_form_ingreso_rapido">  
     </div>
     {# Registro Rápido de Ingresos #}
-
+    {# Registro Rápido de Egresos #}
+    <div id="insertar_form_egreso_rapido">
+    </div>
+    {# Registro Rápido de Egresos #}
+    {# Agregar transacciones o cuentas #}
     <div class="text-center mt-4">
         <button class="btn btn-primary" id="btnTransferencia">Transferencia Rápida</button>
-        <button class="btn btn-success" id="btnAñadirCuenta">Añadir Nueva Cuenta</button>
+        <button class="btn btn-success" id="btnAgregarCuenta_bancaria">Añadir Nueva Cuenta</button>
     </div>
-
+    {# Agregar transacciones o cuentas #}
     {# Calendario de Movimientos #}
     <div class="row mb-4">
         <div class="col">
@@ -96,12 +91,11 @@
             </div>
         </div>
     </div>
-
     {# Notificaciones y Alertas #}
     <div id="notificaciones" class="alert alert-warning" role="alert">
         No hay alertas de saldos bajos.
     </div>
-    
+    {# Notificaciones y Alertas #}
     {# Configuración y Personalización #}
     <div class="row mb-4">
         <div class="col">
@@ -110,7 +104,7 @@
             <button class="btn btn-secondary" id="btnPreferencias">Preferencias de Notificación</button>
         </div>
     </div>
-
+    {# Configuración y Personalización #}
     {# Integración con Otros Módulos #}
     <div class="row mb-4">
         <div class="col">
@@ -137,18 +131,84 @@
             <p id="informeDeudas">Resumen de deudas pendientes y próximas cuotas.</p>
         </div>
     </div>
-
+    {# Integración con Otros Módulos #}
     {# Opciones de Exportación y Reportes #}
     <div class="text-center mt-4">
         <button class="btn btn-secondary" id="btnDescargarExtracto">Descargar Extracto</button>
         <button class="btn btn-dark" id="btnAccesoReportes">Acceso a Reportes Detallados</button>
     </div>
+    {# Opciones de Exportación y Reportes #}
 </div>
+{# Ventana Modal para agregar (ingreso) #}
+<div class="modal fade" id="modalAgregarIngreso" tabindex="-1" aria-labelledby="modalAgregarIngresoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarIngresoLabel">Agregar Ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-agregar-ingreso"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal para agregar (ingreso) #}
+{# Ventana Modal para editar (ingreso) #}
+<div class="modal fade" id="modalEditarIngreso" tabindex="-1" aria-labelledby="modalEditarIngresoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarIngresoLabel">Editar Ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-editar-ingreso"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{#  Ventana Modal para editar (ingreso) #}
+{# Ventana Modal para agregar cuenta #}
+<div class="modal fade" id="modalAgregarCuenta_bancaria" tabindex="-1" aria-labelledby="modalAgregarCuenta_bancaria">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarCuenta_bancaria">Agregar Cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-agregar-cuenta_bancaria"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal para agregar cuenta #}
+{# Ventana Modal para editar cuenta #}
+<div class="modal fade" id="modalEditarCuenta_bancaria" tabindex="-1" aria-labelledby="modalEditarCuenta_bancaria">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarCuenta_bancaria">Editar Cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-editar-cuenta_bancaria"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal para editar cuenta #}
+
+
 {# Modelo #}
 <input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
 {# Modelo #}
 {% endblock %}
-
 {% block javascript %}
 {# jQuery #}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -115,14 +115,18 @@ def crear_egreso(request):
 @login_required
 def crear_egreso_rapido(request):
     print("Crear egreso rápido", request.POST)
+    model_name = request.POST.get('modelo')
     # Transformar el cuenta a un objeto 
-    cuenta = get_object_or_404(CuentaBancaria, pk=request.POST.get('cuenta'))
-
+    try:
+        cuenta = get_object_or_404(CuentaBancaria, pk=request.POST.get('cuenta'))
+    except:
+        cuenta = get_object_or_404(CuentaBancaria, pk=request.POST.get(f'cuenta-{model_name}'))
+    
     # Cuenta por defecto
     data_extra = {
         "cantidad": request.POST.get('cantidad'),
         'cuenta': cuenta,
-        "fuente": request.POST.get('fuente'),
+        "proposito": request.POST.get('proposito'),
         "descripcion": "Egreso rápido",
         "fecha": datetime.date.today(),
         "usuario": request.user,
