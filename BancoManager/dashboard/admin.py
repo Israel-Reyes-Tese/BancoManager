@@ -3,6 +3,10 @@ from .modelo_banco.models_banco import Banco
 from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
 from .modelo_deudas.models_deudas import Deuda, TarjetaCredito, Prestamo
 
+
+from .modelo_utils.modelo_inter import *
+from .modelo_auditlog.modelo_auditlog import *
+
 @admin.register(Banco)
 class BancoAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'direccion', 'telefono')
