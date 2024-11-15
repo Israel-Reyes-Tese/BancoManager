@@ -252,17 +252,17 @@ class ReporteMensual(models.Model):
     """
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reportes_mensuales')
     mes = models.PositiveIntegerField()  # Mes del año: 1 a 12
-    año = models.PositiveIntegerField()  # Año del reporte
+    tiempo_anual = models.PositiveIntegerField()  # Año del reporte
     ingresos_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     egresos_total = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     saldo_final = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('usuario', 'mes', 'año')  # Un usuario no puede tener dos reportes para el mismo mes y año
+        unique_together = ('usuario', 'mes', 'tiempo_anual')  # Un usuario no puede tener dos reportes para el mismo mes y año
         verbose_name = "Reporte Mensual"
         verbose_name_plural = "Reportes Mensuales"
-        ordering = ['-año', '-mes']  # Ordenar por año y mes descendientes
+        ordering = ['-tiempo_anual', '-mes']  # Ordenar por año y mes descendientes
 
     def clean(self):
         """
@@ -271,14 +271,15 @@ class ReporteMensual(models.Model):
         """
         if self.mes < 1 or self.mes > 12:
             raise ValidationError('El mes debe estar entre 1 y 12.')
-        if self.año < 2000:  # Suponiendo que los reportes no deberían ser anteriores al año 2000
+        if self.tiempo_anual < 2000:  # Suponiendo que los reportes no deberían ser anteriores al año 2000
             raise ValidationError('El año debe ser 2000 o posterior.')
 
     def __str__(self):
-        return f"Reporte de {self.usuario} - {self.mes}/{self.año}"
+        return f"Reporte de {self.usuario} - {self.mes}/{self.tiempo_anual}"
 
     def calcular_saldo(self):
         """
         Método para calcular el saldo final a partir de ingresos y egresos.
         """
         self.saldo_final = self.ingresos_total - self.egresos_total
+

@@ -316,7 +316,6 @@ class InicioHelper:
                     "tasa_interes": prestamo.tasa_interes,
                     "fecha_inicio": prestamo.fecha_inicio,
                     "usuario": prestamo.usuario_prestamista.id,
-                    "fechaIngreso": prestamo.fechaIngreso,
                 })
             return lista_prestamos
         
@@ -334,7 +333,6 @@ class InicioHelper:
                     "tasa_interes": prestamo.tasa_interes,
                     "fecha_inicio": prestamo.fecha_inicio,
                     "usuario": prestamo.usuario_prestamista.id,
-                    "fechaIngreso": prestamo.fechaIngreso,
                 })
             return lista_prestamos
 
@@ -361,7 +359,6 @@ class InicioHelper:
 
                     "estado": deuda.estado,
                     
-                    "fechaIngreso": deuda.fechaIngreso,
                     "fecha_vencimiento": deuda.fecha_vencimiento,
                     
                 })

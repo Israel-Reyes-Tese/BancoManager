@@ -23,15 +23,24 @@ class TarjetaCredito(TimestampedModel):
     Modelo para representar una tarjeta de crédito con detalles relevantes
     como el número, titular y límite de la tarjeta.
     """
+    cuenta = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE, related_name='tarjetas_credito')
     numero_tarjeta = models.CharField(
         max_length=16,
         unique=True,
         validators=[RegexValidator(r'^\d{16}$', 'El número de tarjeta debe contener 16 dígitos.')]
     )
     nombre_titular = models.CharField(max_length=100)
+
+    fecha_inicio = models.DateField()
+
+    fecha_corte = models.DateField()
+
+    fecha_limite_pago = models.DateField()
+
     fecha_vencimiento = models.DateField()
 
     colorIdentificacion = models.CharField(max_length=20)
+
     limite = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tarjetas_credito')

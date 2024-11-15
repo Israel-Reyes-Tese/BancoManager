@@ -6,6 +6,7 @@ from ..modelo_banco.models_banco import *
 from django.db.models import Q
 from django.utils import timezone
 
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -13,7 +14,13 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 
 from ..modelo_banco.models_banco import Banco, CuentaBancaria
+from ..modelo_deudas.models_deudas import Deuda, TarjetaCredito, Prestamo
 from ..modelo_auditlog.modelo_auditlog import AuditLog
+
+
+from datetime import timedelta
+from django.core.mail import send_mail
+
 
 
 def BuscarInformacion(request, modelo, values=(), retorno_json=True, campos_busqueda=()):
@@ -31,10 +38,7 @@ def BuscarInformacion(request, modelo, values=(), retorno_json=True, campos_busq
         return JsonResponse({f'{modelo}': modelo_list})
     else:
         return modelo_list
-    
-
 # Funciones Utilitarias
-
 def comprobante_upload_to_ingresos(instance, filename):
     # Extrae la extensión del archivo
     extension = filename.split('.')[-1]
@@ -132,3 +136,67 @@ def validate_año(año):
     """Valida que el año sea razonable (como mínimo 2000)."""
     if año < 2000:
         raise ValidationError('El año debe ser 2000 o posterior.')
+# - 
+def actualizar_saldo(cuenta, saldo_anterior, nuevo_saldo):
+    """
+    Función auxiliar para actualizar el saldo de una cuenta bancaria.
+    """
+    # Calcular la diferencia de saldo
+    diferencia = nuevo_saldo - saldo_anterior
+
+    # Actualizar el saldo de la cuenta bancaria
+    cuenta.saldoInicial += diferencia
+    cuenta.save()
+
+
+def calcular_fecha_vencimiento(fecha_inicio, dias=30):
+    """
+    Función auxiliar para calcular una fecha de vencimiento
+    predeterminada a 30 días después de la fecha de inicio.
+    """
+    return fecha_inicio + timedelta(days=dias)
+
+
+def enviar_alerta_deuda_alta(usuario, monto):
+    """
+    Función auxiliar para enviar un correo de alerta si 
+    el monto de la deuda supera el límite establecido.
+    """
+    subject = 'Alerta: Deuda alta'
+    message = f'Se ha registrado una deuda alta de {monto}.\nPor favor, revise su estado financiero.'
+    from_email = 'noreply@tuapp.com'
+    
+    # Envío del correo
+    send_mail(
+        subject,
+        message,
+        from_email,
+        [usuario.email],
+        fail_silently=False,
+    )
+
+
+def actualizar_limite_deuda(usuario, nuevo_limite):
+    """
+    Función auxiliar para actualizar el límite de las deudas asociadas
+    al usuario cuando el límite de la tarjeta de crédito cambia.
+    """
+    # Actualiza el límite en todas las deudas relacionadas
+    Deuda.objects.filter(usuario_deudor=usuario).update(monto=nuevo_limite)
+
+
+def actualizar_estado_deuda(prestamo):
+    """
+    Función auxiliar para actualizar el estado de la deuda
+    asociada cuando un préstamo es marcado como saldado.
+    """
+    try:
+        # Obtener la deuda relacionada con el préstamo
+        deuda = Deuda.objects.get(prestamo=prestamo)
+        # Actualizar el estado de la deuda
+        deuda.estado = prestamo.estado  # Actualiza el estado basado en el préstamo
+        deuda.save()
+    except ObjectDoesNotExist:
+        print(f"No se encontró la deuda asociada al préstamo {prestamo.id}.")
+    except Exception as e:
+        print(f"Ocurrió un error al actualizar el estado de la deuda: {e}")

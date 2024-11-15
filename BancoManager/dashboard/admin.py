@@ -92,3 +92,49 @@ class PrestamoAdmin(admin.ModelAdmin):
     list_filter = ('fecha_inicio',)
     ordering = ('-fecha_inicio',)
     list_select_related = True
+
+@admin.register(RegistroIngreso)
+class RegistroIngresoAdmin(admin.ModelAdmin):
+    list_display = ('cuenta', 'monto', 'fecha', 'descripcion')
+    search_fields = ('cuenta__nombre', 'monto', 'descripcion')
+    list_filter = ('fecha', 'cuenta__banco')
+    ordering = ('-fecha',)
+    date_hierarchy = 'fecha'
+    list_select_related = True
+
+@admin.register(RegistroEgreso)
+class RegistroEgresoAdmin(admin.ModelAdmin):
+    list_display = ('cuenta', 'monto', 'fecha', 'descripcion')
+    search_fields = ('cuenta__nombre', 'monto', 'descripcion')
+    list_filter = ('fecha', 'cuenta__banco')
+    ordering = ('-fecha',)
+    date_hierarchy = 'fecha'
+    list_select_related = True
+
+
+@admin.register(RegistroPago)
+class RegistroPagoAdmin(admin.ModelAdmin):
+    list_display = ('deuda', 'monto_pago', 'fecha_pago', 'descripcion')
+    search_fields = ('deuda__descripcion', 'monto_pago', 'descripcion')
+    list_filter = ('fecha_pago', 'deuda__tipo_deuda')
+    ordering = ('-fecha_pago',)
+    date_hierarchy = 'fecha_pago'
+    list_select_related = True
+
+@admin.register(Transferencia)
+class TransferenciaAdmin(admin.ModelAdmin):
+    list_display = ('cuenta_origen', 'cuenta_destino', 'monto', 'fecha_transferencia', 'descripcion')
+    search_fields = ('cuenta_origen__nombre', 'cuenta_destino__nombre', 'monto', 'descripcion')
+    list_filter = ('fecha_transferencia', 'cuenta_origen__banco')
+    ordering = ('-fecha_transferencia',)
+    date_hierarchy = 'fecha_transferencia'
+    list_select_related = True
+
+
+@admin.register(ReporteMensual)
+class ReporteMensualAdmin(admin.ModelAdmin):
+    list_display = ('mes', 'tiempo_anual', 'usuario', 'ingresos_total', 'egresos_total')
+    search_fields = ('mes', 'tiempo_anual', 'usuario__email')
+    list_filter = ('mes', 'tiempo_anual')
+    ordering = ('-tiempo_anual', '-mes')
+    list_select_related = True
