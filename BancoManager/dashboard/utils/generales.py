@@ -44,11 +44,12 @@ def comprobante_upload_to_ingresos(instance, filename):
     extension = filename.split('.')[-1]
     
     # Genera el nuevo nombre del archivo con cuenta, usuario y monto
-    nuevo_nombre = f"{instance.cuenta}_{instance.usuario}_{instance.monto}.{extension}"
-    
+    nuevo_nombre = f"{instance.fecha}_{instance.cuenta.banco.nombre}_{instance.monto}.{extension}"
+    nuevo_nombre_usuario = str(instance.usuario.username).replace(".", "_")
+    # Ultimos 4 digitos de la cuenta
+    nuevo_nombre_cuenta = str(instance.cuenta.numeroCuenta)[-4:]
     # Genera la ruta de subida con usuario, cuenta y tipo de modelo
-    ruta = f"comprobantes_ingreso/{instance.tipo_modelo}/{instance.usuario}/{instance.cuenta}/{nuevo_nombre}"
-    
+    ruta = f"comprobantes_ingreso/{instance.tipo_modelo}/{nuevo_nombre_usuario}/{nuevo_nombre_cuenta}/{nuevo_nombre}"
     return ruta
 
 def comprobante_upload_to_egresos(instance, filename):
@@ -56,11 +57,11 @@ def comprobante_upload_to_egresos(instance, filename):
     extension = filename.split('.')[-1]
     
     # Genera el nuevo nombre del archivo con cuenta, usuario y monto
-    nuevo_nombre = f"{instance.cuenta}_{instance.usuario}_{instance.monto}.{extension}"
-    
+    nuevo_nombre = f"{instance.fecha}_{instance.cuenta.banco.nombre}_{instance.monto}.{extension}"
+    nuevo_nombre_usuario = str(instance.usuario.username).replace(".", "_")
+    nuevo_nombre_cuenta = str(instance.cuenta.numeroCuenta)[-4:]
     # Genera la ruta de subida con usuario, cuenta y tipo de modelo
-    ruta = f"comprobantes_egreso/{instance.tipo_modelo}/{instance.usuario}/{instance.cuenta}/{nuevo_nombre}"
-    
+    ruta = f"comprobantes_ingreso/{instance.tipo_modelo}/{nuevo_nombre_usuario}/{nuevo_nombre_cuenta}/{nuevo_nombre}"
     return ruta
 
 
@@ -147,7 +148,6 @@ def actualizar_saldo(cuenta, saldo_anterior, nuevo_saldo):
     # Actualizar el saldo de la cuenta bancaria
     cuenta.saldoInicial += diferencia
     cuenta.save()
-
 
 def calcular_fecha_vencimiento(fecha_inicio, dias=30):
     """

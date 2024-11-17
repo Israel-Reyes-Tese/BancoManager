@@ -28,6 +28,19 @@ class InicioHelper:
         total_ingresos = Ingreso.objects.filter(usuario=usuario).annotate(mes=F('fecha__month')).aggregate(total_ingresos=models.Sum('cantidad'))['total_ingresos'] or 0
         total_egresos = Egreso.objects.filter(usuario=usuario).aggregate(total_egresos=models.Sum('cantidad'))['total_egresos'] or 0
         return total_ingresos, total_egresos
+    
+    def obtener_totales_ingresos_egresos_por_mes(self, usuario, formato_query=True):
+				        # Filtrar las cuenta bancaria de debito o cheque - Sumar los saldos actual de las cuentas
+        total_ingresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta__in=['Cheques', 'Debito']).annotate(mes=F('ingresos__fecha__month')).values('mes').aggregate(total_ingresos=models.Sum('saldoActual'))['total_ingresos'] or 0
+        total_egresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta='Credito').annotate(mes=F('ingresos__fecha__month')).values('mes').aggregate(total_egresos=models.Sum('saldoActual'))['total_egresos'] or 0
+        return total_ingresos, total_egresos
+        
+    
+    def obtener_totales_actuales(self, usuario, formato_query=True):
+        total_ingresos = Ingreso.objects.filter(usuario=usuario).aggregate(total_ingresos=models.Sum('cantidad'))['total_ingresos'] or 0
+        total_egresos = Egreso.objects.filter(usuario=usuario).aggregate(total_egresos=models.Sum('cantidad'))['total_egresos'] or 0
+        total_deudas = Deuda.objects.filter(usuario_deudor=usuario).aggregate(total_deudas=models.Sum('monto'))['total_deudas'] or 0
+        return total_ingresos, total_egresos, total_deudas
 
     def obtener_cuentas(self, usuario, formato_query=True):
         if formato_query:
@@ -42,7 +55,58 @@ class InicioHelper:
                     'saldo': cuenta.saldoActual
                 })
             return lista_cuentas        
-        
+    
+    def obtener_cuentas_filtradas(self, usuario, formato_query=True):
+        total_ingresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta__in=['Cheques', 'Debito'])
+        total_egresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta='Credito')
+        if formato_query:
+            return total_ingresos, total_egresos
+        else:
+            lista_ingresos = []
+            lista_egresos = []
+            for ingreso in total_ingresos:
+                lista_ingresos.append({
+                    "id": ingreso.id,
+                    'nombre': ingreso.nombre,
+                    
+                    'numeroCuenta': ingreso.numeroCuenta,
+                    'tipoCuenta': ingreso.tipoCuenta,
+                    'afiliacion': ingreso.afilacion,
+                    
+                    'saldoInicial': ingreso.saldoInicial,
+                    'saldoActual': ingreso.saldoActual,
+                    
+                    'banco': ingreso.banco.nombre,
+                    
+                    'colorIdentificacion': ingreso.colorIdentificacion,
+                    'cvc': ingreso.cvc,
+                    'fechaVencimiento': ingreso.fechaVencimiento,
+                    'usuario': ingreso.usuario.id,
+                    
+                    'logo': "media/"+str(ingreso.logo)
+                })
+            for egreso in total_egresos:
+                lista_egresos.append({
+                    "id": egreso.id,
+                    'nombre': egreso.nombre,
+                    
+                    'numeroCuenta': egreso.numeroCuenta,
+                    'tipoCuenta': egreso.tipoCuenta,
+                    'afiliacion': egreso.afilacion,
+                    
+                    'saldoInicial': egreso.saldoInicial,
+                    'saldoActual': egreso.saldoActual,
+                    
+                    'banco': egreso.banco.nombre,
+                    
+                    'colorIdentificacion': egreso.colorIdentificacion,
+                    'cvc': egreso.cvc,
+                    'fechaVencimiento': egreso.fechaVencimiento,
+                    'usuario': egreso.usuario.id,
+                    
+                    'logo': "media/"+str(egreso.logo)
+                })
+            return lista_ingresos, lista_egresos
 
     def obtener_transacciones_recientes(self, usuario, formato_query=True):
         ingresos_recentes = Ingreso.objects.filter(usuario=usuario).order_by('-fecha')[:5]
@@ -73,7 +137,6 @@ class InicioHelper:
 
             return lista_ingresos_recientes, lista_egresos_recientes
        
-
     def obtener_transacciones(self, usuario, formato_query=True):
         ingresos = Ingreso.objects.filter(usuario=usuario)
         egresos = Egreso.objects.filter(usuario=usuario)
@@ -148,7 +211,6 @@ class InicioHelper:
 
     def obtener_deudas_proximas(self, usuario):
         return Deuda.objects.filter(usuario_deudor=usuario, fecha_vencimiento__gte=datetime.now()).order_by('fecha_vencimiento')
-
 
     def calcular_total_deudas(self, usuario):
         return Deuda.objects.filter(usuario_deudor=usuario).aggregate(total_deuda=models.Sum('monto'))['total_deuda'] or 0
@@ -283,7 +345,6 @@ class InicioHelper:
                 })
             return lista_bancos
         
-    #     $('#resumen-rapido').text(`${data.cuentas.length} cuentas, ${data.tarjetas_credito.length} tarjeta(s) de crédito, ${data.prestamos.length} préstamo(s) activos.`);
     def obtener_tarjetas_credito(self, usuario, formato_query=True):
         if formato_query:
             return TarjetaCredito.objects.filter(usuario=usuario)
@@ -293,9 +354,9 @@ class InicioHelper:
             for tarjeta in tarjetas:
                 lista_tarjetas.append({
                     "id": tarjeta.id,
-                    "numeroTarjeta": tarjeta.numeroTarjeta,
+                    "numeroTarjeta": tarjeta.numero_tarjeta,
                     "nombre_titular": tarjeta.nombre_titular,
-                    "fechaVencimiento": tarjeta.fechaVencimiento,
+                    "fechaVencimiento": tarjeta.fecha_vencimiento,
                     "colorIdentificacion": tarjeta.colorIdentificacion,
                     "limte": tarjeta.limite,
                     "usuario": tarjeta.usuario.id,

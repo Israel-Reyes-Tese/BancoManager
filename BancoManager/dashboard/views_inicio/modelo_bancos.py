@@ -125,6 +125,7 @@ class BancoInicioView(LoginRequiredMixin, View):
         try:
             bancos = Banco.objects.all()
             context = {
+                "usuario": request.user.username,
                 "bancos": bancos,
                 "modelo_principal": "Banco"
             }

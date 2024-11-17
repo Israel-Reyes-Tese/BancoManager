@@ -57,9 +57,18 @@ def InformacionIngresosView(request, retorno_json=True, modelo_principal=""):
     # Obtener las cuentas del usuario
     cuentas = helper.obtener_cuentas(request.user, formato_query=False) 
     # Preparar el contexto para el template
+    total_ingresos_mes, total_egresos_mes = helper.obtener_totales_ingresos_egresos_por_mes(request.user, formato_query=False)
+    # Cuentas del ingreso y egreso
+    cuentas_ingreso, cuentas_egreso = helper.obtener_cuentas_filtradas(request.user, formato_query=False)
+
     context = {
+        "usuario": request.user.username,
+
         'total_ingreso': total_ingresos,
         'total_egreso': total_egresos,
+
+        'ingreso_acumulados': total_ingresos_mes,
+        'egreso_acumulados': total_egresos_mes,
 
         'todos_ingreso': todos_ingresos,
         'todos_egreso': todos_egresos,
@@ -77,18 +86,16 @@ def InformacionIngresosView(request, retorno_json=True, modelo_principal=""):
         'egreso_mensuales': egresos_mensuales,
         
         'categorias': ingresos_descripcion,
-        'categorias_egresos': egresos_descripcion,
+        'categorias_egreso': egresos_descripcion,
 
         "modelo_principal": modelo_principal,
 
         'cuentas': cuentas,
+
+        'cuentas_ingreso': cuentas_ingreso,
+        'cuentas_egreso': cuentas_egreso,
     }
-    print("Datos de ingresos cargados correctamente.", 
-            "\n Total ingresos: ", total_ingresos, "\n Total egresos: ", total_egresos,
-            "\n Ingresos recientes: ", ingresos_recientes, "\n Egresos recientes: ", egresos_recientes
-            , "\n Ingresos mensuales: ", ingresos_mensuales, "\n Egresos mensuales: ", egresos_mensuales
-            , "\n Categorías: ", ingresos_descripcion, "\n Categorías egresos: ", egresos_descripcion)
-    
+
     if retorno_json:
         return JsonResponse(context)
     else:

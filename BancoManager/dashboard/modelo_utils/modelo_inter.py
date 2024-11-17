@@ -67,6 +67,7 @@ class RegistroIngreso(models.Model):
         """
         cuenta = self.cuenta
         cuenta.saldoActual += self.monto
+        cuenta.saldoInicial += self.monto
         cuenta.save()
 
     def obtener_comprobante_url(self):
@@ -123,8 +124,13 @@ class RegistroEgreso(models.Model):
         cuenta = self.cuenta
         if cuenta.saldoActual < self.monto:
             raise ValidationError('El saldo de la cuenta es insuficiente para realizar este egreso.')
-            
-        cuenta.saldoActual -= self.monto
+        # Validar si la cuenta es de tipo crédito sumar el monto al saldo
+        if cuenta.tipoCuenta == 'Credito':
+            cuenta.saldoActual += self.monto
+            cuenta.saldoInicial += self.monto
+        else:
+            cuenta.saldoActual -= self.monto
+            cuenta.saldoInicial -= self.monto
         cuenta.save()
 
     def obtener_comprobante_url(self):

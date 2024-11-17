@@ -11,14 +11,18 @@
     {# csrf_token #}
     {% csrf_token %}
     <h1 class="text-center">Resumen General de Ingresos</h1>
-    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <h1 class="text-center">Bienvenido, {{usuario}}</h1>
     <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
-    {# Total de Ingresos #}
+    {# Total de Ingresos por mes #}
     <div class="row text-center mb-4">
         <div class="col">
             <div class="card p-3">
-                <h2>Total de Ingresos</h2>
-                <p class="display-4" id="total-ingreso">$0</p>
+                <div class="card-body">
+                    <h2>Ingresos del mes:</h2>
+                    <p class="display-4" id="ingreso-mes">$0</p>
+                    <h3>Total de Ingresos:</h3>
+                    <p class="text-muted" id="total-ingreso">$0</p>
+                </div>
                 {# Botones CRUD para ingresos #}
                 <div class="btn-group mt-3" role="group" aria-label="CRUD de Ingresos">
                     <button type="button" class="btn btn-success" id="btnAgregarIngreso">Agregar Ingreso</button>
@@ -61,7 +65,25 @@
         </div>
     </div>
     </div>
-    {# Registro Rápido de Ingresos #}
+    {# Registro Rápido de Ingresos mes #}
+    {# Saldos actuales #}
+    <div class="carousel-container">
+        <div class="sidebar">
+            <ul id="account-menu">
+                {# Menu items will be populated with JavaScript #}
+            </ul>
+        </div>
+        <div class="carousel">
+            <div id="account-carousel">
+                {# Carousel items will be populated with JavaScript #}
+            </div>
+        </div>
+        <button class="nav-btn prev">‹</button>
+        <button class="nav-btn next">›</button>
+    </div>
+    {# Saldos actuales #}
+
+
     {# Comparativa Mensual #}
     {# Registro Rápido de Ingresos #}
     {# Comparativa Mensual #}
@@ -128,6 +150,7 @@
         <button class="btn btn-secondary" id="btnExportar">Exportar Datos</button>
         <button class="btn btn-info" id="btnVerReportes">Ver Reportes Detallados</button>
     </div>
+
 </div>
 {# Ventana Modal visualizar (cargando) #}
 <div class="modal" id="modalCargando" tabindex="-1" aria-labelledby="modalCargandoLabel" aria-hidden="true">

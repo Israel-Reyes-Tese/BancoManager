@@ -68,6 +68,77 @@ function cuadroCarga(divID) {
         ocultar: ocultarCuadroCarga
     };
 }
+
+// Función carrusel:
+function createCarousel(data, menuTarget, carouselTarget) {
+    const accountMenu = document.getElementById(menuTarget);
+    const accountCarousel = document.getElementById(carouselTarget);
+
+    data.forEach((account, index) => {
+        const menuItem = document.createElement('li');
+        menuItem.innerHTML = `
+            ${account.nombre}
+            <img src="../${account.logo}" class="rotating-logo" alt="Logo">
+        `;
+        menuItem.dataset.index = index;
+        menuItem.style.backgroundColor = account.colorIdentificacion;
+        accountMenu.appendChild(menuItem);
+
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.innerHTML = `
+            <div class="card-header">
+                <h2>${account.nombre}</h2>
+                <img src="../${account.logo}" class="rotating-logo card-logo" alt="Logo">
+            </div>
+            <p>Número de cuenta: ${account.numeroCuenta}</p>
+            <p>Tipo de cuenta: ${account.tipoCuenta}</p>
+            <p style="color: ${account.colorIdentificacion};">Color de identificación</p>
+            <p>Saldo inicial: ${account.saldoInicial}</p>
+            <p>Saldo actual: ${account.saldoActual}</p>
+            <p>Banco: ${account.banco}</p>
+            <p>Afiliación: ${account.afiliacion}</p>
+        `;
+        card.style.backgroundColor = account.colorIdentificacion;
+        accountCarousel.appendChild(card);
+    });
+
+    let currentIndex = 0;
+
+    function showCard(index) {
+        const cards = document.querySelectorAll(`#${carouselTarget} .card`);
+        const menuItems = document.querySelectorAll(`#${menuTarget} li`);
+        cards.forEach((card, i) => {
+            card.style.display = (i === index) ? 'block' : 'none';
+        });
+        menuItems.forEach((item, i) => {
+            item.classList.toggle('active', i === index);
+        });
+    }
+
+    document.querySelector('.nav-btn.prev').addEventListener('click', () => {
+        currentIndex = (currentIndex > 0) ? currentIndex - 1 : data.length - 1;
+        showCard(currentIndex);
+    });
+
+    document.querySelector('.nav-btn.next').addEventListener('click', () => {
+        currentIndex = (currentIndex < data.length - 1) ? currentIndex + 1 : 0;
+        showCard(currentIndex);
+    });
+
+    accountMenu.addEventListener('click', (e) => {
+        if (e.target.tagName === 'LI' || e.target.tagName === 'IMG') {
+            currentIndex = parseInt(e.target.closest('li').dataset.index);
+            showCard(currentIndex);
+        }
+    });
+
+    showCard(currentIndex);
+}
+
+
+
+
 // Función para configurar las gráficas
 function configurarGrafica({ canvasId, tipoGrafica = 'bar', etiquetas, datos, label, backgroundColor = 'rgba(75, 192, 192, 0.5)', opciones = {} }) {
     // Destruir la gráfica si ya existe
@@ -278,6 +349,7 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
 function cargarDatosModeloIngresosorEgresos(modelo, data) {
     // Actualizar el total
     $(`#total-${modelo.toLowerCase()}`).text('$' + data[`total_${modelo.toLowerCase()}`]);
+    $(`#${modelo.toLowerCase()}-mes`).text('$' + data[`${modelo.toLowerCase()}_acumulados`]);
     // Verifica si existen datos recientes
     if (data[`${modelo.toLowerCase()}_recientes`].length > 0) {
         data[`${modelo.toLowerCase()}_recientes`].forEach(function(item) {
@@ -349,6 +421,9 @@ function cargarDatosModeloIngresosorEgresos(modelo, data) {
             "url": "/static/js/i18n/es-ES.json"
         }
     });
+    // Cargar datos de cuentas
+    createCarousel(data[`cuentas_${modelo.toLowerCase()}`], 'account-menu', 'account-carousel');
+
 }
 
 function cargarDatosModeloCuentasBancarias(modelo, data) {

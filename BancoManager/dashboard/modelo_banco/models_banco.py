@@ -76,6 +76,7 @@ class CuentaBancaria(TimestampedModel):
 
     fechaIngreso = models.DateTimeField(auto_now_add=True)
 
+    logo = models.ImageField(upload_to='cuentas/', blank=True, null=True)
     class Meta:
         ordering = ['nombre']
         verbose_name = "Cuenta Bancaria"

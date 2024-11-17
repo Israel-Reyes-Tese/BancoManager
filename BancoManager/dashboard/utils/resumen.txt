@@ -97,3 +97,7 @@ Clases Base Abstractas: Todos los modelos heredan de TimestampedModel, que inclu
 Relaciones: Los modelos incluyen múltiples relaciones con claves foráneas, permitiendo la asociación entre usuarios, cuentas, préstamos, tarjetas y deudas.
 Validaciones: Se han implementado validaciones en los campos necesarios para asegurar la integridad de los datos.
 Con este resumen, puedes tener una comprensión general de los modelos y sus componentes, lo cual es útil para definir cualquier prompt o pregunta relacionada con el desarrollo y diseño de la aplicación en Django.
+
+
+
+

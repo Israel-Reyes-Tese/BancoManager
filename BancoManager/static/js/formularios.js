@@ -451,6 +451,7 @@ if (modelo_principal == "Deuda"){
         // Inicializar funciones - Formulario Usuario
         // Manejar el envío del formulario
         handleFormSubmit('#form-agregar-usuario', '/crear_usuario/');
+        
     } else if (modelo_principal == "Ingreso"){
         // Inicializar funciones - Formulario ingreso
              // Manejar el envío del formulario
