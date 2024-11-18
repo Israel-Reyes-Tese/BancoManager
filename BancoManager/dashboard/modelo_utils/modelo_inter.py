@@ -117,6 +117,7 @@ class RegistroEgreso(models.Model):
         return f"Egreso de {self.monto} en {self.cuenta.nombre} - Fecha: {self.fecha}"
 
     def aplicar_egreso(self):
+        print("Aplicando egreso", self.monto ,"Saldo actual", self.cuenta.saldoActual)
         """
         Método para aplicar el egreso a la cuenta asociada,
         actualizando el saldo de la cuenta.
@@ -127,11 +128,10 @@ class RegistroEgreso(models.Model):
         # Validar si la cuenta es de tipo crédito sumar el monto al saldo
         if cuenta.tipoCuenta == 'Credito':
             cuenta.saldoActual += self.monto
-            cuenta.saldoInicial += self.monto
         else:
             cuenta.saldoActual -= self.monto
-            cuenta.saldoInicial -= self.monto
         cuenta.save()
+        
 
     def obtener_comprobante_url(self):
         """
@@ -188,11 +188,9 @@ class RegistroPago(models.Model):
         self.deuda.monto -= self.monto_pago
         if self.deuda.monto < 0:  # Si el saldo se vuelve negativo
             self.deuda.monto = 0
-        
         # Actualizar el estado de la deuda si se saldó
         if self.deuda.monto == 0:
             self.deuda.estado = True
-        
         self.deuda.save()
         self.save()  # Guardar el registro de pago
 

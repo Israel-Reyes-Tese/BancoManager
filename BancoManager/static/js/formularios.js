@@ -1,7 +1,6 @@
 $(document).ready(function() {
     // Obtener el token CSRF desde la meta etiqueta
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
     // Configurar jQuery para incluir el token CSRF en todas las solicitudes AJAX
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
@@ -10,27 +9,70 @@ $(document).ready(function() {
             }
         }
     });
-
-
     // Manejar la carga del formulario
     function handleFormLoad(buttonSelector, url, targetSelector, modalSelector) {
         $(buttonSelector).on('click', function(e) {
-            e.preventDefault(); // Prevenir comportamiento por defecto
-            console.log('Cargando formulario desde', url);
+            try {
+                e.preventDefault(); // Prevenir comportamiento por defecto
+                console.log('Cargando formulario desde', url);
+                $.ajax({
+                    url: url,  // URL para obtener el formulario
+                    method: "GET",
+                    success: function(response) {
+                        try {
+                            // Eliminar el header y todo el contenido que contenga 
+                            response = response.replace(/<header>[\s\S]*<\/header>/, '');
+                            // Eliminar el <footer class="bg-light text-dark text-center py-4"> y todo el contenido que contenga
+                            response = response.replace(/<footer class="bg-light text-dark text-center py-4">[\s\S]*<\/footer>/, '');
+                            // Insertar el formulario en el HTML
+                            $(targetSelector).html(response);
+                            console.log('Formulario cargado exitosamente', response);
+                            // Mostrar el formulario en un modal
+                            $(modalSelector).removeAttr('aria-hidden').modal('show');
+                            // Validar si existe un formulario en el modal si es asi se elimina
+                        } catch (error) {
+                            console.error('Error en handleFormLoad success callback:', error);
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al cargar el formulario',
+                            text: xhr.responseText
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error en handleFormLoad:', error);
+            }
+        });
+    }
+    // Manejar la carga de datos del formulario
+    function handleFormLoadDataincome(url) {
+        try {
             $.ajax({
+                // Tomar la url como ruta unica y no considerar de donde viene
                 url: url,  // URL para obtener el formulario
                 method: "GET",
                 success: function(response) {
-                    // Eliminar el header y todo el contenido que contenga 
-                    response = response.replace(/<header>[\s\S]*<\/header>/, '');
-                    // Eliminar el <footer class="bg-light text-dark text-center py-4"> y todo el contenido que contenga
-                    response = response.replace(/<footer class="bg-light text-dark text-center py-4">[\s\S]*<\/footer>/, '');
-                    // Insertar el formulario en el HTML
-                    $(targetSelector).html(response);
-                    console.log('Formulario cargado exitosamente', response);
-                    // Mostrar el formulario en un modal
-                    $(modalSelector).removeAttr('aria-hidden').modal('show');
-                    // Validar si existe un formulario en el modal si es asi se elimina
+                    try {
+                        console.log('Formulario cargado exitosamente', response.data[0]);
+                        // Llenar los campos del formulario
+                        for (var key in response.data[0]) {
+                            if (response.data[0].hasOwnProperty(key)) {
+                                var value = response.data[0][key];
+                                var inputSelector = `#${key}`;
+                                $(inputSelector).val(value);
+                            }
+                        }  
+                        var nombre_modelo = response.data[0].modelo.replace("_", " ");
+                        // Actualizar los botones
+                        $('#boton_agregar').text('Actualizar');
+                        // Acrtualizar el titulo
+                        $('#titulo_principal').text('Actualizar '+ nombre_modelo + ''); 
+                    } catch (error) {
+                        console.error('Error en handleFormLoadDataincome success callback:', error);
+                    }               
                 },
                 error: function(xhr) {
                     Swal.fire({
@@ -40,177 +82,187 @@ $(document).ready(function() {
                     });
                 }
             });
-        });
+        } catch (error) {
+            console.error('Error en handleFormLoadDataincome:', error);
+        }
     }
-
-    // Manejar la carga de datos del formulario
-    function handleFormLoadDataincome(url) {
-        $.ajax({
-            // Tomar la url como ruta unica y no considerar de donde viene
-            url: url,  // URL para obtener el formulario
-            method: "GET",
-            success: function(response) {
-                console.log('Formulario cargado exitosamente', response.data[0]);
-                // Llenar los campos del formulario
-                for (var key in response.data[0]) {
-                    if (response.data[0].hasOwnProperty(key)) {
-                        var value = response.data[0][key];
-                        var inputSelector = `#${key}`;
-                        $(inputSelector).val(value);
-                    }
-                }  
-                var nombre_modelo = response.data[0].modelo.replace("_", " ");
-                // Actualizar los botones
-                $('#boton_agregar').text('Actualizar');
-                // Acrtualizar el titulo
-                $('#titulo_principal').text('Actualizar '+ nombre_modelo + '');                
-            },
-            error: function(xhr) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al cargar el formulario',
-                    text: xhr.responseText
-                });
-            }
-        });
-    }
-
-
-
     // Manejar el envío del formulario
     function handleFormSubmit(formSelector, url, metodo = "POST", modalSelector=null) {
         $(formSelector).on('submit', function(e) {
-            e.preventDefault(); // Prevenir comportamiento por defecto
-            console.log('Formulario enviado', e);
-            // Recolectar datos del formulario
-            var formData = $(this).serialize();
-            $.ajax({
-                url: url,  // URL para agregar ingresos
-                method: metodo,
-                data: formData,
-                headers: {
-                    'X-CSRFToken': csrfToken
-                },
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Ingreso agregado exitosamente',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    // Limpiar el formulario
-                    $(formSelector).trigger('reset');
-                    // Validar si existe un modal
-                    if (modalSelector) {
-                        // Ocultar el modal
-                        console.log('Cerrando modal', $(modalSelector));
-                        $(modalSelector).modal('hide');
-                    }
-                },
-                error: function(xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error al agregar',
-                        text: xhr.responseText
-                    });
-                }
-            });
-        });
-    }
-
-
-    // Funcion principal para la busqueda de registros
-    function handleSearchProcess(inputSelector, resultSelector, searchUrl) {
-        var debounceTimer;  // Variable para debounce
-        $(inputSelector).on('input', function() {
-            var query = $(this).val().trim();
-            clearTimeout(debounceTimer);  // Limpiar el timer anterior
-
-            if (query.length > 1) {
-                debounceTimer = setTimeout(function() {
-                    $.ajax({
-                        url: searchUrl,  // Ruta que vas a usar para obtener cuentas
-                        method: "GET",
-                        data: { q: query },  // Envío de la consulta
-                        success: function(data) {
-                            showResults(data, resultSelector);
-                        },
-                        error: function(xhr) {
-                            console.error("Error al obtener cuentas: ", xhr.responseText);
+            try {
+                e.preventDefault(); // Prevenir comportamiento por defecto
+                console.log('Formulario enviado', e);
+                // Recolectar datos del formulario
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: url,  // URL para agregar ingresos
+                    method: metodo,
+                    data: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    success: function(response) {
+                        try {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Ingreso agregado exitosamente',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            // Limpiar el formulario
+                            $(formSelector).trigger('reset');
+                            // Validar si existe un modal
+                            if (modalSelector) {
+                                // Ocultar el modal
+                                console.log('Cerrando modal', $(modalSelector));
+                                $(modalSelector).modal('hide');
+                            }
+                        } catch (error) {
+                            console.error('Error en handleFormSubmit success callback:', error);
                         }
-                    });
-                }, 300);  // Delay de 300ms
-            } else {
-                $(resultSelector).hide();  // Ocultar la lista si el input está vacío
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al agregar',
+                            text: xhr.responseText
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error en handleFormSubmit:', error);
             }
         });
     }
+    // Funcion principal para la busqueda de registros
+    function handleSearchProcess(inputSelector, resultSelector, searchUrl) {
+        try {
 
+            // Validar si se encontraron el input y el resultado y la url
+            if (!inputSelector || !resultSelector || !searchUrl) {
+                console.error('Error en handleSearchProcess: inputSelector, resultSelector y searchUrl son requeridos');
+                return;
+            } else {
+                console.log('Buscando registros en', searchUrl);
+            }
+            var debounceTimer;  // Variable para debounce
+            // Manejar la búsqueda de manera dinámica
+            $(inputSelector).on('input', function() {
+                try {
+                    var query = $(this).val().trim();
+                    clearTimeout(debounceTimer);  // Limpiar el timer anterior
+                    console.log("Buscando registros (", inputSelector, query ,")...");
 
+                    if (query.length > 1) {
+                        debounceTimer = setTimeout(function() {
+                            console.log("Iniciando solicitud AJAX para", query);
+                            $.ajax({
+                                url: searchUrl,  // Ruta que vas a usar para obtener cuentas
+                                method: "GET",
+                                data: { q: query },  // Envío de la consulta
+                                success: function(data) {
+                                    try {
+                                        console.log("Solicitud AJAX exitosa para", query);
+                                        showResults(data, resultSelector);
+                                    } catch (error) {
+                                        console.error('Error en handleSearchProcess success callback:', error);
+                                    }
+                                },
+                                error: function(xhr) {
+                                    console.error("Error al obtener cuentas: ", xhr.responseText);
+                                }
+                            });
+                        }, 300);  // Delay de 300ms
+                    } else {
+                        console.log("Ocultando resultados porque la longitud de la consulta es menor o igual a 1");
+                        $(resultSelector).hide();  // Ocultar la lista si el input está vacío
+                    }
+                } catch (error) {
+                    console.error('Error en handleSearchProcess input event:', error);
+                }
+            });
+        } catch (error) {
+            console.error('Error en handleSearchProcess:', error);
+        }
+    }
     // Manejar la búsqueda de cuentas de manera dinámica
     function handleAccountSearch(inputSelector, resultSelector, searchUrl) {
         handleSearchProcess(inputSelector, resultSelector, searchUrl);
     }
-
     // Manejar la búsqueda de usuarios de manera dinámica
     function handleUserSearch(inputSelector, resultSelector, searchUrl) {
         handleSearchProcess(inputSelector, resultSelector, searchUrl);
     }
-
     // Manejar la búsqueda de prestamos de manera dinámica
     function handleLoanSearch(inputSelector, resultSelector, searchUrl) {
         handleSearchProcess(inputSelector, resultSelector, searchUrl);
     }
-
     // Manejar la búsqueda de bancos de manera dinámica
     function handleBankSearch(inputSelector, resultSelector, searchUrl) {
         handleSearchProcess(inputSelector, resultSelector, searchUrl);
     }
-
-
     // Mostrar los resultados de la búsqueda
     function showResults(data, resultSelector) {
-        var $resultList = $(resultSelector);
-        $resultList.empty();  // Limpiar la lista anterior
-        if (data.length > 0) {
-            data.forEach(function(cuenta) {
-                $resultList.append('<li class="list-group-item cuenta-item" data-id="' + cuenta.id + '">' + cuenta.nombre + '</li>');
-            });
-            $resultList.show();  // Mostrar la lista
-        } else {
-            $resultList.hide();  // Si no hay resultados oculta la lista
+        try {
+            var $resultList = $(resultSelector);
+            $resultList.empty();  // Limpiar la lista anterior
+            if (data.length > 0) {
+                data.forEach(function(cuenta) {
+                    try {
+                        $resultList.append('<li class="list-group-item cuenta-item" data-id="' + cuenta.id + '">' + cuenta.nombre + '</li>');
+                    } catch (error) {
+                        console.error('Error en showResults forEach:', error);
+                    }
+                });
+                $resultList.show();  // Mostrar la lista
+            } else {
+                $resultList.hide();  // Si no hay resultados oculta la lista
+            }
+        } catch (error) {
+            console.error('Error en showResults:', error);
         }
     }
-
     // Función principal para manejar la selección de registros
     function handleSelectionprocess(resultSelector, inputSelector, hiddenInputSelector) {
-        $(document).on('click', '.cuenta-item', function() {
-            var cuentaNombre = $(this).text();
-            var cuentaId = $(this).data('id');
-            var targetInput = $(this).closest(resultSelector).data('target-input');
-            var targetHiddenInput = $(this).closest(resultSelector).data('target-hidden-input');
+        try {
+            $(document).on('click', '.cuenta-item', function() {
+                try {
+                    var cuentaNombre = $(this).text();
+                    var cuentaId = $(this).data('id');
+                    var targetInput = $(this).closest(resultSelector).data('target-input');
+                    var targetHiddenInput = $(this).closest(resultSelector).data('target-hidden-input');
 
-            $(targetInput).val(cuentaNombre);  // Establecer el nombre de la cuenta en el input visible
-            $(targetHiddenInput).val(cuentaId);  // Establecer el ID de la cuenta en el input oculto
-            $(resultSelector).hide();  // Ocultar la lista
-        });
-
-        // Cerrar la lista si se hace clic fuera de ella
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest(resultSelector).length && !$(e.target).is(inputSelector)) {
-                $(resultSelector).hide();
-            }
-        });
-        // Validar si el input es vacio asginar el valor del input a los campos ocultos 
-        $(inputSelector).on('input', function() {
-            if ($(inputSelector).val() == '') {
-                $(hiddenInputSelector).val('');
-            }
-        });
-
+                    $(targetInput).val(cuentaNombre);  // Establecer el nombre de la cuenta en el input visible
+                    $(targetHiddenInput).val(cuentaId);  // Establecer el ID de la cuenta en el input oculto
+                    $(resultSelector).hide();  // Ocultar la lista
+                } catch (error) {
+                    console.error('Error en handleSelectionprocess click event:', error);
+                }
+            });
+            // Cerrar la lista si se hace clic fuera de ella
+            $(document).on('click', function(e) {
+                try {
+                    if (!$(e.target).closest(resultSelector).length && !$(e.target).is(inputSelector)) {
+                        $(resultSelector).hide();
+                    }
+                } catch (error) {
+                    console.error('Error en handleSelectionprocess document click event:', error);
+                }
+            });
+            // Validar si el input es vacio asginar el valor del input a los campos ocultos 
+            $(inputSelector).on('input', function() {
+                try {
+                    if ($(inputSelector).val() == '') {
+                        $(hiddenInputSelector).val('');
+                    }
+                } catch (error) {
+                    console.error('Error en handleSelectionprocess input event:', error);
+                }
+            });
+        } catch (error) {
+            console.error('Error en handleSelectionprocess:', error);
+        }
     }
-
-
     // Manejar el clic en una cuenta de la lista
     function handleAccountSelection(resultSelector, inputSelector, hiddenInputSelector) {
         handleSelectionprocess(resultSelector, inputSelector, hiddenInputSelector);
@@ -227,135 +279,158 @@ $(document).ready(function() {
     function handleBankSelection(resultSelector, inputSelector, hiddenInputSelector) {
         handleSelectionprocess(resultSelector, inputSelector, hiddenInputSelector);
     }
-
-
-
-
     // Manejar listar "Ver todas las cuentas"
     function handleViewAllAccounts(buttonSelector, modalSelector, tableSelector, apiUrl) {
         $(buttonSelector).on('click', function() {
-            $.ajax({
-                url: apiUrl,  // URL para obtener todas las cuentas
-                method: "GET",
-                success: function(data) {
-                    console.log("Informacion cuenta", data);
-                    var table = $(tableSelector).DataTable();
-                    // Mostrar
-                    table.clear();
-                    data.cuentas.forEach(function(cuenta) {
-                        table.row.add([
-                            cuenta.id,
-                            cuenta.nombre,
-                            cuenta.banco,
-                            cuenta.numeroCuenta,
-                            cuenta.tipoCuenta
-                        ]).draw();
-                    });
-                    // Mostrar la ventana modal
-                    $(modalSelector).modal('show');
-                },
-                error: function(xhr) {
-                    console.error("Error al obtener cuentas: ", xhr.responseText);
-                }
-            });
+            try {
+                $.ajax({
+                    url: apiUrl,  // URL para obtener todas las cuentas
+                    method: "GET",
+                    success: function(data) {
+                        try {
+                            console.log("Informacion cuenta", data);
+                            var table = $(tableSelector).DataTable();
+                            // Mostrar
+                            table.clear();
+                            data.cuentas.forEach(function(cuenta) {
+                                table.row.add([
+                                    cuenta.id,
+                                    cuenta.nombre,
+                                    cuenta.banco,
+                                    cuenta.numeroCuenta,
+                                    cuenta.tipoCuenta
+                                ]).draw();
+                            });
+                            // Mostrar la ventana modal
+                            $(modalSelector).modal('show');
+                        } catch (error) {
+                            console.error('Error en handleViewAllAccounts success callback:', error);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Error al obtener cuentas: ", xhr.responseText);
+                    }
+                });
+            } catch (error) {
+                console.error('Error en handleViewAllAccounts:', error);
+            }
         });
     }
-    
     // Manejar listar "Ver todos los usuarios"
     function handleViewallUsers(buttonSelector, modalSelector, tableSelector, apiUrl) {
         console.log("Boton ver todos los usuarios");
-
         $(buttonSelector).on('click', function() {
-
-            $.ajax({
-                url: apiUrl,  // URL para obtener todas los usuarios
-                method: "GET",
-                success: function(data) {
-                    console.log("Informacion usuario", data);
-                    var table = $(tableSelector).DataTable();
-                    // Mostrar
-                    table.clear();
-                    data.usuarios.forEach(function(usuario) {
-                        table.row.add([
-                            usuario.id,
-                            usuario.nombre_usuario,
-                            usuario.nombre,
-                            usuario.apellido,
-                            usuario.correo,
-                        ]).draw();
-                    });
-                    // Mostrar la ventana modal
-                    $(modalSelector).modal('show');
-                },
-                error: function(xhr) {
-                    console.error("Error al obtener usuarios: ", xhr.responseText);
-                }
-            });
+            try {
+                $.ajax({
+                    url: apiUrl,  // URL para obtener todas los usuarios
+                    method: "GET",
+                    success: function(data) {
+                        try {
+                            console.log("Informacion usuario", data);
+                            var table = $(tableSelector).DataTable();
+                            // Mostrar
+                            table.clear();
+                            data.usuarios.forEach(function(usuario) {
+                                table.row.add([
+                                    usuario.id,
+                                    usuario.nombre_usuario,
+                                    usuario.nombre,
+                                    usuario.apellido,
+                                    usuario.correo,
+                                ]).draw();
+                            });
+                            // Mostrar la ventana modal
+                            $(modalSelector).modal('show');
+                        } catch (error) {
+                            console.error('Error en handleViewallUsers success callback:', error);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Error al obtener usuarios: ", xhr.responseText);
+                    }
+                });
+            } catch (error) {
+                console.error('Error en handleViewallUsers:', error);
+            }
         });
     }
     // Manejar listar "Ver todas las prestamos"
     function handleViewAllloan(buttonSelector, modalSelector, tableSelector, apiUrl) {
         $(buttonSelector).on('click', function() {
-            $.ajax({
-                url: apiUrl,  // URL para obtener todas las cuentas
-                method: "GET",
-                success: function(data) {
-                    console.log("Informacion prestamo", data);
-                    var table = $(tableSelector).DataTable();
-                    // Mostrar
-                    table.clear();
-                    data.prestamos.forEach(function(prestamo) {
-                        table.row.add([
-                            prestamo.id,
-                            prestamo.descripcion,
-                            prestamo.monto_total,
-                            prestamo.tasa_interes,
-                            prestamo.fecha_inicio,
-                            prestamo.usuario_prestamista,
-                            prestamo.fechaIngreso,
-                        ]).draw();
-                    });
-                    // Mostrar la ventana modal
-                    $(modalSelector).modal('show');
-                },
-                error: function(xhr) {
-                    console.error("Error al obtener prestamos: ", xhr.responseText);
-                }
-            });
+            try {
+                $.ajax({
+                    url: apiUrl,  // URL para obtener todas las cuentas
+                    method: "GET",
+                    success: function(data) {
+                        try {
+                            console.log("Informacion prestamo", data);
+                            var table = $(tableSelector).DataTable();
+                            // Mostrar
+                            table.clear();
+                            data.prestamos.forEach(function(prestamo) {
+                                table.row.add([
+                                    prestamo.id,
+                                    prestamo.descripcion,
+                                    prestamo.monto_total,
+                                    prestamo.tasa_interes,
+                                    prestamo.fecha_inicio,
+                                    prestamo.usuario_prestamista,
+                                    prestamo.fechaIngreso,
+                                ]).draw();
+                            });
+                            // Mostrar la ventana modal
+                            $(modalSelector).modal('show');
+                        } catch (error) {
+                            console.error('Error en handleViewAllloan success callback:', error);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Error al obtener prestamos: ", xhr.responseText);
+                    }
+                });
+            } catch (error) {
+                console.error('Error en handleViewAllloan:', error);
+            }
         });
     }
     // Manejar listar "Ver todas las bancos"
     function handleViewAllBanks(buttonSelector, modalSelector, tableSelector, apiUrl) {
         $(buttonSelector).on('click', function() {
-            $.ajax({
-                url: apiUrl,  // URL para obtener todas las cuentas
-                method: "GET",
-                success: function(data) {
-                    console.log("Informacion banco", data);
-                    var table = $(tableSelector).DataTable();
-                    // Mostrar
-                    table.clear();
-                    data.bancos.forEach(function(banco) {
-                        table.row.add([
-                            banco.id,
-                            banco.nombre,
-                            banco.direccion,
-                            banco.telefono,
-                        ]).draw();
-                    });
-                    // Mostrar la ventana modal
-                    $(modalSelector).modal('show');
-                },
-                error: function(xhr) {
-                    console.error("Error al obtener bancos: ", xhr.responseText);
-                }
-            });
+            try {
+                $.ajax({
+                    url: apiUrl,  // URL para obtener todas las cuentas
+                    method: "GET",
+                    success: function(data) {
+                        try {
+                            console.log("Informacion banco", data);
+                            var table = $(tableSelector).DataTable();
+                            // Mostrar
+                            table.clear();
+                            data.bancos.forEach(function(banco) {
+                                table.row.add([
+                                    banco.id,
+                                    banco.nombre,
+                                    banco.direccion,
+                                    banco.telefono,
+                                ]).draw();
+                            });
+                            // Mostrar la ventana modal
+                            $(modalSelector).modal('show');
+                        } catch (error) {
+                            console.error('Error en handleViewAllBanks success callback:', error);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Error al obtener bancos: ", xhr.responseText);
+                    }
+                });
+            } catch (error) {
+                console.error('Error en handleViewAllBanks:', error);
+            }
         });
     }
-
     // Validando que funciones se van a a utilizar 
     var modelo_principal = $("#modelo_principal").val();
-
 if (modelo_principal == "Deuda"){
         // Inicializar funciones - Formulario deuda
         // ♠ Manejar el envío del formulario ♠
@@ -511,6 +586,7 @@ if (modelo_principal == "Deuda"){
         handleViewAllAccounts('#ver-todas-cuentas', '#modalCuentas', '#tabla-cuentas', '/api/cuentas/');
         // Cargar formularios extras
         handleFormLoad('#agregar-cuenta', '/crear_cuenta_bancaria/', '#insert-form-agregar-cuenta-bancaria', '#modalAgregarCuenta');
+
         } else if (modelo_principal == "Cuenta_bancaria"){
         // Extraer el id de la url
         id = $("#id_formulario").val();

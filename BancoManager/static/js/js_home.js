@@ -1,4 +1,6 @@
 // JS_HOME.js
+    // Importar la libreria handleAccountSearch de formularios.js
+
 // Objeto global para almacenar las gráficas
 var charts = {};
 // Inicializar el cuadro de carga
@@ -18,7 +20,6 @@ $.ajaxSetup({
 window.editarModelo = function(modelo, id) {
     handleFormLoad(null, `/api/editar_${modelo.toLowerCase()}/` + id + '/', `#insert-form-editar-${modelo.toLowerCase()}`, `#modalEditar${modelo}`);
 }
-
 // Función para crear el cuadro de carga
 function cuadroCarga(divID) {
     const cuadroCarga = ` 
@@ -68,7 +69,6 @@ function cuadroCarga(divID) {
         ocultar: ocultarCuadroCarga
     };
 }
-
 // Función carrusel:
 function createCarousel(data, menuTarget, carouselTarget) {
     const accountMenu = document.getElementById(menuTarget);
@@ -135,10 +135,6 @@ function createCarousel(data, menuTarget, carouselTarget) {
 
     showCard(currentIndex);
 }
-
-
-
-
 // Función para configurar las gráficas
 function configurarGrafica({ canvasId, tipoGrafica = 'bar', etiquetas, datos, label, backgroundColor = 'rgba(75, 192, 192, 0.5)', opciones = {} }) {
     // Destruir la gráfica si ya existe
@@ -166,7 +162,6 @@ function configurarGrafica({ canvasId, tipoGrafica = 'bar', etiquetas, datos, la
         }, opciones)
     });
 }
-
 function configurarTabla({ tablaId, modelo, opciones = {}, data={}, campos={} } ) {
     // Eliminar los widgets de buscar y filtrar
     limpiarHTML(`#${tablaId}_length`, true);
@@ -194,9 +189,7 @@ function configurarTabla({ tablaId, modelo, opciones = {}, data={}, campos={} } 
         lengthChange: true,
         pageLength: 10,
     }, opciones));
-}
-            
-
+}           
 function limpiarHTML(target, destroy = false) {
     // Validar si existe el target
     if ($(target).length) {
@@ -206,7 +199,6 @@ function limpiarHTML(target, destroy = false) {
         }
     }
 }
-
 function generarListadocuentas(url, targetSelector) {
     $.ajax({
         url: url,
@@ -231,7 +223,6 @@ function generarListadocuentas(url, targetSelector) {
         }
     });
 }
-
 function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = '', lista_select=[]) {
     // Validar eliminar todo el contenido que exista en el targetSelector
     limpiarHTML(targetSelector);
@@ -309,12 +300,16 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
 
     if (existingCuentaSelect) {
         console.log('El select cuenta ya existe', existingCuentaSelect);
+        console.log('cuente-1er');
+
         var cuentaSelect = document.createElement('select');
         cuentaSelect.className = 'custom-select';
         cuentaSelect.id = `cuenta-${modelo}`;
         cuentaSelect.name = `cuenta-${modelo}`;
         cuentaSelect.required = true;
     } else {
+        console.log('cuente-1er');
+
         var cuentaSelect = document.createElement('select');
         cuentaSelect.className = 'custom-select';
         cuentaSelect.id = 'cuenta';
@@ -344,8 +339,6 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
     // Enviar el formulario
     handleFormSubmit(`#formAgregarRapido${modelo}`, `/api/crear_rapido_${modelo.toLowerCase()}/`, 'POST', modelo);
 }
-
-
 function cargarDatosModeloIngresosorEgresos(modelo, data) {
     // Actualizar el total
     $(`#total-${modelo.toLowerCase()}`).text('$' + data[`total_${modelo.toLowerCase()}`]);
@@ -425,7 +418,6 @@ function cargarDatosModeloIngresosorEgresos(modelo, data) {
     createCarousel(data[`cuentas_${modelo.toLowerCase()}`], 'account-menu', 'account-carousel');
 
 }
-
 function cargarDatosModeloCuentasBancarias(modelo, data) {
     console.log('Datos de cuentas bancarias cargados: Funcion lv 2' );
     console.log('Datos de cuentas bancarias cargados: ', data.total_cuenta_bancaria);
@@ -695,7 +687,6 @@ function handleFormDelete(url) {
         }
     });
 }
-
 // Manejar el envío del formulario
 function handleFormSubmit(formSelector, url, metodo = "POST", modelo,  modalSelector=null, actualizar_informacion = true) {
     $(formSelector).on('submit', function(e) {
@@ -742,7 +733,6 @@ function handleFormSubmit(formSelector, url, metodo = "POST", modelo,  modalSele
         });
     });
 }
-
 // Evento para el botón de filtrar
 $('#filtrarIngresos').on('click', function() {
     buscarModelo('Ingresos');
@@ -794,10 +784,9 @@ if (modelo_principal) {
     handleFormLoad(`#btnAgregar${modelo_principal}`, `/crear_${modelo_principal.toLowerCase()}/`, `#insert-form-agregar-${modelo_principal.toLowerCase()}`, `#modalAgregar${modelo_principal}`);
     // AGREGAR RÁPIDO
     handleFormSubmit(`#formAgregarRapido${modelo_principal}`, `/api/crear_rapido_${modelo_principal.toLowerCase()}/`, 'POST', modelo_principal );
+
+
 }
-
-
-
 function buscarBotoneditar() {
     var botones = document.querySelectorAll('.editbutton');
     console.log("Los botones son: ", botones);
@@ -808,7 +797,6 @@ function buscarBotoneditar() {
         });
     });
 }
-
 function buscarBotonEliminar() {
     var botones = document.querySelectorAll('.deletebutton');
     console.log("Los botones son: ", botones);
@@ -819,12 +807,8 @@ function buscarBotonEliminar() {
         });
     });
 }
-
-
-
 // Llamar a la función para cargar datos del modelo principal
 cargarDatosModelo(modelo_principal);
-
 // Boton actualizar
 $(`#btnActualizar${modelo_principal}`).on('click', function() {
     cargarDatosModelo(modelo_principal);

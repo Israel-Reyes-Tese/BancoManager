@@ -31,9 +31,18 @@ class InicioHelper:
     
     def obtener_totales_ingresos_egresos_por_mes(self, usuario, formato_query=True):
 				        # Filtrar las cuenta bancaria de debito o cheque - Sumar los saldos actual de las cuentas
-        total_ingresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta__in=['Cheques', 'Debito']).annotate(mes=F('ingresos__fecha__month')).values('mes').aggregate(total_ingresos=models.Sum('saldoActual'))['total_ingresos'] or 0
-        total_egresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta='Credito').annotate(mes=F('ingresos__fecha__month')).values('mes').aggregate(total_egresos=models.Sum('saldoActual'))['total_egresos'] or 0
-        return total_ingresos, total_egresos
+        totales_ingresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta__in=['Cheques', 'Debito'])
+        # Sumar los saldos actual de las cuentas
+        saldos_actuales = 0
+        for total in totales_ingresos:
+            saldos_actuales += total.saldoActual
+        totales_egresos = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta='Credito')
+        # Sumar los saldos actual de las cuentas
+        saldos_actuales_egresos = 0
+        for total in totales_egresos:
+            saldos_actuales_egresos += total.saldoActual
+            
+        return saldos_actuales, saldos_actuales_egresos
         
     
     def obtener_totales_actuales(self, usuario, formato_query=True):
