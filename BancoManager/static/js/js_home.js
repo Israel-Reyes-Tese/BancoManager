@@ -190,6 +190,7 @@ function configurarTabla({ tablaId, modelo, opciones = {}, data={}, campos={} } 
         pageLength: 10,
     }, opciones));
 }           
+
 function limpiarHTML(target, destroy = false) {
     // Validar si existe el target
     if ($(target).length) {
@@ -199,6 +200,7 @@ function limpiarHTML(target, destroy = false) {
         }
     }
 }
+
 function generarListadocuentas(url, targetSelector) {
     $.ajax({
         url: url,
@@ -784,8 +786,6 @@ if (modelo_principal) {
     handleFormLoad(`#btnAgregar${modelo_principal}`, `/crear_${modelo_principal.toLowerCase()}/`, `#insert-form-agregar-${modelo_principal.toLowerCase()}`, `#modalAgregar${modelo_principal}`);
     // AGREGAR RÁPIDO
     handleFormSubmit(`#formAgregarRapido${modelo_principal}`, `/api/crear_rapido_${modelo_principal.toLowerCase()}/`, 'POST', modelo_principal );
-
-
 }
 function buscarBotoneditar() {
     var botones = document.querySelectorAll('.editbutton');

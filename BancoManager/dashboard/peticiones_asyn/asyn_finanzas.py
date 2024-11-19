@@ -85,19 +85,85 @@ def obtener_transacciones_mes(request):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
+def obtener_categorias_transacciones(request):
+    if request.method == 'GET':
+        usuario = request.user
+        helper = InicioHelper()
+        top_fuentes_ingresos, top_propositos_egresos = helper.obtener_fuentes_propositos_comunes(usuario, limitar_resultados=False)
+        # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
+        categorias = []
+        for fuente_ingresos in top_fuentes_ingresos:
+            categorias.append(fuente_ingresos['fuente'])
+        for proposito_egresos in top_propositos_egresos:
+            categorias.append(proposito_egresos['proposito'])
+        # Añadir todas las categorias
+        categorias.append("Todas")
+        return JsonResponse({'categorias': categorias})
+
+def obtener_datos_graficables_ingresos_egresos(request):
+    if request.method == 'GET':
+        usuario = request.user
+        helper = InicioHelper()
+        top_fuentes_ingresos, top_propositos_egresos = helper.obtener_fuentes_propositos_comunes(usuario, limitar_resultados=False)
+        # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
+        categorias = []
+        for fuente_ingresos in top_fuentes_ingresos:
+            categorias.append(fuente_ingresos['fuente'])
+        for proposito_egresos in top_propositos_egresos:
+            categorias.append(proposito_egresos['proposito'])
+        # Añadir todas las categorias
+        categorias.append("Todas")
+        # Obtener los datos de los ingresos y egresos
+        ingresos, egresos = helper.obtener_transacciones(usuario)
+        # Convertir QuerySets a listas y unirlas
+        egresos_list = list(egresos)
+        ingresos_list = list(ingresos)
+
+        # Serializar datos
+        ingresos_data = [{
+            'fecha': ingreso.fecha.strftime('%Y-%m-%d'),
+            'descripcion': ingreso.descripcion,
+            'cantidad': str(ingreso.cantidad),
+            'fuente': ingreso.fuente,
+            'id': ingreso.id,
+        } for ingreso in ingresos_list]
+
+        egresos_data = [{
+            'fecha': egreso.fecha.strftime('%Y-%m-%d'),
+            'descripcion': egreso.descripcion,
+            'cantidad': str(egreso.cantidad),
+            'proposito': egreso.proposito,
+            'id': egreso.id,
+        } for egreso in egresos_list]
+
+        gastos_por_mes, ingresos_por_mes = helper.obtener_gastos_ingresos_por_mes(request.user)
+        # Crear un diccionario para almacenar el total acumulado por mes
+        gastos_acumulados = helper.calcular_acumulados_por_mes(gastos_por_mes)
+        ingresos_acumulados = helper.calcular_acumulados_por_mes(ingresos_por_mes)
+        # Graficar los datos
+        ingresos_data, egresos_data = helper.preparar_datos_graficas(ingresos_acumulados, gastos_acumulados)
+        etiquetas_meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio','Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+        return JsonResponse({ 
+                              'categorias': categorias, 
+                              'etiquetas_meses': etiquetas_meses,
+                              'ingreso_data_graficable': ingresos_data, 
+                              'egreso_data_graficable': egresos_data,
+                             })
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
 def RefrescarTablasTransacciones(request):
     if request.method == 'GET':
         helper = InicioHelper()
         usuario = request.user  # Obtén el usuario autenticado
-
         # Obtener todos los ingresos y egresos
         ingresos, egresos = helper.obtener_transacciones(usuario)
         # Convertir QuerySets a listas y unirlas
         egresos_list = list(egresos)
         ingresos_list = list(ingresos)
         transacciones = egresos_list + ingresos_list
-
-
         # Serializar datos
         transacciones_data = [{
             'fecha': transaccion.fecha.strftime('%Y-%m-%d'),
@@ -109,7 +175,6 @@ def RefrescarTablasTransacciones(request):
         } for transaccion in transacciones]
 
         return JsonResponse(transacciones_data, safe=False)
-    
 
 # Usuarios
 def listar_usuarios(request):

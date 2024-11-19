@@ -178,9 +178,13 @@ class InicioHelper:
         twelve_months_ago = datetime.now() - timedelta(days=365)
         return Egreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
 
-    def obtener_fuentes_propositos_comunes(self, usuario):
-        top_fuentes_ingresos = Ingreso.objects.filter(usuario=usuario).values('fuente').annotate(count=models.Count('fuente')).order_by('-count')[:4]
-        top_propositos_egresos = Egreso.objects.filter(usuario=usuario).values('proposito').annotate(count=models.Count('proposito')).order_by('-count')[:4]
+    def obtener_fuentes_propositos_comunes(self, usuario, limitar_resultados=True):
+        if limitar_resultados:
+            top_fuentes_ingresos = Ingreso.objects.filter(usuario=usuario).values('fuente').annotate(count=models.Count('fuente')).order_by('-count')[:4]
+            top_propositos_egresos = Egreso.objects.filter(usuario=usuario).values('proposito').annotate(count=models.Count('proposito')).order_by('-count')[:4]
+        else:
+            top_fuentes_ingresos = Ingreso.objects.filter(usuario=usuario).values('fuente').annotate(count=models.Count('fuente')).order_by('-count')
+            top_propositos_egresos = Egreso.objects.filter(usuario=usuario).values('proposito').annotate(count=models.Count('proposito')).order_by('-count')
         return top_fuentes_ingresos, top_propositos_egresos
 
     def obtener_datos_graficos_mes_actual(self, usuario, formato_query=True):

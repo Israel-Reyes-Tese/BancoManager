@@ -47,23 +47,16 @@ urlpatterns = [
     path('api/egresos/', listar_egresos, name='listar_egresos'),
     # Petición asíncrona bancos
     path('api/bancos/', listar_bancos, name='listar_bancos'),
-
-
     # Petición asíncrona Inicio modelos
     path('api/informacion_ingreso/', InformacionIngresosView, name='informacion_ingresos'),  # Petición asíncrona ingresos
     path('api/informacion_egreso/', InformacionIngresosView, name='informacion_egresos'),  # Petición asíncrona egresos
     path('api/informacion_banco/', InformacionBancosView, name='informacion_banco'),  # Petición asíncrona bancos
     path('api/informacion_cuenta_bancaria/', InformacionCuentasBancariasView, name='informacion_cuenta_bancaria'),  # Petición asíncrona cuentas bancarias
-
-
-
     # Petición asíncrona transacciones
-
-    
-
     path('api/transacciones_mes/', obtener_transacciones_mes, name='obtener_transacciones_mes'),  # Nueva ruta
     path('api/refrescar_tablas_transacciones/', RefrescarTablasTransacciones, name='refrescar_tablas_transacciones'),
-
+    path('api/obtener_categoria_ingreso_egreso/', obtener_categorias_transacciones, name='obtener_categoria_ingreso_egreso'),
+    path('api/obtener_datos_graficables_ingreso_egreso/', obtener_datos_graficables_ingresos_egresos, name='obtener_datos_graficables_ingreso_egreso'), 
     # Transacciones ...
     path('api/filtrar_transacciones/', FiltrarTransaccionesView.as_view(), name='filtrar_transacciones'),
     path('api/ordenar_transacciones/', OrdenarTransaccionesView.as_view(), name='ordenar_transacciones'),
