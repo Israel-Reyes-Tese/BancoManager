@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Panel de Bienvenida del Banco</h1>
+    <div class="card text-center mb-4">
+        <div class="card-body">
+            <h2 id="nombre-banco">Banco XYZ</h2>
+            <p id="direccion-banco">Dirección: Av. Siempreviva 123, Ciudad</p>
+            <p id="telefono-banco">Teléfono: (123) 456-7890</p>
+            <p id="fecha-incorporacion">Fecha de Incorporación: 01/01/2000</p>
+        </div>
+    </div>
+
+    {# Resumen General del Banco #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Número Total de Cuentas Asociadas</h2>
+            <p class="display-4" id="total-cuentas">0</p>
+            <h2>Distribución de Tipos de Cuenta</h2>
+            <canvas id="distribucionTiposCuenta" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Visualización de Sucursales #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Mapa Interactivo de Sucursales</h2>
+            <div id="mapaSucursales" style="height: 400px;"></div>
+            <select class="custom-select my-2" id="filtroCiudad">
+                <option selected>Filtrar por Ciudad...</option>
+                <option value="ciudad1">Ciudad 1</option>
+                <option value="ciudad2">Ciudad 2</option>
+            </select>
+        </div>
+    </div>
+
+    {# Estadísticas y Desempeño del Banco #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Gráfica de Crecimiento</h2>
+            <canvas id="graficaCrecimiento" width="400" height="200"></canvas>
+        </div>
+        <div class="col">
+            <h2>Indicadores de Rendimiento</h2>
+            <p id="nuevos-clientes">Nuevos Clientes por Mes: </p>
+        </div>
+    </div>
+
+    {# Acciones Rápidas para la Administración del Banco #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnAñadirSucursal">Añadir Nueva Sucursal</button>
+        <button class="btn btn-secondary" id="btnGestionarUsuarios">Gestionar Usuarios del Banco</button>
+    </div>
+
+    {# Calendario y Eventos del Banco #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Eventos del Banco</h2>
+            <div id="calendarioEventos" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+            <h2>Notificaciones de Compliance</h2>
+            <p id="notificaciones-compliance">No hay alertas de cumplimiento pendientes.</p>
+        </div>
+    </div>
+
+    {# Notificaciones y Alertas del Banco #}
+    <div id="alertasBanco" class="alert alert-warning" role="alert">
+        No hay alertas de auditoría activas.
+    </div>
+
+    {# Configuración y Personalización del Entorno Bancario #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Configuración y Personalización</h2>
+            <button class="btn btn-info" id="btnPersonalizarReportes">Personalización de Reportes</button>
+            <button class="btn btn-light" id="btnPreferenciasComunicacion">Preferencias de Comunicación</button>
+        </div>
+    </div>
+
+    {# Integración con Otros Módulos de la Aplicación #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Visibilidad de Cuentas de Préstamos</h2>
+            <p id="resumen-prestamos">Total de Préstamos Activos: $0</p>
+            <h2>Colaboración con otras Entidades</h2>
+            <p id="colaboraciones">Colaboraciones Actuales: Ninguna</p>
+        </div>
+    </div>
+
+    {# Opciones de Exportación y Generación de Reportes #}
+    <div class="text-center mt-4">
+        <button class="btn btn-secondary" id="btnExportarBanco">Exportar Información del Banco</button>
+        <button class="btn btn-dark" id="btnGenerarReportes">Generación de Reportes Financieros</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/js_home.js' %}"></script>
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+{# Bootstrap JS #}
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    {# Cargar información del banco y estadísticas al cargar la página #}
+    $('#total-cuentas').text('12'); {# Ejemplo #}
+
+    {# Gráfica: Distribución de Tipos de Cuenta #}
+    var ctx1 = document.getElementById('distribucionTiposCuenta').getContext('2d');
+    var chartTipoCuenta = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Créditos', 'Débitos'],
+            datasets: [{
+                data: [7, 5],
+                backgroundColor: ['#36A2EB', '#FF6384']
+            }]
+        }
+    });
+
+    {# Gráfica: Crecimiento del Banco #}
+    var ctx2 = document.getElementById('graficaCrecimiento').getContext('2d');
+    var chartCrecimiento = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: ['Mes 1', 'Mes 2', 'Mes 3', 'Mes 4'],
+            datasets: [{
+                label: 'Crecimiento de Cuentas',
+                data: [10, 12, 14, 15],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+
+    {# Mapa interactivo (placeholder) #}
+    $('#mapaSucursales').text('Mapa interactivo aquí (por implementar)');
+    
+    {# Funcionalidades de botones #}
+    $('#btnAñadirSucursal').on('click', function() {
+        alert('Funcionalidad para añadir sucursal por implementar.');
+    });
+    
+    $('#btnGestionarUsuarios').on('click', function() {
+        alert('Funcionalidad para gestionar usuarios por implementar.');
+    });
+
+    $('#btnPersonalizarReportes').on('click', function() {
+        alert('Funcionalidad para personalizar reportes por implementar.');
+    });
+
+    $('#btnPreferenciasComunicacion').on('click', function() {
+        alert('Funcionalidad para establecer preferencias de comunicación por implementar.');
+    });
+
+    $('#btnExportarBanco').on('click', function() {
+        alert('Funcionalidad para exportar información del banco por implementar.');
+    });
+
+    $('#btnGenerarReportes').on('click', function() {
+        alert('Funcionalidad para generar reportes financieros por implementar.');
+    });
+});
+</script>
+{% endblock %}

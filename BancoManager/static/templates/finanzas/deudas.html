@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Resumen General de Deudas</h1>
+    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
+    {# Total de Deudas Pendientes #}
+    <div class="row text-center mb-4">
+        <div class="col">
+            <div class="card p-3">
+                <h2>Total de Deudas Pendientes</h2>
+                <p class="display-4" id="total-deudas">$0</p>
+            </div>
+        </div>
+    </div>
+
+    {# Deudas por Estado #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Deudas por Estado</h2>
+            <canvas id="deudasPorEstado" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Estadísticas de Deudas #}
+    <div class="row">
+        <div class="col">
+            <h2>Deudas por Tipo</h2>
+            <canvas id="deudasPorTipo" width="400" height="200"></canvas>
+        </div>
+        <div class="col">
+            <h2>Próximas Fechas de Vencimiento</h2>
+            <ul id="deudasProximas" class="list-group">
+                {# Deudas se llenarán con jQuery #}
+            </ul>
+        </div>
+    </div>
+
+    {# Filtros y Búsqueda #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Filtros y Búsqueda</h2>
+            <select class="custom-select my-2" id="estadoDeuda">
+                <option selected>Selecciona un estado...</option>
+                <option value="saldada">Saldada</option>
+                <option value="activa">Activa</option>
+            </select>
+            <select class="custom-select my-2" id="tipoDeuda">
+                <option selected>Selecciona un tipo...</option>
+                <option value="tarjeta">Tarjeta de Crédito</option>
+                <option value="prestamo">Préstamo</option>
+                <option value="usuario">Usuario</option>
+            </select>
+            <input type="text" class="form-control" id="buscarDeuda" placeholder="Buscar por descripción, monto o fecha de vencimiento">
+            <button id="filtrarDeudas" class="btn btn-primary mt-2">Filtrar</button>
+        </div>
+    </div>
+
+    {# Registro de Nuevas Deudas #}
+    <div class="row">
+        <div class="col">
+            <h2>Registro de Nuevas Deudas</h2>
+            <form id="formDeuda">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Monto" id="montoDeuda">
+                    <input type="text" class="form-control" placeholder="Descripción" id="descripcionDeuda">
+                    <input type="date" class="form-control" id="fechaVencimientoDeuda">
+                    <select class="custom-select" id="tipoDeudaRegistro">
+                        <option selected>Selecciona un tipo...</option>
+                        <option value="tarjeta">Tarjeta de Crédito</option>
+                        <option value="prestamo">Préstamo</option>
+                        <option value="usuario">Usuario</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-success" type="submit">Registrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {# Notificaciones y Alertas de Vencimiento #}
+    <div id="notificacionesDeudas" class="alert alert-warning" role="alert">
+        No hay alertas de vencimientos próximos.
+    </div>
+    {# Calendario de Vencimientos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Vista de Calendario de Vencimientos</h2>
+            {# Placeholder para el calendario #}
+            <div id="calendarioDeudas" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+        </div>
+    </div>
+    {# Panel de Control Financiero #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Indicadores de Proporción de Deuda</h2>
+            <p>Porcentaje de cada tipo de deuda con respecto al total.</p>
+        </div>
+    </div>
+    {# Botones de Acción Rápida #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnRegistrarDeuda">Registrar Deuda</button>
+        <button class="btn btn-warning" id="btnMarcarSaldada">Marcar como Saldada</button>
+        <button class="btn btn-secondary" id="btnExportarDeudas">Exportar Reporte de Deudas</button>
+        <button class="btn btn-info" id="btnVerReportesDeudas">Ver Reportes Detallados</button>
+    </div>
+    {# Tabla para calcular los interes de un prestamo o disposicion o compra terminal #}
+    <div class="container mt-5">
+        <h2 class="text-center">Calculadora de Intereses</h2>
+        <div class="row">
+            <div class="col">
+                <div class="card p-3">
+                    <h3>Intereses de un Préstamo</h3>
+                    <form id="formInteresPrestamo">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="floatformat" class="form-control" placeholder="Monto" id="montoPrestamo" name="montoPrestamo" autocomplete="off" value="">
+                            <input type="text" class="form-control" placeholder="Tasa de Interés" id="tasaInteresPrestamo" name="tasaInteresPrestamo" autocomplete="off" value="">
+                            <input type="text" class="form-control" placeholder="Plazo (meses)" id="plazoPrestamo" name="plazoPrestamo" autocomplete="off" value="">
+                            <select class="custom-select" id="tipoInteresPrestamo">
+                                <option selected>Selecciona un tipo...</option>
+                                <option value="prestamo" name="prestamo">Préstamo</option>
+                                <option value="terminal" name="terminal">Compra Terminal</option>
+                                <option value="disposicion" name="disposicion">Disposición</option>
+                                <option value="tarjeta" name="tarjeta">Tarjeta de Crédito</option>
+                            </select>
+                            <div class="input-group-append">
+                                <button class="btn btn-success" type="submit" id="calcular-prestamo">Calcular</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Tabla para calcular los interes de un prestamo o disposicion o compra terminal #}
+    {# Tabla de respuesta del form de interes oculto hasta que se genere una respuesta #}
+    <div class="container mt-5" id="tablaInteresPrestamo" style="display: none;">
+        <h2 class="text-center">Tabla de Intereses Prestamo (BANCO)</h2>
+        <h3 class="text-center" id="cantida-solicitada" >$ 0.0 </h3>
+        <table class="table table-striped" id="tablaPrestamo">
+            <thead>
+                <tr>
+                    <th scope="col">Banco</th>
+                    <th scope="col">Interes %</th>
+                    <th scope="col">Me(s)</th>
+                    <th scope="col">Pago (Interes) Total</th>
+                    <th scope="col">Pago (Intereses + Prestamo)</th>
+                    <th scope="col">Pago (Mensual)</th>
+                    <th scope="col">Fecha corte - Fecha ultimo pago</th>
+
+                </tr>
+            </thead>
+            <tbody id="tablaInteresPrestamoBody">
+                {# Cuerpo de la tabla se llenará con jQuery #}
+            </tbody>
+        </table>
+    {# Tabla de respuesta del form de interes #}
+    {# Tabla de respuesta prestamo con terminal #}
+        <div class="container mt-5" id="tablaInteresTerminal" style="display: none;">
+            <h2 class="text-center">Tabla de Intereses Prestamo (TERMINAL)</h2>
+            <h3 class="text-center" id="cantida-solicitada-terminal" >$ 0.0 </h3>
+            <table class="table table-striped" id="tablaPrestamoTerminal">
+                <thead>
+                    <tr>
+                        <th scope="col">Terminal</th>
+                        <th scope="col">Interes %</th>
+                        <th scope="col">Pago mensual</th>
+
+                    </tr>
+                </thead>
+                <tbody id="tablaInteresPrestamoBodyTerminal">
+                    {# Cuerpo de la tabla se llenará con jQuery #}
+                </tbody>
+            </table>
+        {# Tabla de respuesta prestamo con terminal #}
+
+</div>
+{# Ventana Modal visualizar (cargando) #}
+<div class="modal" id="modalCargando" tabindex="-1" aria-labelledby="modalCargandoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal visualizar (cargando) #}
+{# Modelo #}
+<input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+{# Modelo #}
+{% endblock %}
+
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{# Incluyendo jQuery UI #}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{# Incluyendo el script de bootstrap (opcional si ya está en base.html) #}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{# Incluyendo SweetAlert2 #}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{# Incluyendo Font Awesome #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{# Incluyendo DataTables #}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Obtener el token CSRF desde la meta etiqueta
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    // Configurar jQuery para incluir el token CSRF en todas las solicitudes AJAX
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            }
+        }
+    });
+
+
+</script>
+
+<script type="module">
+    import { handleFormSubmit, configurarTabla } from "{% static 'js/js_util.js' %}";
+    // Usa la función importada
+    handleFormSubmit('#formInteresPrestamo', '/api/obtener_interes/', 'GET', null, false, true, function(response) {
+        console.log('Response recibido:', response);
+        // Asegúrate de que response tenga la estructura esperada
+        if (response && response.interes) {
+            console.log('Interes:', response.interes);
+            // Manejar el response aquí
+            $('#tablaInteresPrestamo').show();
+            $('#tablaInteresTerminal').show();
+
+            configurarTabla({
+                tablaId: 'tablaPrestamo',
+                modelo: modelo_principal,
+                data: response.interes.monto_meses,
+                campos: ['banco','porcentaje_interes', 'meses','interes', 'pago_total', 'pago_mensual', 'fecha_corte' ],
+                categoria_filter: '',
+                numeroData: 10,
+                totalesdraw: '',
+                actualizar_totales_validacion: false,
+                agregar_botones_edit: false,
+                total_text_act_ext: 'cantida-solicitada',
+                cantidad_ingresar: response.interes.cantidad_original,
+
+            });
+
+            configurarTabla({
+                tablaId: 'tablaPrestamoTerminal',
+                modelo: modelo_principal,
+                data: response.interes.monto_terminales,
+                campos: ['interes','nombre_terminal', 'pago_mensual'],
+                categoria_filter: '',
+                numeroData: 10,
+                totalesdraw: '',
+                actualizar_totales_validacion: false,
+                agregar_botones_edit: false,
+                total_text_act_ext: 'cantida-solicitada-terminal',
+                cantidad_ingresar: response.interes.cantidad_original,
+
+            });
+
+        } else {
+            console.error('Response no contiene la propiedad interes:', response);
+        }
+    });
+
+
+
+</script>
+{% endblock %}

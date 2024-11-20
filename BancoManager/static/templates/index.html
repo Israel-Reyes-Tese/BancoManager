@@ -74,11 +74,15 @@
         <div class="row mt-5">
             <div class="col-md-6 mb-4">
                 <h4 class="text-center">Resumen de Ingresos</h4>
-                <canvas id="IngresosChart"></canvas>
+                <canvas id="grafica-ingresos"></canvas>
+                        {#  Los datos se llenarán con jQuery  #}
+
             </div>
             <div class="col-md-6 mb-4">
                 <h4 class="text-center">Resumen de Egresos</h4>
-                <canvas id="EgresosChart"></canvas>
+                <canvas id="grafica-egresos"></canvas>
+                        {#  Los datos se llenarán con jQuery  #}
+
             </div>
         </div>
         {# Graficos de ingresos - egresos  #}
@@ -87,57 +91,7 @@
             <div class="col-md-12">
                 <h4 class="text-center mb-4">Mis Cuentas</h4>
                 <div id="lista-cuentas">
-                    <div class="row">
-                        {% for cuenta in cuentas %}
-                        <!-- Ejemplo de cuentas, se pueden reemplazar con datos reales de la base de datos -->
-                        <div class="col-md-4 mb-4">
-                            <div class="card account-card">
-                                <div class="card-inner">
-                                    <div class="card-front" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ cuenta.banco }}</h5>
-                                            <h6 class="card-subtitle mb-2">Cuenta: {{ cuenta.numeroCuenta }}</h6>
-                                            <p class="card-text">Saldo: <strong>${{ cuenta.saldoActual }}</strong></p>
-                                            <p class="card-text">Últimos 4 dígitos: <strong>{{ cuenta.numeroCuenta|slice:"-4:" }} </strong></p>
-                                        </div>
-                                        <br>
-                                        <div class="card-icon mb-3">
-                                            {% if cuenta.afilacion == 'Visa' %}
-                                                <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}" alt="MasterCard" class="card-logo">
-                                            {% elif cuenta.afilacion == 'MasterCard' %}
-                                                <img src="{% static 'img/Afilaciones_bancos/mastercard.png' %}"  alt="Visa" class="card-logo">
-                                            {% elif cuenta.afilacion == 'American Express' %}
-                                                <img src="{% static 'img/Afilaciones_bancos/american.png' %}"  alt="American Express" class="card-logo">
-                                            {% else %}
-                                                <i class="fas fa-credit-card fa-2x"></i>
-                                            {% endif %}
-                                        
-                                        </div>
-                                    </div>
-                                    <div class="card-back" style="background-color: {{ cuenta.colorIdentificacion }}; color: black;">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Detalles Adicionales</h5>
-                                            <p class="card-text">CVC: <strong>{{ cuenta.cvc }}</strong></p>
-                                            <p class="card-text">Fecha Vencimiento: <strong>{{ cuenta.fechaVencimiento|date:"F Y" }}</strong></p>
-                                            <p class="card-text">Banco: <strong>{{ cuenta.banco }}</strong></p>
-                                            <div class="card-icon">
-                                                <i class="fas fa-lock fa-2x"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {% empty %}
-                            <div class="col-md-12">
-                                <div class="alert alert-warning" role="alert">
-                                    No tienes cuentas registradas.
-                                </div>
-                            </div>
-                        {% endfor %}
-                        <!-- Si hay más cuentas, se pueden repetir las col-md-4 según sea necesario -->
-                    </div>
+                    {#  Las cuentas se llenarán con jQuery  #}
                     <a class="text-center mb-4"  id="ver-todas-cuentas">Ver todas</a>
                 </div>    
             </div>
@@ -145,19 +99,16 @@
         {# Cuentas #}
         {# Transacciones #}
         <div class="row mt-5">
-            
             <div class="col-md-12">
                 <div class="d-flex align-items-center mb-4">
-                    <!-- Botón para refrescar datos -->
+                     {#  Botón para refrescar datos  #}
                     <button id="refrescar-transacciones" class="btn btn-primary me-2">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <h4 class="text-center">Transacciones del Mes</h4>
                 </div>
-                
-                
                 <div class="row">
-                    <!-- Tarjetas de Totales -->
+                     {#  Tarjetas de Totales  #}
                     <div class="col-md-6 mb-4">
                         <div id="tarjeta-ingresos" class="card transaction-card" style="background-color: #28a745; color: white;">
                             <div class="card-body">
@@ -165,11 +116,7 @@
                                 <p  id="total-ingresos" class="card-text">Total: <strong>${{ total_ingresos }}</strong></p>
                                 <h6 class="card-subtitle mb-2">Fuentes Principales:</h6>
                                 <ul id="top_fuentes_ingresos">
-                                    {% for fuente in top_fuentes_ingresos %}
-                                        <li>{{ fuente.fuente }} ({{ fuente.count }})</li>
-                                    {% empty %}
-                                        <li>No hay fuentes disponibles.</li>
-                                    {% endfor %}
+                                     {#  Los datos se llenarán con jQuery  #}
                                 </ul>
                             </div>
                         </div>
@@ -182,11 +129,7 @@
                                 <p  id="total-egresos" class="card-text">Total: <strong>${{ total_egresos }}</strong></p>
                                 <h6 class="card-subtitle mb-2">Propósitos Principales:</h6>
                                 <ul id="top_fuentes_egresos">
-                                    {% for proposito in top_propositos_egresos %}
-                                        <li>{{ proposito.proposito }} ({{ proposito.count }})</li>
-                                    {% empty %}
-                                        <li>No hay propósitos disponibles.</li>
-                                    {% endfor %}
+                                     {#  Los datos se llenarán con jQuery  #}
                                 </ul>
                             </div>
                         </div>
@@ -199,79 +142,44 @@
         <div class="row mt-5">
             <div class="col-md-12">
                 <h4 class="text-center mb-4">Registro de Transacciones</h4>
-                
-                <!-- Menú de filtros -->
-
+                 {#  Menú de filtros  #}
                 <div class="d-flex align-items-center mb-4">
                     <div class="dropdown me-2">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            Filtrar por Categoría
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><a class="dropdown-item" href="#" data-categoria="todas">Todas</a></li>
-                            {% for categoria in categorias %}
-                                <li><a class="dropdown-item dropdown-item-transacciones" href="#" data-categoria="{{ categoria }}">{{ categoria }}</a></li>
-                            {% endfor %}
-                            <!-- Agrega más categorías según sea necesario -->
-                        </ul>
+                        {#  Dropdown para filtrar por tipo de transacción  #}
+                        <select id="categoriaDropdown"  class="form-select">
+                            <!-- Agrega más opciones según tus categorías -->
+                          </select>
+                        {#  Dropdown para filtrar por tipo de transacción  #}
+    
                     </div>
-                    
                     <button id="refrescar-tablas" class="btn btn-primary me-2">
                         <i class="fas fa-sync-alt"></i> Refrescar
                     </button>
                 </div>
-                <!-- Menú de filtros -->
+                 {#  Menú de filtros  #}
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered" id="tabla-transacciones">
+                    <table id="tablatransacciones" class="table table-striped table-bordered">
                         <thead>
                             <tr>
-                                <th id="th-fecha" class="sortable">Fecha <i class="fas fa-sort" data-key="fecha"></i></th>
-                                <th id="th-descripcion" class="sortable">Descripción <i class="fas fa-sort" data-key="descripcion"></i></th>
-                                <th id="th-monto" class="sortable">Monto <i class="fas fa-sort" data-key="cantidad"></i></th>
-                                <th id="th-categoria" class="sortable">Categoría <i class="fas fa-sort" data-key="categoria"></i></th>
-                                <th id="th-tipo" class="sortable">Tipo <i class="fas fa-sort" data-key="tipo"></i></th>                               
+                                <th>Descripción</th>
+                                <th>Cantidad</th>
+                                <th>Fecha</th>
+                                <th>Fuente</th>
+                                <th>Categoría</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Mostrar ingresos -->
-                            {% for ingreso in ingresos %}
-                            <tr>
-                                <td>{{ ingreso.fecha }}</td>
-                                <td>{{ ingreso.descripcion }}</td>
-                                <td>${{ ingreso.cantidad }}</td>
-                                <td>{{ ingreso.fuente }}</td>
-                                <td><span class="badge badge-success">{{ ingreso.tipo }}</span></td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm" onclick="editTransaction({{ ingreso.id }})">Editar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteTransaction({{ ingreso.id }})">Eliminar</button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">No hay ingresos registrados.</td>
-                            </tr>
-                            {% endfor %}
-                            <!-- Mostrar egresos -->
-                            {% for egreso in egresos %}
-                            <tr>
-                                <td>{{ egreso.fecha }}</td>
-                                <td>{{ egreso.descripcion }}</td>
-                                <td>${{ egreso.cantidad }}</td>
-                                <td>{{ egreso.proposito }}</td>
-                                <td><span class="badge badge-danger">{{ egreso.tipo }}</span></td>
-                                <td>
-                                    <button class="btn btn-warning btn-sm" onclick="editTransaction({{ egreso.id }})">Editar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteTransaction({{ egreso.id }})">Eliminar</button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">No hay egresos registrados.</td>
-                            </tr>
-                            {% endfor %}
+                            {#  Mostrar ingresos - egresos #}
+                            {#  Los datos se llenarán con jQuery  #}
+                            {#  Mostrar ingresos - egresos #}
                         </tbody>
                     </table>
+                    <div class="totales">
+                        <p id="totalEgresos">Total Egresos: 0.00</p>
+                        <p id="totalIngresos">Total Ingresos: 0.00</p>
+                      </div>
+
                 </div>
             </div>
         </div>
@@ -365,84 +273,22 @@
 
 {% block javascript %}
  {# Incluyendo //cdn.jsdelivr.net/npm/chart.js #}
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{# Incluyendo jQuery UI #}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{# Incluyendo el script de bootstrap (opcional si ya está en base.html) #}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{# Incluyendo SweetAlert2 #}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{# Incluyendo Font Awesome #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{# Incluyendo DataTables #}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+{# Chart.js para las gráficas #}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{# Incluyendo jQuery #}
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-
-<script>
-    // Datos de egresos por mes inyectados desde el contexto de Django
-    const egresosData = {{ egresos_data|safe }};
-    const ingresosData = {{ ingresos_data|safe }};
-    
-    // Configurar gráfico de gastos acumulados por mes
-    const ctxEgresos = document.getElementById('EgresosChart').getContext('2d');
-    const ctxIngresos = document.getElementById('IngresosChart').getContext('2d');
-
-    const ingresosChart = new Chart(ctxIngresos, {
-        type: 'bar',
-        data: {
-            labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            datasets: [{
-                label: 'Ingresos por Mes',
-                data: ingresosData,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Total Ingresos'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Meses'
-                    }
-                }
-            }
-        }
-    });
-
-    const egresosChart = new Chart(ctxEgresos, {
-        type: 'bar',
-        data: {
-            labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            datasets: [{
-                label: 'Egresos por Mes',
-                data: egresosData,
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Total Egresos'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Meses'
-                    }
-                }
-            }
-        }
-    });
-</script>
-
 <script src="{% static 'js/js.js' %}"></script>
 
 {% endblock %}

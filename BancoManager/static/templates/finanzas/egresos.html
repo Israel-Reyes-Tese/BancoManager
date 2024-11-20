@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    {# csrf_token #}
+    {% csrf_token %}
+    <h1 class="text-center">Resumen General de Egresos</h1>
+    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
+    {# Total de Egresos #}
+    <div class="row text-center mb-4">
+        <div class="col">
+            <div class="card p-3">
+                <h2>Total de Egresos</h2>
+                <p class="display-4" id="total-egreso">$0</p>
+                {# Botones CRUD para egresos #}
+                <div class="btn-group mt-3" role="group" aria-label="CRUD de Egresos">
+                    <button type="button" class="btn btn-success" id="btnAgregarEgreso">Agregar Egreso</button>
+                    <button type="button" class="btn btn-warning" id="btnEditarEgreso">Editar Egreso</button>
+                    <button type="button" class="btn btn-danger" id="btnEliminarEgreso">Eliminar Egreso</button>
+                    <button type="button" class="btn btn-info" id="btnVerEgreso">Ver Egresos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# Registro Rápido de Egreso #}
+    <div class="row">
+        <div class="col">
+            <h2>Registro Rápido de Egresos</h2>
+            <form id="formAgregarRapidoEgreso">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                    <input type="number" class="form-control" id="cantidad" name="cantidad" value="" required>
+                    {# Fuente lista añadir a input cuando se seleccione #}
+                    <select class="custom-select" id="proposito" name="proposito" required>
+                        <option value="" selected disabled>Selecciona el proposito</option>
+                        <option value="Alimentos">Alimentos</option>
+                        <option value="Bebidas">Bebidas</option>
+                        <option value="Energetizantes">Energetizantes</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    {# Fuente lista añadir a input cuando se seleccione #}
+                    <select class="custom-select" id="cuenta" name="cuenta" required>
+                        <option selected>Selecciona una cuenta...</option>
+                        {# Cuentas se llenarán con jQuery #}
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-success" type="submit">Agregar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {# Registro Rápido de Egreso #}
+
+
+    {# Comparativa Mensual de Egreso #}
+    <div class="row">
+        <div class="col">
+            <h2>Comparativa Mensual de Egresos</h2>
+            <canvas id="comparativaMensual" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    {# Estadísticas de Egresos #}
+    <div class="row">
+        <div class="col">
+            <h2>Egresos por Categoría</h2>
+            <canvas id="egresoPorCategoria" width="400" height="200"></canvas>
+        </div>
+        <div class="col">
+            <h2>Egresos Recientes</h2>
+            <ul id="lista_egreso_recientes" class="list-group">
+                {# Egresos se llenarán con jQuery #}
+            </ul>
+        </div>
+    </div>
+
+    {# Filtros y Búsqueda #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Filtros y Búsqueda</h2>
+            <input type="text" class="form-control" id="buscarEgreso" placeholder="Buscar por propósito, descripción o cuenta">
+            <input type="date" class="form-control my-2" id="rangoFechaDesdeEgresos">
+            <input type="date" class="form-control" id="rangoFechaHastaEgresos">
+            <select class="custom-select my-2" id="categoriaEgreso">
+                <option selected>Selecciona una categoría...</option>
+                <option value="compras">Compras</option>
+                <option value="servicios">Servicios</option>
+                <option value="entretenimiento">Entretenimiento</option>
+            </select>
+            <button id="filtrarEgresos" class="btn btn-primary mt-2">Filtrar</button>
+        </div>
+    </div>
+
+
+
+    {# Notificaciones y Alertas de Gastos #}
+    <div id="notificacionesEgresos" class="alert alert-warning" role="alert">
+        No hay alertas de gastos excedidos.
+    </div>
+
+    {# Calendario de Egresos Programados #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Calendario de Egresos Programados</h2>
+            {# Placeholder para el calendario #}
+            <div id="calendarioEgresos" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+        </div>
+    </div>
+
+    {# Panel de Control Financiero #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Indicadores de Proporción de Gastos</h2>
+            <p>Proporción de egresos por cuenta o categoría.</p>
+        </div>
+    </div>
+
+    {# Tabla para visualizar los egreso y poder filtrarlos #}
+    <div class="container mt-5">
+        <h2 class="text-center">Egresos Registrados
+            <button class="btn btn-primary" id="btnActualizarEgreso"><i class="fas fa-sync-alt"></i> Actualizar</button>
+        </h2>
+        <table id="tablaEgreso" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Fecha</th>
+                    <th>Propósito</th>
+                    <th>Cuenta</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {# Egresos se llenarán con jQuery #}
+            </tbody>
+        </table>
+    </div>
+    {# Tabla para visualizar los egreso y poder filtrarlos #}
+
+    {# Botones de Acción Rápida #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnAñadirEgreso">Añadir Egreso</button>
+        <button class="btn btn-secondary" id="btnExportar">Exportar Datos</button>
+        <button class="btn btn-info" id="btnVerReportes">Ver Reportes Detallados</button>
+    </div>
+</div>
+
+<!-- Ventana Modal visualizar (cargando) -->
+<div class="modal" id="modalCargando" tabindex="-1" aria-labelledby="modalCargandoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal para agregar (egreso) -->
+<div class="modal fade" id="modalAgregarEgreso" tabindex="-1" aria-labelledby="modalAgregarEgresoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarEgresoLabel">Agregar Egreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-agregar-egreso"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana Modal para editar (egreso) -->
+<div class="modal fade" id="modalEditarEgreso" tabindex="-1" aria-labelledby="modalEditarEgresoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarEgresoLabel">Editar Egreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- El formulario se cargará aquí -->
+                <div id="insert-form-editar-egreso"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Modelo #}
+<input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+<input type="hidden" id="id_formulario" value="{{id_formulario}}">
+{% endblock %}
+{% block javascript %}
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Incluyendo jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- Incluyendo el script de bootstrap (opcional si ya está en base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Incluyendo SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Incluyendo Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- Incluyendo DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/js_home.js' %}"></script>
+{% endblock %}

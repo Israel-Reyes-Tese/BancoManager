@@ -1,7 +1,9 @@
+from datetime import timedelta
 from django.http import JsonResponse
 from django.views import View
+from django.db.models import Sum, F
 
-from ..modelo_banco.models_banco import CuentaBancaria, Banco # Asegúrate de que la ruta sea correcta
+from ..modelo_banco.models_banco import CuentaBancaria, Banco, TasaInteres # Asegúrate de que la ruta sea correcta
 from ..modelo_dinero.models_dinero import Ingreso, Egreso  # Asegúrate de que la ruta sea correcta
 from ..modelo_deudas.models_deudas import Deuda, Prestamo, TarjetaCredito  # Asegúrate de que la ruta sea correcta
 # Usuario
@@ -79,11 +81,77 @@ def obtener_transacciones_mes(request):
                 "count" : proposito_egresos['count']
                 })
 
-        print("Obtener transacciones del mes \n" + "Total ingresos",str(total_ingresos) + "\n" + "Total egresos", 
-              str(total_egresos) + "\n" + "Top fuentes ingresos", str(top_fuentes_ingresos_lista) + "\n" + "Top fuentes egresos",str(top_propositos_egresos_lista))
-
         return JsonResponse({'total_ingresos': total_ingresos, 'total_egresos': total_egresos,
                              'top_fuentes_ingresos': top_fuentes_ingresos_lista, 'top_propositos_egresos': top_propositos_egresos_lista})
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def obtener_categorias_transacciones(request):
+    if request.method == 'GET':
+        usuario = request.user
+        helper = InicioHelper()
+        top_fuentes_ingresos, top_propositos_egresos = helper.obtener_fuentes_propositos_comunes(usuario, limitar_resultados=False)
+        # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
+        categorias = []
+        for fuente_ingresos in top_fuentes_ingresos:
+            categorias.append(fuente_ingresos['fuente'])
+        for proposito_egresos in top_propositos_egresos:
+            categorias.append(proposito_egresos['proposito'])
+        # Añadir todas las categorias
+        categorias.append("Todas")
+        return JsonResponse({'categorias': categorias})
+
+def obtener_datos_graficables_ingresos_egresos(request):
+    if request.method == 'GET':
+        usuario = request.user
+        helper = InicioHelper()
+        top_fuentes_ingresos, top_propositos_egresos = helper.obtener_fuentes_propositos_comunes(usuario, limitar_resultados=False)
+        # Todas la catergorias unir top_fuentes_ingresos y top_propositos_egresos
+        categorias = []
+        for fuente_ingresos in top_fuentes_ingresos:
+            categorias.append(fuente_ingresos['fuente'])
+        for proposito_egresos in top_propositos_egresos:
+            categorias.append(proposito_egresos['proposito'])
+        # Añadir todas las categorias
+        categorias.append("Todas")
+        # Obtener los datos de los ingresos y egresos
+        ingresos, egresos = helper.obtener_transacciones(usuario)
+        # Convertir QuerySets a listas y unirlas
+        egresos_list = list(egresos)
+        ingresos_list = list(ingresos)
+
+        # Serializar datos
+        ingresos_data = [{
+            'fecha': ingreso.fecha.strftime('%Y-%m-%d'),
+            'descripcion': ingreso.descripcion,
+            'cantidad': str(ingreso.cantidad),
+            'fuente': ingreso.fuente,
+            'id': ingreso.id,
+        } for ingreso in ingresos_list]
+
+        egresos_data = [{
+            'fecha': egreso.fecha.strftime('%Y-%m-%d'),
+            'descripcion': egreso.descripcion,
+            'cantidad': str(egreso.cantidad),
+            'proposito': egreso.proposito,
+            'id': egreso.id,
+        } for egreso in egresos_list]
+
+        gastos_por_mes, ingresos_por_mes = helper.obtener_gastos_ingresos_por_mes(request.user)
+        # Crear un diccionario para almacenar el total acumulado por mes
+        gastos_acumulados = helper.calcular_acumulados_por_mes(gastos_por_mes)
+        ingresos_acumulados = helper.calcular_acumulados_por_mes(ingresos_por_mes)
+        # Graficar los datos
+        ingresos_data, egresos_data = helper.preparar_datos_graficas(ingresos_acumulados, gastos_acumulados)
+        etiquetas_meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio','Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+        return JsonResponse({ 
+                              'categorias': categorias, 
+                              'etiquetas_meses': etiquetas_meses,
+                              'ingreso_data_graficable': ingresos_data, 
+                              'egreso_data_graficable': egresos_data,
+                             })
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
@@ -92,15 +160,12 @@ def RefrescarTablasTransacciones(request):
     if request.method == 'GET':
         helper = InicioHelper()
         usuario = request.user  # Obtén el usuario autenticado
-
         # Obtener todos los ingresos y egresos
         ingresos, egresos = helper.obtener_transacciones(usuario)
         # Convertir QuerySets a listas y unirlas
         egresos_list = list(egresos)
         ingresos_list = list(ingresos)
         transacciones = egresos_list + ingresos_list
-
-
         # Serializar datos
         transacciones_data = [{
             'fecha': transaccion.fecha.strftime('%Y-%m-%d'),
@@ -112,7 +177,6 @@ def RefrescarTablasTransacciones(request):
         } for transaccion in transacciones]
 
         return JsonResponse(transacciones_data, safe=False)
-    
 
 # Usuarios
 def listar_usuarios(request):
@@ -132,7 +196,105 @@ def listar_usuarios(request):
         return JsonResponse({'usuarios': usuarios_data})
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-# Funciones de usuarios
+def calcular_interes_prestamo(request):
+    if request.method == 'GET':
+        usuario = request.user  # Obtén el usuario autenticado
+        # Obtener los datos del formulario
+        monto = request.GET.get('montoPrestamo')
+        tasa_interes = request.GET.get('tasaInteresPrestamo')
+        tiempo = request.GET.get('plazoPrestamo')
+        tipo = request.GET.get('tipoInteresPrestamo')
+        print(monto, tasa_interes, tiempo, tipo)
+        # Calcular el interés - tiene que devolver Mes que se inica el primer pago, interes total, cuota mensual, capital total - agrega a la consulta la tasa de interes de la cuenta 
+        monto = float(monto)
+
+        def calcular_intereses_terminal(monto, terminal):
+            tasa_interes_terminales ={
+                "Terminal point": 0.0406,
+                "Terminal uala": 0.03,
+            }
+            interes = monto * float(tasa_interes_terminales[terminal])
+            return round(interes, 2)
+        
+        def calcular_intereses_monto(monto, tasa, tiempo, tipo):
+            tasa = float(tasa) / 100
+
+            if tipo == "Simple":
+                pago_interes = int(monto) * tasa * tiempo
+            else:
+                pago_interes = int(monto) * (1 + tasa) ** tiempo - int(monto)
+
+            pago_interes = round(pago_interes, 2)
+            pago_total = round(monto + pago_interes, 2)
+            pago_mensual = round(pago_total / tiempo, 2)
+
+            return pago_interes, pago_mensual, pago_total
+        # Filtra las cuentas de credito y agrega a la consulta la tasa de interes del banco que esta relacionado con la cuenta
+        cuentas = CuentaBancaria.objects.filter(usuario=usuario, tipoCuenta='Credito').values(
+            'nombre',
+            'numeroCuenta',
+            'saldoActual',
+            'banco__nombre',
+            'banco__tasa_interes')
+        
+        lista_cuentas = []
+        for cuenta in cuentas:
+            lista_cuentas.append({
+                'nombre': cuenta['nombre'],
+                'numeroCuenta': cuenta['numeroCuenta'],
+                'saldoActual': cuenta['saldoActual'],
+                'banco': cuenta['banco__nombre'],
+                'tasa_interes': cuenta['banco__tasa_interes'],
+            })
+        # Filtrar tasas de interes bancos y agregar a la consulta la tasa de interes del banco con respecto a los meses y al monto solicitado
+        lista_montos_m = []
+
+        lista_intereses_terminal = []
+        lista_nombres_terminales = ["Terminal point", "Terminal uala"]
+
+        for tasa in TasaInteres.objects.all():
+            interes, pago_mensual, pago_total = calcular_intereses_monto(monto, tasa.porcentaje_interes, tasa.meses, "Simple")   
+            # Nadamas mes y dia
+            fecha_corte = tasa.fechaCorte  + timedelta(days=1) 
+            fecha_limite = tasa.fechaLimite + timedelta(days=30)
+            # Sumar un mes a la fecha de corte
+            fecha_corte = fecha_corte.strftime('%m-%d') + " / " + fecha_limite.strftime('%m-%d') 
+
+            lista_montos_m.append({
+                'banco': tasa.banco.nombre,
+                
+                'meses': tasa.meses,
+                'porcentaje_interes': float(tasa.porcentaje_interes),
+
+                'interes': interes,
+                'pago_mensual': pago_mensual,
+                'pago_total': pago_total,
+
+                'fecha_corte': fecha_corte,
+            })
+        for terminal in lista_nombres_terminales:
+            interes = calcular_intereses_terminal(monto, terminal)
+            lista_intereses_terminal.append({
+
+                'interes': interes,
+
+                'nombre_terminal': terminal,
+
+                'pago_mensual': round((monto + interes), 2),
+            })
+
+        context = {
+            'cuentas': lista_cuentas,
+
+            'monto_meses': lista_montos_m,
+
+            "monto_terminales": lista_intereses_terminal,
+            
+            'cantidad_original': float(monto),
+
+        }
+        return JsonResponse({'interes': context})
+
 
 
 # Deudas

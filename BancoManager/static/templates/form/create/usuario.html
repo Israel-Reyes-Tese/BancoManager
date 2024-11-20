@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Agregar Usuario</h2>
+    <h2 class="text-center" id="titulo_principal">Agregar Usuario</h2>
     <form method="POST" id="form-agregar-usuario">
         {% csrf_token %}
         {# Campo nombre #}
@@ -48,7 +48,7 @@
         {# Campo username #}
         {# Agregar #}
         <div class="mb-3">
-            <button type="submit" class="btn btn-primary">Agregar Usuario <i class="fas fa-plus-circle"></i></button>
+            <button type="submit" class="btn btn-primary" id="boton_agregar">Agregar Usuario <i class="fas fa-plus-circle"></i></button>
         </div>
         {# Agregar #}
 

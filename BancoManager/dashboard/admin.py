@@ -1,7 +1,11 @@
 from django.contrib import admin
-from .modelo_banco.models_banco import Banco
+from .modelo_banco.models_banco import Banco, TasaInteres
 from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
 from .modelo_deudas.models_deudas import Deuda, TarjetaCredito, Prestamo
+
+
+from .modelo_utils.modelo_inter import *
+from .modelo_auditlog.modelo_auditlog import *
 
 @admin.register(Banco)
 class BancoAdmin(admin.ModelAdmin):
@@ -18,6 +22,14 @@ class BancoAdmin(admin.ModelAdmin):
             banco.save()
         self.message_user(request, "Selected banks have been verified.")
     mark_as_verified.short_description = "Mark selected banks as verified"
+
+@admin.register(TasaInteres)
+class TasaInteresAdmin(admin.ModelAdmin):
+    list_display = ('banco', 'meses', 'porcentaje_interes')
+    search_fields = ('banco__nombre', 'meses')
+    list_filter = ('banco', 'meses')
+    ordering = ('banco', 'meses')
+    list_select_related = True
 
 @admin.register(CuentaBancaria)
 class CuentaBancariaAdmin(admin.ModelAdmin):
@@ -46,7 +58,7 @@ class CuentaBancariaAdmin(admin.ModelAdmin):
 
 @admin.register(Ingreso)
 class IngresoAdmin(admin.ModelAdmin):
-    list_display = ('cantidad', 'fecha', 'fuente', 'cuenta', 'usuario')
+    list_display = ('cantidad', 'fecha', 'fuente', 'cuenta', 'descripcion', 'usuario')
     search_fields = ('fuente', 'cantidad', 'usuario__email')
     list_filter = ('fecha', 'cuenta__banco')
     ordering = ('-fecha',)
@@ -87,4 +99,50 @@ class PrestamoAdmin(admin.ModelAdmin):
     search_fields = ('monto_total', 'usuario_prestamista__email')
     list_filter = ('fecha_inicio',)
     ordering = ('-fecha_inicio',)
+    list_select_related = True
+
+@admin.register(RegistroIngreso)
+class RegistroIngresoAdmin(admin.ModelAdmin):
+    list_display = ('cuenta', 'monto', 'fecha', 'descripcion')
+    search_fields = ('cuenta__nombre', 'monto', 'descripcion')
+    list_filter = ('fecha', 'cuenta__banco')
+    ordering = ('-fecha',)
+    date_hierarchy = 'fecha'
+    list_select_related = True
+
+@admin.register(RegistroEgreso)
+class RegistroEgresoAdmin(admin.ModelAdmin):
+    list_display = ('cuenta', 'monto', 'fecha', 'descripcion')
+    search_fields = ('cuenta__nombre', 'monto', 'descripcion')
+    list_filter = ('fecha', 'cuenta__banco')
+    ordering = ('-fecha',)
+    date_hierarchy = 'fecha'
+    list_select_related = True
+
+
+@admin.register(RegistroPago)
+class RegistroPagoAdmin(admin.ModelAdmin):
+    list_display = ('deuda', 'monto_pago', 'fecha_pago', 'descripcion')
+    search_fields = ('deuda__descripcion', 'monto_pago', 'descripcion')
+    list_filter = ('fecha_pago', 'deuda__tipo_deuda')
+    ordering = ('-fecha_pago',)
+    date_hierarchy = 'fecha_pago'
+    list_select_related = True
+
+@admin.register(Transferencia)
+class TransferenciaAdmin(admin.ModelAdmin):
+    list_display = ('cuenta_origen', 'cuenta_destino', 'monto', 'fecha_transferencia', 'descripcion')
+    search_fields = ('cuenta_origen__nombre', 'cuenta_destino__nombre', 'monto', 'descripcion')
+    list_filter = ('fecha_transferencia', 'cuenta_origen__banco')
+    ordering = ('-fecha_transferencia',)
+    date_hierarchy = 'fecha_transferencia'
+    list_select_related = True
+
+
+@admin.register(ReporteMensual)
+class ReporteMensualAdmin(admin.ModelAdmin):
+    list_display = ('mes', 'tiempo_anual', 'usuario', 'ingresos_total', 'egresos_total')
+    search_fields = ('mes', 'tiempo_anual', 'usuario__email')
+    list_filter = ('mes', 'tiempo_anual')
+    ordering = ('-tiempo_anual', '-mes')
     list_select_related = True

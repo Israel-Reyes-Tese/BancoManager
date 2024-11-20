@@ -8,7 +8,7 @@
 {% block content %}
 
 <div class="container mt-5">
-    <h2 class="text-center text-success">Agregar Banco</h2>
+    <h2 class="text-center text-success" id="titulo_principal">Agregar Banco</h2>
     <form method="POST" id="form-agregar-banco">
         {% csrf_token %}
 
@@ -35,7 +35,7 @@
 
         <div class="mb-3">
             <div class="d-flex align-items-center">
-                <button type="submit" class="btn btn-success align-items-center">Agregar Banco <i class="fas fa-plus-circle"></i></button>
+                <button type="submit" class="btn btn-success align-items-center" id="boton_agregar">Agregar Banco <i class="fas fa-plus-circle"></i></button>
             </div>
         </div>
     </form>

@@ -1,8 +1,11 @@
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: #f8f9fa; /* Fondo claro */
+    font-family: Arial, sans-serif;
+    background: url('images/background.jpg') no-repeat center center fixed; /* Fondo futurista */
+    background-size: cover;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 header {
@@ -135,4 +138,81 @@ body {
 /* Estilo para botones */
 .btn {
     margin-right: 5px; /* Espaciado entre botones */
+}
+
+/*Estilos del select */
+#categoriaDropdown {
+    max-width: 100%; /* Responsive width */
+    width: 300px; /* Default width */
+    margin: 10px 0; /* Spacing */
+    padding: 10px; /* Padding for better appearance */
+    border-radius: 5px; /* Rounded corners */
+    border: 2px solid #007bff; /* Border color */
+    background-color: #f8f9fa; /* Background color */
+    color: #343a40; /* Text color */
+    font-size: 16px; /* Font size */
+    transition: all 0.3s ease; /* Smooth transition */
+}
+
+#categoriaDropdown:focus {
+    border-color: #0056b3; /* Border color on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Shadow on focus */
+    outline: none; /* Remove default outline */
+}
+
+#categoriaDropdown:hover {
+    background-color: #e2e6ea; /* Background color on hover */
+}
+
+@media (max-width: 768px) {
+    #categoriaDropdown {
+        width: 100%; /* Full width on smaller screens */
+    }
+}
+/* Totales */
+.totales {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.total-item {
+    flex: 1;
+    margin: 0 10px;
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 5px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+#totalEgresos {
+    background-color: #dc3545; /* Red for egresos */
+}
+
+#totalIngresos {
+    background-color: #28a745; /* Green for ingresos */
+}
+
+.total-item:hover {
+    transform: scale(1.05);
+    background-color: #343a40; /* Darker background on hover */
+}
+
+@media (max-width: 768px) {
+    .totales {
+        flex-direction: column;
+    }
+
+    .total-item {
+        margin: 10px 0;
+    }
 }

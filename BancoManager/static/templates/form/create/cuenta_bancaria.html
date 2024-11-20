@@ -8,7 +8,7 @@
 {% block content %}
 
 <div class="container mt-5">
-    <h2 class="text-center text-primary">Agregar Cuenta Bancaria</h2>
+    <h2 class="text-center text-primary" id="titulo_principal">Agregar Cuenta Bancaria</h2>
     <form method="POST" id="form-agregar-cuenta-bancaria">
         {% csrf_token %}
 
@@ -76,7 +76,7 @@
         {# CVC maximo 3 valores #}
         <div class="mb-3">
             <label for="cvc" class="form-label text-primary">CVC</label>
-            <input type="text" class="form-control border-primary" id="cvc" name="cvc" required pattern="123|456|789|010" title="Debe ser uno de los siguientes valores: 123, 456 o 789">
+            <input type="text" class="form-control border-primary" id="cvc" name="cvc" title="Debe ser uno de los siguientes valores: 123, 456 o 789">
         </div>
         {# CVC #}
         {# Fecha de Vencimiento #}
@@ -105,7 +105,7 @@
 
         <div class="mb-3">
             <div class="d-flex align-items-center">
-                <button type="submit" class="btn btn-primary align-items-center">Agregar Cuenta Bancaria <i class="fas fa-plus-circle"></i></button>
+                <button type="submit" class="btn btn-primary align-items-center" id="boton_agregar">Agregar Cuenta Bancaria <i class="fas fa-plus-circle"></i></button>
             </div>
         </div>
     </form>
@@ -217,6 +217,8 @@
 
 {# Modelo #}
 <input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+<input type="hidden" id="id_formulario" value="{{id_formulario}}">
+{# Modelo #}
 
 {% endblock %}
 

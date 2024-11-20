@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% load static %}
+{% block style %}
+{# Cargando estilos personalizados y librerías adicionales #}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+{# Tailwind CSS #}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Resumen General de Cuentas bancarias</h1>
+    <h1 class="text-center">Bienvenido, {{usuario}}</h1>
+    <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
+    {# Resumen de Cuentas Bancarias #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Total de Saldos</h2>
+            <p class="display-4" id="total-cuenta_bancaria">$0</p>
+            <h2>Gráfica Comparativa</h2>
+            <canvas id="graficaTipoCuenta" width="400" height="200"></canvas>
+        </div>
+    </div>
+    {# Resumen de Cuentas Bancarias #}
+    {# Tabla para visualizar los cuentas y poder filtrarlos #}
+    <div class="container mt-5">
+        <h2 class="text-center">Lista de Cuentas
+            <button class="btn btn-primary" id="btnActualizarCuenta_bancaria"><i class="fas fa-sync-alt"></i> Actualizar</button>
+        </h2>
+        {# Boton con icono de actualizar #}
+        <table id="tablaCuenta_bancaria" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Saldo</th>
+                    <th>Fecha de Creación</th>
+                    <th>Tipo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se llenarán con jQuery -->
+            </tbody>
+        </table>
+    </div>
+    {# Tabla para visualizar los cuentas y poder filtrarlos #}
+    {# Estadísticas Financieras #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Progresión de Saldo</h2>
+            <canvas id="comparativaMensual" width="400" height="200"></canvas>
+        </div>
+
+        <div class="col">
+            <h2>Distribución de Tipos de Cuentas</h2>
+            <canvas id="distribucionTipos" width="400" height="200"></canvas>
+        </div>
+    </div>
+    {# Registro Rápido de Ingresos #}
+    <div id="insertar_form_ingreso_rapido">  
+    </div>
+    {# Registro Rápido de Ingresos #}
+    {# Registro Rápido de Egresos #}
+    <div id="insertar_form_egreso_rapido">
+    </div>
+    {# Registro Rápido de Egresos #}
+    {# Agregar transacciones o cuentas #}
+    <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btnTransferencia">Transferencia Rápida</button>
+        <button class="btn btn-success" id="btnAgregarCuenta_bancaria">Añadir Nueva Cuenta</button>
+    </div>
+    {# Agregar transacciones o cuentas #}
+    {# Calendario de Movimientos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Transacciones Recientes</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Monto</th>
+                        <th>Tipo de Transacción</th>
+                    </tr>
+                </thead>
+                <tbody id="transaccionesRecientes">
+                    {# Las transacciones se llenarán con jQuery #}
+                </tbody>
+            </table>
+            <h2>Eventos Futuros</h2>
+            <div id="calendarioMovimientos" class="border p-3">
+                <p>Calendario interactivo aquí (por implementar)</p>
+            </div>
+        </div>
+    </div>
+    {# Notificaciones y Alertas #}
+    <div id="notificaciones" class="alert alert-warning" role="alert">
+        No hay alertas de saldos bajos.
+    </div>
+    {# Notificaciones y Alertas #}
+    {# Configuración y Personalización #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Configuración y Personalización</h2>
+            <button class="btn btn-info" id="btnPersonalizacion">Personalizar Interfaz</button>
+            <button class="btn btn-secondary" id="btnPreferencias">Preferencias de Notificación</button>
+        </div>
+    </div>
+    {# Configuración y Personalización #}
+    {# Integración con Otros Módulos #}
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Resumen de Préstamos y Créditos</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Monto Total</th>
+                    </tr>
+                </thead>
+                <tbody id="resumenPrestamos">
+                    <tr>
+                        <td>Préstamos Activos</td>
+                        <td id="totalPrestamos">$0</td>
+                    </tr>
+                    <tr>
+                        <td>Balance de Tarjetas de Crédito</td>
+                        <td id="balanceTarjetas">$0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Informe de Deudas</h2>
+            <p id="informeDeudas">Resumen de deudas pendientes y próximas cuotas.</p>
+        </div>
+    </div>
+    {# Integración con Otros Módulos #}
+    {# Opciones de Exportación y Reportes #}
+    <div class="text-center mt-4">
+        <button class="btn btn-secondary" id="btnDescargarExtracto">Descargar Extracto</button>
+        <button class="btn btn-dark" id="btnAccesoReportes">Acceso a Reportes Detallados</button>
+    </div>
+    {# Opciones de Exportación y Reportes #}
+</div>
+{# Ventana Modal para agregar (ingreso) #}
+<div class="modal fade" id="modalAgregarIngreso" tabindex="-1" aria-labelledby="modalAgregarIngresoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarIngresoLabel">Agregar Ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-agregar-ingreso"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal para agregar (ingreso) #}
+{# Ventana Modal para editar (ingreso) #}
+<div class="modal fade" id="modalEditarIngreso" tabindex="-1" aria-labelledby="modalEditarIngresoLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarIngresoLabel">Editar Ingreso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-editar-ingreso"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{#  Ventana Modal para editar (ingreso) #}
+{# Ventana Modal para agregar cuenta #}
+<div class="modal fade" id="modalAgregarCuenta_bancaria" tabindex="-1" aria-labelledby="modalAgregarCuenta_bancaria">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarCuenta_bancaria">Agregar Cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-agregar-cuenta_bancaria"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal para agregar cuenta #}
+{# Ventana Modal para editar cuenta #}
+<div class="modal fade" id="modalEditarCuenta_bancaria" tabindex="-1" aria-labelledby="modalEditarCuenta_bancaria">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarCuenta_bancaria">Editar Cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {# El formulario se cargará aquí #}
+                <div id="insert-form-editar-cuenta_bancaria"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal para editar cuenta #}
+
+
+{# Modelo #}
+<input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+{# Modelo #}
+{% endblock %}
+{% block javascript %}
+{# jQuery #}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Incluyendo jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- Incluyendo el script de bootstrap (opcional si ya está en base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Incluyendo SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Incluyendo Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- Incluyendo DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+{# Chart.js para las gráficas #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/js_home.js' %}"></script>
+{% endblock %}

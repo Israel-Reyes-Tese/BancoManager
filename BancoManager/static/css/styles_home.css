@@ -1,0 +1,179 @@
+.loader {
+    text-align: center;
+}
+
+.bill {
+    width: 200px;
+    height: 100px;
+    background-color: #4CAF50; /* Color del billete */
+    border-radius: 10px;
+    position: relative;
+    animation: move 2s infinite alternate; /* Animación de movimiento */
+    overflow: hidden;
+}
+
+.bill-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 5px solid #333; /* Contorno del billete */
+    border-radius: 10px;
+    box-sizing: border-box;
+    animation: borderPulse 2s infinite; /* Animación de pulso del borde */
+}
+
+.dollar-sign {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centrar el signo de dólar */
+    font-size: 48px; /* Tamaño del signo */
+    color: #fff; /* Color del signo */
+    animation: fadeIn 2s forwards; /* Animación de aparición */
+}
+
+.loading-text {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #333;
+    opacity: 0; /* Inicialmente oculto */
+    animation: fadeIn 5s forwards; /* Animación de aparición */
+}
+
+@keyframes move {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(20px); /* Movimiento a la derecha */
+    }
+}
+
+@keyframes borderPulse {
+    0%, 100% {
+        border-color: #333; /* Color original */
+    }
+    50% {
+        border-color: #4CAF50; /* Color durante el pulso */
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.carousel-container {
+    display: flex;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 200px;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.3s;
+}
+
+.sidebar li:hover,
+.sidebar li.active {
+    background-color: #f0f0f0;
+}
+
+.rotating-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    animation: rotate 5s linear infinite;
+}
+
+.card-logo {
+    position: relative;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10;
+    max-width: 50px;
+    max-height: 50px;
+    margin-left: 10px;
+}
+
+.carousel {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel .card {
+    min-width: 100%;
+    width: 100vh;
+    transition: transform 0.5s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
+}
+
+.carousel .card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 15px 15px 0 0;
+}
+
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.nav-btn.prev {
+    left: 10px;
+}
+
+.nav-btn.next {
+    right: 10px;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
