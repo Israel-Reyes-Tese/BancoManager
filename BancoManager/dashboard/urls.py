@@ -13,14 +13,13 @@ from .peticiones_asyn.asyn_forms import *
 # Views inicio
 from .views_inicio.modelo_dinero import *
 from .views_inicio.modelo_bancos import *
+from .views_inicio.modelo_deudas import *
 urlpatterns = [
     # Inicio
     path('', InicioView.as_view(), name='inicio'),  # Vista de inicio
-
-
-
     # Finanzas
-    path('deudas/', views.deudas, name='deudas'),
+    path('deudas/', DeudaInicioView.as_view(), name='deudas'),
+    path('prestamos/', PrestamoInicioView.as_view(), name='prestamos'),
 
     path('ingresos/', IngresoInicioView.as_view(), name='ingresos'),
     path('egresos/', EgresoInicioView.as_view(), name='egresos'),
@@ -28,7 +27,6 @@ urlpatterns = [
     path('cuentas/', CuentasBancaInicioView.as_view(), name='cuentas'),
     path('bancos/', BancoInicioView.as_view(), name='bancos'),
 
-    path('prestamos/', views.prestamos, name='prestamos'),
     path('mi_cuenta/', views.mi_cuenta, name='mi_cuenta'),
 
     # Salir - Ingresar
@@ -119,5 +117,8 @@ urlpatterns = [
     path('api/buscar_dinamica_tarjetas_credito/', ObtenerTarjetasCreditoicontainsView.as_view(), name='buscar_dinamica_tarjetas_credito'),
     path('api/buscar_dinamica_prestamos/', ObtenerPrestamosicontainsView.as_view(), name='buscar_dinamica_prestamos'),
     path('api/buscar_dinamica_bancos/', ObtenerBancosicontainsView.as_view(), name='buscar_dinamica_bancos'),
+
+    # Calculos
+    path('api/obtener_interes/', calcular_interes_prestamo, name='obtener_interes'),
 
 ]

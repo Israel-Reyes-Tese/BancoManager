@@ -55,13 +55,13 @@ def crear_tarjeta_credito(sender, instance, created, **kwargs):
             # Crear una Tarjeta de Crédito asociada a la cuenta
             TarjetaCredito.objects.create(
                 cuenta=instance,
-                numero_tarjeta=f"0000{instance.numeroCuenta[-4:]}",
-                nombre_titular=instance.usuario.get_full_name(),
+                numero_tarjeta=f"000000000000{instance.numeroCuenta[-4:]}",
+                nombre_titular=instance.usuario.username,
                 fecha_inicio=instance.fechaIngreso,
                 fecha_corte=instance.fechaIngreso + timedelta(days=15),
                 fecha_limite_pago=instance.fechaIngreso + timedelta(days=30),
                 fecha_vencimiento=instance.fechaIngreso + timedelta(days=365),
-                colorIdentificacion='#38daf7',
+                colorIdentificacion=instance.colorIdentificacion,
                 limite=0,
                 usuario=instance.usuario
             )
@@ -71,7 +71,6 @@ def crear_tarjeta_credito(sender, instance, created, **kwargs):
         except Exception as e:
             # Manejo de errores genéricos
             print(f"Ocurrió un error no esperado funcion crear tarjeta de credito: {e}")
-
 
 # /==================================================================================\
 @receiver(post_save, sender=Ingreso)

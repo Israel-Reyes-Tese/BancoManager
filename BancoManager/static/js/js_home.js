@@ -4,7 +4,7 @@
 // Objeto global para almacenar las gráficas
 var charts = {};
 // Inicializar el cuadro de carga
-const cargaIngresos = cuadroCarga('#cuadroCargaIngresos');
+const cargaIngresos = cuadroCarga(`#cuadroCarga${modelo_principal}`);
 // Obtener el token CSRF desde del input oculto en el HTML body 
 // <input type="hidden" name="csrfmiddlewaretoken" value="p07Eb4EnxPEdHIlgSAUwpSOTh1rVfyGkxQPeNk3wBJPNdAyqKyqLnopRWd0bAyNJ">
 var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;

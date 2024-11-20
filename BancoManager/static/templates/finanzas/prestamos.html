@@ -15,7 +15,7 @@
 {% block content %}
 <div class="container my-5">
     <h1 class="text-center">Resumen General de Préstamos</h1>
-    <h1 class="text-center">Bienvenido, [Nombre del Usuario]</h1>
+    <h1 class="text-center">Bienvenido, {{usuario}}</h1>
     <p class="text-center">Resumen Rápido: <span id="resumen-rapido">3 cuentas, 1 tarjeta de crédito, 2 préstamos activos.</span></p>
     {# Monto Total de Préstamos #}
     <div class="row text-center mb-4">
@@ -115,89 +115,40 @@
     </div>
 </div>
 
+
+{# Ventana Modal visualizar (cargando) #}
+<div class="modal" id="modalCargando" tabindex="-1" aria-labelledby="modalCargandoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2">Cargando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{# Ventana Modal visualizar (cargando) #}
+{# Modelo #}
+<input type="hidden" id="modelo_principal" value="{{modelo_principal}}">
+{# Modelo #}
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'js/js_home.js' %}"></script>
-{# jQuery #}
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-{# Bootstrap JS #}
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{# Incluyendo jQuery UI #}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{# Incluyendo el script de bootstrap (opcional si ya está en base.html) #}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{# Incluyendo SweetAlert2 #}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{# Incluyendo Font Awesome #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{# Incluyendo DataTables #}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 {# Chart.js para las gráficas #}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-$(document).ready(function() {
-    {# Cargar monto total de préstamos y interés acumulado al cargar la página #}
-    $('#total-prestamos').text('$10000'); {# Ejemplo #}
-    $('#interes-acumulado').text('$1200'); {# Ejemplo #}
-
-    {# Gráfica de Préstamos por Fecha de Inicio #}
-    var ctx1 = document.getElementById('prestamosPorFecha').getContext('2d');
-    var chartFecha = new Chart(ctx1, {
-        type: 'line',
-        data: {
-            labels: ['Enero', 'Febrero', 'Marzo', 'Abril'],
-            datasets: [{
-                label: 'Préstamos por Fecha de Inicio',
-                data: [5000, 3000, 4000, 3000],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                fill: false
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    {# Gráfica de Préstamos por Usuario #}
-    var ctx2 = document.getElementById('prestamosPorUsuario').getContext('2d');
-    var chartUsuario = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: ['Usuario 1', 'Usuario 2'],
-            datasets: [{
-                label: 'Préstamos por Usuario',
-                data: [6000, 4000],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    {# Manejo del formulario para agregar préstamos #}
-    $('#formPrestamo').on('submit', function(event) {
-        event.preventDefault();
-
-        var monto = $('#montoPrestamo').val();
-        var tasaInteres = $('#tasaInteresPrestamo').val();
-        var descripcion = $('#descripcionPrestamo').val();
-        var usuario = $('#usuarioPrestamista').val();
-        // Lógica para agregar el préstamo...
-
-        $('#notificacionesPrestamos').text('Préstamo registrado: ' + descripcion + ' de $' + monto);
-    });
-});
-</script>
 {% endblock %}

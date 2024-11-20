@@ -222,6 +222,11 @@ class InicioHelper:
         ingresos_por_mes = Ingreso.objects.filter(usuario=usuario, fecha__gte=twelve_months_ago)
         return gastos_por_mes, ingresos_por_mes
 
+    def obtener_totales_deudas_prestamos(self, usuario, formato_query=True):
+        total_deudas = Deuda.objects.filter(usuario_deudor=usuario).aggregate(total_deudas=models.Sum('monto'))['total_deudas'] or 0
+        total_prestamos = Prestamo.objects.filter(usuario_prestamista=usuario).aggregate(total_prestamos=models.Sum('monto_total'))['total_prestamos'] or 0
+        return total_deudas, total_prestamos
+
     def obtener_deudas_proximas(self, usuario):
         return Deuda.objects.filter(usuario_deudor=usuario, fecha_vencimiento__gte=datetime.now()).order_by('fecha_vencimiento')
 

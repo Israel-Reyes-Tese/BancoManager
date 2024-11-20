@@ -6,7 +6,7 @@ from django.views import View
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..modelo_dinero.models_dinero import Ingreso, Egreso  # Importar modelos necesarios
-from ..utils.modelo_dinero import *  # Importar funciones utilitarias
+from ..utils.generales import *  # Importar funciones utilitarias
 
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .modelo_banco.models_banco import Banco
+from .modelo_banco.models_banco import Banco, TasaInteres
 from .modelo_dinero.models_dinero import CuentaBancaria, Ingreso, Egreso
 from .modelo_deudas.models_deudas import Deuda, TarjetaCredito, Prestamo
 
@@ -22,6 +22,14 @@ class BancoAdmin(admin.ModelAdmin):
             banco.save()
         self.message_user(request, "Selected banks have been verified.")
     mark_as_verified.short_description = "Mark selected banks as verified"
+
+@admin.register(TasaInteres)
+class TasaInteresAdmin(admin.ModelAdmin):
+    list_display = ('banco', 'meses', 'porcentaje_interes')
+    search_fields = ('banco__nombre', 'meses')
+    list_filter = ('banco', 'meses')
+    ordering = ('banco', 'meses')
+    list_select_related = True
 
 @admin.register(CuentaBancaria)
 class CuentaBancariaAdmin(admin.ModelAdmin):
