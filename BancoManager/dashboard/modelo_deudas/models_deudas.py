@@ -41,7 +41,9 @@ class TarjetaCredito(TimestampedModel):
 
     colorIdentificacion = models.CharField(max_length=20)
 
-    limite = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    limite_maximo = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+
+    limite_actual = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tarjetas_credito')
 
@@ -56,7 +58,7 @@ class TarjetaCredito(TimestampedModel):
             raise ValidationError('La fecha de vencimiento debe ser una fecha futura.')
 
     def __str__(self):
-        return f"Tarjeta: {self.numero_tarjeta} - Titular: {self.nombre_titular} - Límite: {self.limite} - Vencimiento: {self.fecha_vencimiento}"
+        return f"Tarjeta: {self.numero_tarjeta} - Titular: {self.nombre_titular} - Límite: {self.limite_actual} - Vencimiento: {self.fecha_vencimiento}"
 
 #╔══════════════════════════════════════════════╗
 #║ ____        __      _                        ║
@@ -104,19 +106,23 @@ class Deuda(TimestampedModel):
         ('usuario', 'Usuario'),
         ('tarjeta', 'Tarjeta de Crédito'),
         ('prestamo', 'Préstamo'),
+        ('meses', 'Deuda a Meses'),
     )
     
     usuario_deudor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='deudas_deudor')
     monto = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-    tipo_deuda = models.CharField(max_length=20, choices=DEUDA_TIPO_CHOICES)
+    tipo_deuda = models.CharField(max_length=50, choices=DEUDA_TIPO_CHOICES, default='tarjeta')
     estado = models.BooleanField(default=False)  # Indica si la deuda está saldada o no
     descripcion = models.CharField(max_length=255, blank=True, null=True)
     
     tarjeta = models.ForeignKey(CuentaBancaria, on_delete=models.SET_NULL, null=True, blank=True)
     prestamo = models.ForeignKey(Prestamo, on_delete=models.SET_NULL, null=True, blank=True)
+    deuda_meses = models.ForeignKey('DeudaMeses', on_delete=models.SET_NULL, null=True, blank=True)
 
     fecha_creacion = models.DateField(auto_now_add=True)
     fecha_vencimiento = models.DateField()
+    meses = models.PositiveIntegerField(null=True, blank=True)
+    interes = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0)], default=0, null=True, blank=True)
 
     class Meta:
         ordering = ['fecha_vencimiento']
@@ -127,7 +133,64 @@ class Deuda(TimestampedModel):
         # Asegúrate de que la fecha de vencimiento sea posterior a la fecha de creación
         if self.fecha_vencimiento <= self.fecha_creacion:
             raise ValidationError('La fecha de vencimiento debe ser posterior a la fecha de creación.')
+        # Validar que los meses sean mayores a 0 si existen
+        if self.meses is not None and self.meses <= 0:
+            raise ValidationError('El número de meses debe ser mayor a 0.')
+
+    def calcular_pago_mensual(self):
+        if self.interes and self.interes > 0:
+            tasa_mensual = self.interes / 100 / 12
+            pago_mensual = self.monto * (tasa_mensual * (1 + tasa_mensual) ** self.meses) / ((1 + tasa_mensual) ** self.meses - 1)
+        else:
+            pago_mensual = self.monto / self.meses if self.meses else self.monto
+        return pago_mensual
 
     def __str__(self):
         estado_texto = "Saldada" if self.estado else "Pendiente"
         return f"{self.usuario_deudor} debe {self.monto} - Tipo: {self.tipo_deuda} - Estado: {estado_texto}"
+
+class DeudaMeses(TimestampedModel):
+    DEUDA_TIPO_CHOICES = (
+        ('usuario', 'Usuario'),
+        ('tarjeta', 'Tarjeta de Crédito'),
+        ('prestamo', 'Préstamo'),
+    )
+
+    usuario_deudor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='deudas_meses_deudor')
+    monto = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    tipo_deuda = models.CharField(max_length=60, choices=DEUDA_TIPO_CHOICES)
+    estado = models.BooleanField(default=False)  # Indica si la deuda está saldada o no
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    
+    tarjeta = models.ForeignKey(CuentaBancaria, on_delete=models.SET_NULL, null=True, blank=True)
+    prestamo = models.ForeignKey(Prestamo, on_delete=models.SET_NULL, null=True, blank=True)
+
+    fecha_creacion = models.DateField(auto_now_add=True)
+    fecha_vencimiento = models.DateField()
+    meses = models.PositiveIntegerField()
+    interes = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0)], default=0)
+
+    class Meta:
+        ordering = ['fecha_vencimiento']
+        verbose_name = "Deuda a Meses"
+        verbose_name_plural = "Deudas a Meses"
+
+    def clean(self):
+        # Asegúrate de que la fecha de vencimiento sea posterior a la fecha de creación
+        if self.fecha_vencimiento <= self.fecha_creacion:
+            raise ValidationError('La fecha de vencimiento debe ser posterior a la fecha de creación.')
+        # Validar que los meses sean mayores a 0
+        if self.meses <= 0:
+            raise ValidationError('El número de meses debe ser mayor a 0.')
+
+    def calcular_pago_mensual(self):
+        if self.interes > 0:
+            tasa_mensual = self.interes / 100 / 12
+            pago_mensual = self.monto * (tasa_mensual * (1 + tasa_mensual) ** self.meses) / ((1 + tasa_mensual) ** self.meses - 1)
+        else:
+            pago_mensual = self.monto / self.meses
+        return pago_mensual
+
+    def __str__(self):
+        estado_texto = "Saldada" if self.estado else "Pendiente"
+        return f"{self.usuario_deudor} debe {self.monto} en {self.meses} meses - Tipo: {self.tipo_deuda} - Estado: {estado_texto}"

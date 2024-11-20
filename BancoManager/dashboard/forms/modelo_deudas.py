@@ -5,13 +5,13 @@ from ..modelo_deudas.models_deudas import TarjetaCredito, Prestamo, Deuda
 class TarjetaCreditoForm(forms.ModelForm):
     class Meta:
         model = TarjetaCredito
-        fields = ['numero_tarjeta', 'nombre_titular', 'fecha_vencimiento', 'colorIdentificacion', 'limite']
+        fields = ['numero_tarjeta', 'nombre_titular', 'fecha_vencimiento', 'colorIdentificacion', 'limite_actual']
         widgets = {
             'numero_tarjeta': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de Tarjeta'}),
             'nombre_titular': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del Titular'}),
             'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'colorIdentificacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Color de Identificación'}),
-            'limite': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Límite'}),
+            'limite_actual': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Límite'}),
         }
 
 class PrestamoForm(forms.ModelForm):

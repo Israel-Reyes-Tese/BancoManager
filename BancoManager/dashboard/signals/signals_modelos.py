@@ -126,12 +126,13 @@ def crear_registro_egreso(sender, instance, created, **kwargs):
             # Manejo de errores genéricos
             print(f"Ocurrió un error no esperado crear registro egreso: {e}")
 
+    """
 @receiver(post_save, sender=Ingreso)
 def actualizar_saldo_cuenta_ingreso(sender, instance, created, **kwargs):
-    """
+    """     """
     Signal para actualizar el saldo de la cuenta asociada a un Ingreso
     cuando se crea o actualiza un ingreso.
-    """
+    """     """
     try:
         with transaction.atomic():
             cuenta = instance.cuenta
@@ -146,13 +147,14 @@ def actualizar_saldo_cuenta_ingreso(sender, instance, created, **kwargs):
     except Exception as e:
         # Manejo de errores genéricos
         print(f"Ocurrió un error al actualizar el saldo de ingreso: {e}")
-
+    """
+    """
 @receiver(post_save, sender=Egreso)
 def actualizar_saldo_cuenta_egreso(sender, instance, created, **kwargs):
-    """
+    """    """
     Signal para actualizar el saldo de la cuenta asociada a un Egreso
     cuando se crea o actualiza un egreso.
-    """
+    """     """
     try:
         with transaction.atomic():
             cuenta = instance.cuenta
@@ -167,7 +169,7 @@ def actualizar_saldo_cuenta_egreso(sender, instance, created, **kwargs):
     except Exception as e:
         # Manejo de errores genéricos
         print(f"Ocurrió un error al actualizar el saldo de egreso: {e}")
-
+    """
 # /==================================================================================\
 @receiver(post_save, sender=Prestamo)
 def crear_deuda_al_prestamo(sender, instance, created, **kwargs):
@@ -217,13 +219,14 @@ def crear_deuda_por_tarjeta(sender, instance, **kwargs):
     try:
         # Calcular una fecha de vencimiento predeterminada a 30 días después de la fecha de inicio del préstamo
         fecha_vencimiento = calcular_fecha_vencimiento(instance.fecha_inicio)
+        cuenta_bancaria = CuentaBancaria.objects.get(pk=instance.cuenta.id)
         # Crear una Deuda por el saldo pendiente de la tarjeta
         Deuda.objects.create(
             usuario_deudor=instance.usuario,
-            monto=instance.saldo,
+            monto= instance.limite_maximo - instance.limite_actual,
             tipo_deuda='tarjeta',
             descripcion=f'Deuda generada por la tarjeta {instance.numero_tarjeta}',
-            tarjeta=instance,
+            tarjeta=cuenta_bancaria,
             fecha_vencimiento=fecha_vencimiento
         )
     except ValidationError as e:

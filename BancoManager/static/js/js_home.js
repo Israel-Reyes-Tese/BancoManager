@@ -225,7 +225,7 @@ function generarListadocuentas(url, targetSelector) {
         }
     });
 }
-function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = '', lista_select=[]) {
+function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = '', lista_select=[], targetCuenta = null) {
     // Validar eliminar todo el contenido que exista en el targetSelector
     limpiarHTML(targetSelector);
     // Seleccionar el elemento objetivo
@@ -271,7 +271,6 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
     label_input.value = cantidad;
     label_input.required = true;
     div_form_group.appendChild(label_input);
-
     // Crear el select de fuente
     const fuenteSelect = document.createElement('select');
     fuenteSelect.className = 'custom-select';
@@ -294,11 +293,9 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
         fuenteSelect.appendChild(option);
     });
     div_form_group.appendChild(fuenteSelect);
-
     // validar si ya existe el select cuenta y en caso de que exista asignar los mismo valores para que se vean los dos o mas
-
     // Crear el select de cuenta
-    var existingCuentaSelect = document.getElementById('cuenta');
+    var existingCuentaSelect = document.getElementById(targetCuenta);
 
     if (existingCuentaSelect) {
         console.log('El select cuenta ya existe', existingCuentaSelect);
@@ -311,11 +308,10 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
         cuentaSelect.required = true;
     } else {
         console.log('cuente-1er');
-
         var cuentaSelect = document.createElement('select');
         cuentaSelect.className = 'custom-select';
-        cuentaSelect.id = 'cuenta';
-        cuentaSelect.name = 'cuenta';
+        cuentaSelect.id = targetCuenta;
+        cuentaSelect.name = targetCuenta;
         cuentaSelect.required = true;
     }
     div_form_group.appendChild(cuentaSelect);
@@ -341,7 +337,7 @@ function insertarRegistroRapido(csrfToken, targetSelector, modelo, cantidad = ''
     // Enviar el formulario
     handleFormSubmit(`#formAgregarRapido${modelo}`, `/api/crear_rapido_${modelo.toLowerCase()}/`, 'POST', modelo);
 }
-function cargarDatosModeloIngresosorEgresos(modelo, data) {
+function cargarDatosModeloIngresosorEgresos(modelo, data, targetCuenta = "cuenta") {
     // Actualizar el total
     $(`#total-${modelo.toLowerCase()}`).text('$' + data[`total_${modelo.toLowerCase()}`]);
     $(`#${modelo.toLowerCase()}-mes`).text('$' + data[`${modelo.toLowerCase()}_acumulados`]);
@@ -355,7 +351,7 @@ function cargarDatosModeloIngresosorEgresos(modelo, data) {
     }
 
     // Generar el listado de opciones cuentas
-    const cuentaSelect = $('#cuenta');
+    const cuentaSelect = $(`#${targetCuenta}`);
     cuentaSelect.empty(); // Limpiar las opciones existentes
     cuentaSelect.append('<option selected>Selecciona una cuenta...</option>');
     data.cuentas.forEach(function(cuenta) {
@@ -473,7 +469,7 @@ function cargarDatosModeloCuentasBancarias(modelo, data) {
         backgroundColor: data.cuentas.map(cuenta => cuenta.colorIdentificacion)
     });
     // Cargar el formulario de agregar ingreso
-    insertarRegistroRapido(csrfToken, '#insertar_form_ingreso_rapido', 'Ingreso', '', lista_select=['Salario', 'Venta', 'Intereses', 'Otro']);
+    insertarRegistroRapido(csrfToken, '#insertar_form_ingreso_rapido', 'Ingreso', '', lista_select=['Salario', 'Venta', 'Intereses', 'Otro'], targetCuenta='cuenta');
     // Cargar el formulario de agregar egreso
     insertarRegistroRapido(csrfToken, '#insertar_form_egreso_rapido', 'Egreso', '', lista_select=['Compra', 'Pago', 'Retiro', 'Otro']);
 
@@ -488,7 +484,7 @@ function cargarDatosModelo(modelo) {
             console.log(`Datos de ${modelo} cargados: `, data);
             // Validar que modelo es para cargar los datos
             if (modelo === 'Ingreso' || modelo === 'Egreso') {
-                cargarDatosModeloIngresosorEgresos(modelo, data);
+                cargarDatosModeloIngresosorEgresos(modelo, data, targetCuenta = `cuenta-${modelo}`);
             } else if (modelo === 'Cuenta_bancaria') {
                 console.log('Datos de cuentas bancarias cargados: Funcion' );
                 cargarDatosModeloCuentasBancarias(modelo, data);

@@ -376,7 +376,8 @@ class InicioHelper:
                     "nombre_titular": tarjeta.nombre_titular,
                     "fechaVencimiento": tarjeta.fecha_vencimiento,
                     "colorIdentificacion": tarjeta.colorIdentificacion,
-                    "limte": tarjeta.limite,
+                    "limte_maximo": tarjeta.limite_maximo,
+                    "limite_actual": tarjeta.limite_actual,
                     "usuario": tarjeta.usuario.id,
                 })
             return lista_tarjetas
