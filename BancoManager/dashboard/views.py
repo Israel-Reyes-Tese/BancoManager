@@ -418,31 +418,35 @@ class InicioHelper:
 
     def obtener_deudas(self, usuario, formato_query=True):
         if formato_query:
-            return Deuda.objects.filter(usuario_deudor=usuario)
+            total_deudas = Deuda.objects.filter(usuario_deudor=usuario).aggregate(total_deudas=models.Sum('monto'))['total_deudas'] or 0
+            return Deuda.objects.filter(usuario_deudor=usuario), total_deudas
         else:
             deudas = Deuda.objects.filter(usuario_deudor=usuario)
             # Contar cuantas son de tarjeta de crédito y cuantas son de préstamos
-            tarjetas = deudas.filter(tipo_deuda='tarjeta')
-            prestamos = deudas.filter(tipo_deuda='prestamo')
-            # 
-            
-
-
             lista_deudas = []
+            total_deudas = 0
             for deuda in deudas:
+                total_deudas+= deuda.monto
                 lista_deudas.append({
                     "id": deuda.id,
-                    "usuario_deudor": deuda.usuario_deudor.id,
-                    
+                    "usuario_deudor": deuda.usuario_deudor.username,
                     "monto": deuda.monto,
                     "tipo_deuda": deuda.tipo_deuda,
+                    "estado": "Pagada" if deuda.estado else "Pendiente",
+                    "descripcion": deuda.descripcion,
 
-                    "estado": deuda.estado,
-                    
+                    "tarjeta": deuda.tarjeta.numeroCuenta if deuda.tarjeta else None,
+                    "prestamo": deuda.prestamo.descripcion if deuda.prestamo else None,
+
+                    "deuda_meses": deuda.deuda_meses.descripcion if deuda.deuda_meses else None,
+
                     "fecha_vencimiento": deuda.fecha_vencimiento,
-                    
+                    "meses": deuda.meses,
+                    "interes": deuda.interes,                    
                 })
-            return lista_deudas
+
+            
+            return lista_deudas, total_deudas
 
 class InicioView(LoginRequiredMixin, View):
     def get(self, request):

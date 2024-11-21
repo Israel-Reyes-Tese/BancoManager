@@ -65,6 +65,7 @@ def crear_tarjeta_credito(sender, instance, created, **kwargs):
                 limite=0,
                 usuario=instance.usuario
             )
+            print(f"Tarjeta de Crédito creada exitosamente para la cuenta: {instance}")
         except ValidationError as e:
             # Manejo de errores para validaciones específicas del modelo
             print(f"Error al crear Tarjeta de Crédito: {e}")
@@ -90,7 +91,7 @@ def crear_registro_ingreso(sender, instance, created, **kwargs):
                 descripcion=instance.descripcion or "Ingreso registrado automáticamente"
             )
             registro_ingreso.aplicar_ingreso()  # Aplicar ingreso al saldo de la cuenta
-
+            print(f"RegistroIngreso creado exitosamente: {registro_ingreso}")
         except ValidationError as e:
             # Manejo de errores para validaciones específicas del modelo
             print(f"Error al crear RegistroIngreso: {e}")
@@ -115,10 +116,11 @@ def crear_registro_egreso(sender, instance, created, **kwargs):
                 descripcion=f"Transacción automática basada en el Egreso: {instance.descripcion} - {instance.proposito}",
                 usuario=instance.usuario  # Usuario asociado
             )
-            
             # Intentamos aplicar el egreso (lo mismo que saldo negativo en cuenta)
             registro_egreso.aplicar_egreso()
-
+            registro_egreso.crear_deuda_por_tarjeta()  # Crear deuda por tarjeta de crédito si aplica
+            
+            print(f"Registro de egreso creado exitosamente: {registro_egreso}")
         except ValidationError as e:
             # Manejo de errores para validaciones específicas del modelo
             print(f"Error al crear RegistroEgreso: {e}")
@@ -211,30 +213,7 @@ def actualizar_prestamo_estado(sender, instance, created, **kwargs):
     except Exception as e:
         print(f"Ocurrió un error al intentar actualizar el estado del préstamo: {e}")
 
-@receiver(post_save, sender=TarjetaCredito)
-def crear_deuda_por_tarjeta(sender, instance, **kwargs):
-    """
-    Signal para crear una Deuda automáticamente al eliminar una Tarjeta de Crédito.
-    """
-    try:
-        # Calcular una fecha de vencimiento predeterminada a 30 días después de la fecha de inicio del préstamo
-        fecha_vencimiento = calcular_fecha_vencimiento(instance.fecha_inicio)
-        cuenta_bancaria = CuentaBancaria.objects.get(pk=instance.cuenta.id)
-        # Crear una Deuda por el saldo pendiente de la tarjeta
-        Deuda.objects.create(
-            usuario_deudor=instance.usuario,
-            monto= instance.limite_maximo - instance.limite_actual,
-            tipo_deuda='tarjeta',
-            descripcion=f'Deuda generada por la tarjeta {instance.numero_tarjeta}',
-            tarjeta=cuenta_bancaria,
-            fecha_vencimiento=fecha_vencimiento
-        )
-    except ValidationError as e:
-        # Manejo de errores específicos de validación
-        print(f"Error al crear Deuda por tarjeta: {e}")
-    except Exception as e:
-        # Manejo de errores genéricos
-        print(f"Ocurrió un error no esperado crear deuda a una tarjeta: {e}")
+
 
 # /==================================================================================\
 @receiver(post_save, sender=Deuda)

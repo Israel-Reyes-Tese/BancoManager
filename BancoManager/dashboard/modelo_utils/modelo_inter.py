@@ -115,6 +115,30 @@ class RegistroEgreso(models.Model):
     def __str__(self):
         return f"Egreso de {self.monto} en {self.cuenta.nombre} - Fecha: {self.fecha}"
 
+    def crear_deuda_por_tarjeta(self):
+        """
+        Signal para crear una Deuda automáticamente al eliminar una Tarjeta de Crédito.
+        """
+        try:
+            # Calcular una fecha de vencimiento predeterminada a 30 días después de la fecha de inicio del préstamo
+            fecha_vencimiento = calcular_fecha_vencimiento(self.fecha)
+            # Crear una Deuda por el saldo pendiente de la tarjeta
+            Deuda.objects.create(
+                usuario_deudor= self.usuario,
+                monto = self.monto,
+                tipo_deuda='tarjeta',
+                descripcion=f'Deuda generada por la tarjeta {self.cuenta.numeroCuenta[-4:]}',
+                tarjeta=self.cuenta,
+                fecha_vencimiento=fecha_vencimiento
+            )
+            print(f"Deuda por tarjeta creada exitosamente", self.cuenta.numeroCuenta, "Montos: ", self.monto)
+        except ValidationError as e:
+            # Manejo de errores específicos de validación
+            print(f"Error al crear Deuda por tarjeta: {e}")
+        except Exception as e:
+            # Manejo de errores genéricos
+            print(f"Ocurrió un error no esperado crear deuda a una tarjeta: {e}")
+
     def aplicar_egreso(self):
         print("Aplicando egreso", self.monto ,"Saldo actual", self.cuenta.saldoActual)
         """
@@ -130,6 +154,7 @@ class RegistroEgreso(models.Model):
                 if tarjeta.limite_actual < self.monto:
                     raise ValidationError('El límite de la tarjeta es insuficiente para realizar este egreso.')
                 tarjeta.limite_actual -= self.monto
+
                 tarjeta.save()
                 cuenta.saldoActual += self.monto
                 
@@ -139,7 +164,6 @@ class RegistroEgreso(models.Model):
             if cuenta.saldoActual < self.monto:
                 raise ValidationError('El saldo de la cuenta es insuficiente para realizar este egreso.')
             cuenta.saldoActual -= self.monto
-
         cuenta.save()
         
 

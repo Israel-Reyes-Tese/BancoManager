@@ -1,7 +1,7 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: url('images/background.jpg') no-repeat center center fixed; /* Fondo futurista */
+    background: url('../img/background.jpg') no-repeat center center fixed; /* Fondo futurista */
     background-size: cover;
     justify-content: center;
     align-items: center;
@@ -179,7 +179,15 @@ body {
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    background: linear-gradient(135deg, #ff00ff, #00ffff);
+
+}
+.totales p {
+    font-size: 1.5em;
+    margin: 10px 0;
+    text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
 }
 
 .total-item {
@@ -194,13 +202,6 @@ body {
     transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-#totalEgresos {
-    background-color: #dc3545; /* Red for egresos */
-}
-
-#totalIngresos {
-    background-color: #28a745; /* Green for ingresos */
-}
 
 .total-item:hover {
     transform: scale(1.05);

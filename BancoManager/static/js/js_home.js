@@ -476,6 +476,7 @@ function cargarDatosModeloCuentasBancarias(modelo, data) {
 }
 // Función para cargar datos de un modelo
 function cargarDatosModelo(modelo) {
+    console.log(`Cargando datos de ${modelo}...`);
     const cargaModelo = cuadroCarga(`#cuadroCarga${modelo}`);
     $.ajax({
         url: `/api/informacion_${modelo.toLowerCase()}/`,
@@ -488,6 +489,8 @@ function cargarDatosModelo(modelo) {
             } else if (modelo === 'Cuenta_bancaria') {
                 console.log('Datos de cuentas bancarias cargados: Funcion' );
                 cargarDatosModeloCuentasBancarias(modelo, data);
+            } else if (modelo === 'Deuda') {
+                llenarCarruselDeudas(data.deudas);
             }
         },
         error: function(xhr, status, error) {
@@ -809,4 +812,23 @@ cargarDatosModelo(modelo_principal);
 $(`#btnActualizar${modelo_principal}`).on('click', function() {
     cargarDatosModelo(modelo_principal);
 });
+
+function llenarCarruselDeudas(deudas) {
+    const carouselInner = document.getElementById('deudasCarouselInner');
+    carouselInner.innerHTML = ''; // Limpiar contenido existente
+
+    deudas.forEach((deuda, index) => {
+        const item = document.createElement('div');
+        item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+        item.innerHTML = `
+            <div class="d-block w-100">
+                <h5>${deuda.descripcion}</h5>
+                <p>Monto: $${deuda.monto}</p>
+                <p>Fecha de Vencimiento: ${deuda.fecha_vencimiento}</p>
+                <p>Estado: ${deuda.estado ? 'Saldada' : 'Pendiente'}</p>
+            </div>
+        `;
+        carouselInner.appendChild(item);
+    });
+}
 
